@@ -53,30 +53,96 @@ def load_step(path: str, verbose: bool = False) -> tuple[Solid, float]:
     return part, z_min
 
 
-def find_overhang_faces(part: Solid, threshold: float = -0.5, verbose: bool = False):
-    """Find faces whose normal points downward (overhang)."""
+def find_overhang_faces(
+    part: Solid,
+    model_mesh: trimesh.Trimesh,
+    angle: float = 45.0,
+    verbose: bool = False,
+):
+    """Find faces that need support.
+
+    A face needs support if:
+      1. Its normal exceeds the overhang angle threshold (measured from
+         horizontal — 45° means any downward-facing surface steeper than 45°), OR
+      2. It starts mid-air: its lowest edge has no model material below it,
+         so the first printed layers would have nothing to attach to.
+    """
+    import math
+
+    # Convert angle from horizontal to normal-Z threshold.
+    # 0° = horizontal (nz=-1), 45° = nz≈-0.707, 90° = vertical (nz=0)
+    nz_threshold = -math.cos(math.radians(angle))
+
     overhang_faces = []
 
     for i, face in enumerate(part.faces()):
         center = face.center()
         normal = face.normal_at(center)
+        bb = face.bounding_box()
 
-        if normal.Z < threshold:
-            bb = face.bounding_box()
+        # Skip bottom faces sitting on build plate
+        if bb.max.Z < 0.5:
+            continue
 
-            # Skip bottom faces sitting on build plate
-            if bb.max.Z < 0.5:
-                if verbose:
-                    print(f"    Face {i}: nz={normal.Z:.3f}, "
-                          f"z={bb.min.Z:.1f}..{bb.max.Z:.1f} — SKIP (bottom)")
-                continue
+        # Skip upward-facing faces (normal Z > 0 = top surface)
+        if normal.Z >= 0:
+            continue
 
-            overhang_faces.append((i, face, bb, normal))
-            if verbose:
-                print(f"    Face {i}: nz={normal.Z:.3f}, "
-                      f"z={bb.min.Z:.1f}..{bb.max.Z:.1f}, area={face.area:.1f}")
+        reason = None
+
+        # Check 1: overhang angle
+        if normal.Z < nz_threshold:
+            reason = "overhang"
+        # Check 2: mid-air — lowest point has no model below it
+        elif bb.min.Z > 0.5:
+            if _is_mid_air(face, bb, model_mesh):
+                reason = "mid-air"
+
+        if reason is None:
+            continue
+
+        overhang_faces.append((i, face, bb, normal))
+        if verbose:
+            deg = math.degrees(math.acos(-normal.Z))
+            print(f"    Face {i}: nz={normal.Z:.3f} ({deg:.0f}°), "
+                  f"z={bb.min.Z:.1f}..{bb.max.Z:.1f}, "
+                  f"area={face.area:.1f}, {reason}")
 
     return overhang_faces
+
+
+def _is_mid_air(face, fbb, model_mesh: trimesh.Trimesh, n_samples: int = 5) -> bool:
+    """Check if a face starts mid-air by raycasting downward from its lowest edge.
+
+    Samples points near the bottom of the face and casts rays downward.
+    If none of them hit the model within a short distance below, the face
+    is floating (mid-air) and needs support regardless of angle.
+    """
+    # Sample points near the bottom of the face's bounding box
+    z_bottom = fbb.min.Z
+    z_sample = z_bottom + 0.1  # just above the bottom edge
+
+    # Create a grid of sample points within the face's XY footprint
+    xs = np.linspace(fbb.min.X + 0.1, fbb.max.X - 0.1, min(n_samples, 3))
+    ys = np.linspace(fbb.min.Y + 0.1, fbb.max.Y - 0.1, min(n_samples, 3))
+
+    origins = []
+    for x in xs:
+        for y in ys:
+            origins.append([x, y, z_sample])
+
+    if not origins:
+        return False
+
+    origins = np.array(origins)
+    directions = np.tile([0, 0, -1], (len(origins), 1))
+
+    # Cast rays downward — if they hit the model, the face is supported
+    hits = model_mesh.ray.intersects_any(origins, directions)
+
+    # If most rays don't hit anything, the face is mid-air
+    hit_ratio = hits.sum() / len(hits)
+    return hit_ratio < 0.5
 
 
 def _repair_mesh(mesh: trimesh.Trimesh) -> trimesh.Trimesh:
@@ -144,6 +210,7 @@ def compute_supports(
     margin: float = 0.2,
     min_volume: float = 1.0,
     stl_tolerance: float = 0.01,
+    angle: float = 45.0,
     verbose: bool = False,
 ) -> trimesh.Trimesh | None:
     """Compute supports using STEP topology for face detection and trimesh for booleans."""
@@ -157,10 +224,17 @@ def compute_supports(
     if verbose:
         print(f"  Offset done in {time.time() - t0:.1f}s")
 
+    # Export non-inflated model mesh for mid-air raycasting
+    with tempfile.NamedTemporaryFile(suffix=".stl") as tmp:
+        export_stl(part, tmp.name, tolerance=stl_tolerance)
+        model_mesh = _repair_mesh(trimesh.load(tmp.name))
+
     # Find overhang faces
     if verbose:
-        print("  Finding overhang faces...")
-    overhangs = find_overhang_faces(part, verbose=verbose)
+        print(f"  Finding overhang faces (angle={angle}°)...")
+    overhangs = find_overhang_faces(
+        part, model_mesh=model_mesh, angle=angle, verbose=verbose
+    )
 
     if not overhangs:
         if verbose:
@@ -250,20 +324,19 @@ def compute_supports(
                 print(f"    No region")
             continue
 
-        # Split into components, filter by volume and Z-overlap with face
+        # Split into components, filter by volume.
+        # Discard pieces entirely ABOVE the face (strays captured by the
+        # XY column). Pieces below are legitimate supports reaching down.
         components = region.split(only_watertight=False)
         good = []
         for comp in components:
             vol = abs(comp.volume)
             if vol < min_volume:
                 continue
-            # Discard pieces whose Z range doesn't overlap the face
             comp_z_min = comp.bounds[0][2]
-            comp_z_max = comp.bounds[1][2]
-            # Allow pieces that overlap or nearly touch the face (within margin)
-            gap = max(comp_z_min - fbb.max.Z, fbb.min.Z - comp_z_max)
-            if gap > margin:
+            if comp_z_min > fbb.max.Z + margin:
                 if verbose:
+                    comp_z_max = comp.bounds[1][2]
                     print(f"    Discarded stray: vol={vol:.0f}, "
                           f"z={comp_z_min:.1f}..{comp_z_max:.1f}")
                 continue
@@ -316,6 +389,12 @@ def main():
         help="STL export tolerance in mm (default: 0.01)",
     )
     parser.add_argument(
+        "-a", "--angle",
+        type=float, default=45.0,
+        help="Overhang angle threshold in degrees from horizontal (default: 45). "
+             "Faces steeper than this get supports. Mid-air faces are always supported.",
+    )
+    parser.add_argument(
         "-e", "--export-model",
         action="store_true",
         help="Also export the input STEP model as STL",
@@ -337,12 +416,13 @@ def main():
     part, original_z_min = load_step(args.input, verbose=args.verbose)
 
     if args.verbose:
-        print(f"\nComputing supports (margin={args.margin}mm)...")
+        print(f"\nComputing supports (margin={args.margin}mm, angle={args.angle}°)...")
     supports = compute_supports(
         part,
         margin=args.margin,
         min_volume=args.min_volume,
         stl_tolerance=args.tolerance,
+        angle=args.angle,
         verbose=args.verbose,
     )
 
