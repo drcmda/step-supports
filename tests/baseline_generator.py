@@ -5,175 +5,24 @@ Uses B-Rep topology from STEP to identify overhang faces, then extracts
 the negative space under each face via boolean operations.
 
 Algorithm:
-  1. Load STEP → tessellate model to mesh
-  2. Inflate model mesh outward by margin (Minkowski sum with sphere)
-  3. Compute full negative space (bounding box - inflated model)
-  4. Clip negative space to model bounding box
-  5. Find overhang faces (normal Z < threshold)
-  6. Per face: extract region of negative space under the face's XY footprint
-  7. Merge all support pieces, export as STL
+  1. Load STEP → offset solid outward by margin → export to mesh
+  2. Compute full negative space (bounding box - inflated model)
+  3. Clip negative space to model bounding box
+  4. Find overhang faces (normal Z < threshold)
+  5. Per face: extract region of negative space under the face's XY footprint
+  6. Merge all support pieces, export as STL
 """
 
 from __future__ import annotations
 
 import argparse
-import math
 import sys
 import tempfile
-import threading
 import time
-import warnings
 
 import numpy as np
 import trimesh
-from build123d import Location, Solid, export_stl, import_step
-
-
-# ── Progress display ───────────────────────────────────────────────────
-
-SPINNER_FRAMES = "⠋⠙⠹⠸⠼⠴⠦⠧⠇⠏"
-BAR_WIDTH = 20
-
-
-class ProgressDisplay:
-    """Multi-step pipeline progress with spinner and progress bar.
-
-    Each step is rendered on a single line. The active step updates
-    in-place using carriage return (\\r). When a step completes, its line
-    is finalised and the next step starts on a new line. This avoids
-    fragile multi-line ANSI cursor movement.
-
-    Falls back to simple line-by-line output when stdout is not a TTY.
-    """
-
-    def __init__(self, enabled: bool = True):
-        self._tty = sys.stdout.isatty()
-        self._enabled = enabled
-        self._use_color = self._tty
-        self._step_start: float | None = None
-        self._step_name: str = ""
-        self._progress: tuple[int, int] | None = None
-        self._spinner_idx = 0
-        self._spinner_thread: threading.Thread | None = None
-        self._spinner_stop = threading.Event()
-        self._lock = threading.Lock()
-        self._line_open = False  # True if current line needs \r to overwrite
-
-    # ── public API ──────────────────────────────────────────────────
-
-    def start_step(self, name: str) -> None:
-        if not self._enabled:
-            return
-        with self._lock:
-            self._step_name = name
-            self._step_start = time.time()
-            self._progress = None
-            self._spinner_idx = 0
-        self._start_spinner()
-
-    def finish_step(self, detail: str = "") -> None:
-        if not self._enabled:
-            return
-        self._stop_spinner()
-        with self._lock:
-            elapsed = time.time() - self._step_start if self._step_start else 0
-            self._progress = None
-            line = self._format_done(self._step_name, detail, elapsed)
-            self._write_final(line)
-
-    def fail_step(self, detail: str = "") -> None:
-        if not self._enabled:
-            return
-        self._stop_spinner()
-        with self._lock:
-            elapsed = time.time() - self._step_start if self._step_start else 0
-            sym = self._red("✗")
-            detail_str = self._red(detail) if detail else ""
-            time_str = self._dim(f"{elapsed:>5.1f}s")
-            line = f"  {sym} {self._step_name:<20s}{detail_str:<27s}{time_str}"
-            self._write_final(line)
-
-    def update_progress(self, current: int, total: int) -> None:
-        if not self._enabled:
-            return
-        with self._lock:
-            self._progress = (current, total)
-
-    # ── rendering ───────────────────────────────────────────────────
-
-    def _render_active(self) -> None:
-        """Render the active step line in-place (called by spinner thread)."""
-        with self._lock:
-            elapsed = time.time() - self._step_start if self._step_start else 0
-            frame = SPINNER_FRAMES[self._spinner_idx % len(SPINNER_FRAMES)]
-            sym = self._cyan(frame)
-            name_str = f"{self._step_name:<20s}"
-            time_str = self._dim(f"{elapsed:>5.1f}s")
-
-            if self._progress and self._progress[1] > 0:
-                cur, tot = self._progress
-                pct = cur / tot
-                filled = int(pct * BAR_WIDTH)
-                bar = self._cyan("█" * filled) + self._dim("░" * (BAR_WIDTH - filled))
-                pct_str = f"{pct * 100:>3.0f}%"
-                line = f"  {sym} {name_str}{bar} {pct_str}  {time_str}"
-            else:
-                line = f"  {sym} {name_str}{'':<27s}{time_str}"
-
-            if self._tty:
-                sys.stdout.write(f"\r\033[2K{line}")
-                sys.stdout.flush()
-                self._line_open = True
-
-    def _write_final(self, line: str) -> None:
-        """Write a completed step line (permanent, not overwritten)."""
-        if self._tty and self._line_open:
-            sys.stdout.write(f"\r\033[2K{line}\n")
-        else:
-            sys.stdout.write(f"{line}\n")
-        sys.stdout.flush()
-        self._line_open = False
-
-    def _format_done(self, name: str, detail: str, elapsed: float) -> str:
-        sym = self._green("✓")
-        time_str = self._dim(f"{elapsed:>5.1f}s")
-        detail_str = self._dim(detail) if detail else ""
-        return f"  {sym} {name:<20s}{detail_str:<27s}{time_str}"
-
-    # ── spinner thread ──────────────────────────────────────────────
-
-    def _start_spinner(self) -> None:
-        self._stop_spinner()
-        self._spinner_stop.clear()
-        self._spinner_thread = threading.Thread(target=self._spinner_loop, daemon=True)
-        self._spinner_thread.start()
-
-    def _stop_spinner(self) -> None:
-        if self._spinner_thread and self._spinner_thread.is_alive():
-            self._spinner_stop.set()
-            self._spinner_thread.join(timeout=1)
-            self._spinner_thread = None
-
-    def _spinner_loop(self) -> None:
-        while not self._spinner_stop.is_set():
-            with self._lock:
-                self._spinner_idx += 1
-            self._render_active()
-            self._spinner_stop.wait(0.1)
-
-    # ── ANSI helpers ────────────────────────────────────────────────
-
-    def _green(self, s: str) -> str:
-        return f"\033[32m{s}\033[0m" if self._use_color else s
-
-    def _red(self, s: str) -> str:
-        return f"\033[31m{s}\033[0m" if self._use_color else s
-
-    def _cyan(self, s: str) -> str:
-        return f"\033[36m{s}\033[0m" if self._use_color else s
-
-    def _dim(self, s: str) -> str:
-        return f"\033[2m{s}\033[0m" if self._use_color else s
+from build123d import Kind, Location, Solid, export_stl, import_step, offset
 
 
 def load_step(path: str, verbose: bool = False) -> tuple[Solid, float]:
@@ -222,6 +71,8 @@ def find_overhang_faces(
     since the overhang angle varies. Only the overhanging portion is used
     for the extraction column bounding box.
     """
+    import math
+
     # Convert angle from horizontal to normal-Z threshold.
     # 0° = horizontal (nz=-1), 45° = nz≈-0.707, 90° = vertical (nz=0)
     nz_threshold = -math.cos(math.radians(angle))
@@ -327,10 +178,17 @@ def find_overhang_faces(
 
 
 def _is_mid_air(face, fbb, model_mesh: trimesh.Trimesh, n_samples: int = 5) -> bool:
-    """Check if a face starts mid-air by raycasting downward from its lowest edge."""
-    z_bottom = fbb.min.Z
-    z_sample = z_bottom + 0.1
+    """Check if a face starts mid-air by raycasting downward from its lowest edge.
 
+    Samples points near the bottom of the face and casts rays downward.
+    If none of them hit the model within a short distance below, the face
+    is floating (mid-air) and needs support regardless of angle.
+    """
+    # Sample points near the bottom of the face's bounding box
+    z_bottom = fbb.min.Z
+    z_sample = z_bottom + 0.1  # just above the bottom edge
+
+    # Create a grid of sample points within the face's XY footprint
     xs = np.linspace(fbb.min.X + 0.1, fbb.max.X - 0.1, min(n_samples, 3))
     ys = np.linspace(fbb.min.Y + 0.1, fbb.max.Y - 0.1, min(n_samples, 3))
 
@@ -345,13 +203,17 @@ def _is_mid_air(face, fbb, model_mesh: trimesh.Trimesh, n_samples: int = 5) -> b
     origins = np.array(origins)
     directions = np.tile([0, 0, -1], (len(origins), 1))
 
+    # Cast rays downward — if they hit the model, the face is supported
     hits = model_mesh.ray.intersects_any(origins, directions)
+
+    # If most rays don't hit anything, the face is mid-air
     hit_ratio = hits.sum() / len(hits)
     return hit_ratio < 0.5
 
 
 def _repair_mesh(mesh: trimesh.Trimesh) -> trimesh.Trimesh:
     """Remove degenerate faces and repair mesh to be watertight."""
+    # Remove zero-area faces that break watertightness
     areas = mesh.area_faces
     good = areas > 1e-8
     if not good.all():
@@ -386,7 +248,7 @@ def _from_manifold(manifold_obj) -> trimesh.Trimesh:
 def _manifold_boolean(
     a: trimesh.Trimesh, b: trimesh.Trimesh, op: str
 ) -> trimesh.Trimesh:
-    """Perform boolean using manifold3d directly."""
+    """Perform boolean using manifold3d directly, tolerating non-volume meshes."""
     import manifold3d
     ma = _to_manifold(a)
     mb = _to_manifold(b)
@@ -401,14 +263,38 @@ def _manifold_boolean(
     return _from_manifold(result)
 
 
-def _model_to_mesh(
-    part: Solid, stl_tolerance: float
+def _offset_to_mesh(
+    part: Solid, margin: float, stl_tolerance: float, verbose: bool
 ) -> trimesh.Trimesh:
-    """Tessellate the STEP solid to a trimesh."""
+    """Offset the solid outward and return as a trimesh.
+
+    Tries B-Rep offset with multiple kernel modes first. Falls back to
+    vertex-normal inflation on the tessellated mesh if all B-Rep attempts fail.
+    """
+    for kind in (Kind.ARC, Kind.INTERSECTION, Kind.TANGENT):
+        try:
+            inflated = offset(part, amount=margin, kind=kind)
+            with tempfile.NamedTemporaryFile(suffix=".stl") as tmp:
+                export_stl(inflated, tmp.name, tolerance=stl_tolerance)
+                mesh = trimesh.load(tmp.name)
+            mesh = _repair_mesh(mesh)
+            if verbose:
+                print(f"    B-Rep offset succeeded (kind={kind.name})")
+            return mesh
+        except Exception:
+            continue
+
+    # Fallback: vertex-normal inflation
+    if verbose:
+        print("    B-Rep offset failed, using vertex-normal inflation")
     with tempfile.NamedTemporaryFile(suffix=".stl") as tmp:
         export_stl(part, tmp.name, tolerance=stl_tolerance)
         mesh = trimesh.load(tmp.name)
-    return _repair_mesh(mesh)
+    mesh = _repair_mesh(mesh)
+    mesh = mesh.subdivide()
+    mesh.vertices += mesh.vertex_normals * (margin * 2.0)
+    mesh = _repair_mesh(mesh)
+    return mesh
 
 
 def compute_supports(
@@ -418,70 +304,68 @@ def compute_supports(
     stl_tolerance: float = 0.01,
     angle: float = 45.0,
     verbose: bool = False,
-    debug: bool = False,
 ) -> trimesh.Trimesh | None:
-    """Compute supports using STEP topology for face detection and trimesh for booleans.
-
-    Algorithm:
-      1. Tessellate model
-      2. Inflate model mesh outward by margin (Minkowski sum with sphere)
-      3. Compute negative space: bounding box - inflated model
-      4. For each overhang face: extract the column of negative space
-      5. Merge and return
-    """
-    progress = ProgressDisplay(enabled=verbose)
+    """Compute supports using STEP topology for face detection and trimesh for booleans."""
     t0 = time.time()
 
-    # Step 1: Tessellate
-    progress.start_step("Tessellate")
-    model_mesh = _model_to_mesh(part, stl_tolerance)
-    progress.finish_step(f"{len(model_mesh.faces):,} faces")
+    # Offset model outward (provides the margin gap)
+    if verbose:
+        print("  Offsetting model...")
+    inflated_mesh = _offset_to_mesh(part, margin, stl_tolerance, verbose)
 
-    # Step 2: Inflate
-    progress.start_step("Inflate")
-    import manifold3d
-    model_man = _to_manifold(model_mesh)
-    sphere = manifold3d.Manifold.sphere(margin, 16)
-    inflated_man = model_man.minkowski_sum(sphere)
-    inflated_mesh = _from_manifold(inflated_man)
-    progress.finish_step(f"{len(inflated_mesh.faces):,} faces")
+    if verbose:
+        print(f"  Offset done in {time.time() - t0:.1f}s")
 
-    # Step 3: Negative space
+    # Export non-inflated model mesh for mid-air raycasting
+    with tempfile.NamedTemporaryFile(suffix=".stl") as tmp:
+        export_stl(part, tmp.name, tolerance=stl_tolerance)
+        model_mesh = _repair_mesh(trimesh.load(tmp.name))
+
+    # Find overhang faces
+    if verbose:
+        print(f"  Finding overhang faces (angle={angle}°)...")
+    overhangs = find_overhang_faces(
+        part, model_mesh=model_mesh, angle=angle, verbose=verbose
+    )
+
+    if not overhangs:
+        if verbose:
+            print("  No overhang faces found")
+        return None
+
+    if verbose:
+        print(f"  {len(overhangs)} overhang faces found")
+
+    # Compute full negative space and extract per-face regions.
+    # Try mesh-based booleans first (faster, supports inflated margin).
+    # Fall back to pure B-Rep if mesh path fails.
     bb = part.bounding_box()
-    progress.start_step("Negative space")
+    use_brep = False
+
+    if verbose:
+        print("  Computing negative space...")
+
     try:
-        negative_mesh = _compute_negative_mesh(bb, inflated_mesh, margin, verbose=False)
+        negative_mesh = _compute_negative_mesh(
+            bb, inflated_mesh, margin, verbose
+        )
         if negative_mesh is None or negative_mesh.is_empty:
             raise ValueError("empty negative space")
-        progress.finish_step(f"{negative_mesh.volume:,.0f} mm³")
+        if verbose:
+            print(f"  Negative space: vol={negative_mesh.volume:.0f} mm³")
     except Exception as e:
-        progress.fail_step(str(e))
         print(f"\nError: mesh boolean failed for this model ({e}).")
         print("The model's tessellation is non-manifold and cannot be")
         print("used for support generation. Try repairing the STEP model")
         print("in your CAD software.")
         return None
 
-    # Step 4: Detect overhangs
-    progress.start_step("Detect overhangs")
-    overhangs = find_overhang_faces(
-        part, model_mesh=model_mesh, angle=angle, verbose=debug
-    )
-    if not overhangs:
-        progress.finish_step("none found")
-        return None
-    progress.finish_step(f"{len(overhangs)} faces")
-
-    # Suppress trimesh warnings about degenerate triangles during extraction
-    warnings.filterwarnings("ignore", category=RuntimeWarning, module="trimesh")
-
-    # Step 5: Extract supports
-    progress.start_step("Extract supports")
+    # --- Mesh-based extraction ---
     support_pieces = []
-    n_overhangs = len(overhangs)
 
     for idx, (face_id, face, fbb, normal) in enumerate(overhangs):
-        progress.update_progress(idx + 1, n_overhangs)
+        if verbose:
+            print(f"  Extracting face {face_id} ({idx + 1}/{len(overhangs)})...")
 
         # Create vertical column matching face's XY bounding box
         fx = fbb.max.X - fbb.min.X + 0.1
@@ -499,50 +383,58 @@ def compute_supports(
 
         try:
             region = _manifold_boolean(negative_mesh, column, "intersection")
-        except Exception:
+        except Exception as e:
+            if verbose:
+                print(f"    Failed: {e}")
             continue
 
         if region is None or region.is_empty:
+            if verbose:
+                print(f"    No region")
             continue
 
         # Split into components, filter by volume.
         # Discard pieces entirely ABOVE the face (strays captured by the
         # XY column). Pieces below are legitimate supports reaching down.
         components = region.split(only_watertight=False)
+        good = []
         for comp in components:
             vol = abs(comp.volume)
             if vol < min_volume:
                 continue
             comp_z_min = comp.bounds[0][2]
             if comp_z_min > fbb.max.Z + margin:
-                if debug:
+                if verbose:
                     comp_z_max = comp.bounds[1][2]
                     print(f"    Discarded stray: vol={vol:.0f}, "
                           f"z={comp_z_min:.1f}..{comp_z_max:.1f}")
                 continue
-            support_pieces.append(comp)
+            good.append(comp)
+        support_pieces.extend(good)
+
+        if verbose:
+            total = sum(abs(c.volume) for c in good)
+            print(f"    {len(good)} pieces, vol={total:.0f} mm³")
 
     if not support_pieces:
-        progress.finish_step("none")
+        if verbose:
+            print("  No supports after filtering")
         return None
-    progress.finish_step(f"{len(support_pieces)} pieces")
 
-    # Step 6: Merge
-    progress.start_step("Merge")
+    # Merge all pieces
     supports = trimesh.util.concatenate(support_pieces)
-    progress.finish_step(f"{len(supports.faces):,} faces")
 
     elapsed = time.time() - t0
-    if verbose and not debug:
-        vol = abs(supports.volume)
-        print(f"\n  Done in {elapsed:.1f}s — {len(support_pieces)} pieces, "
-              f"{vol:,.1f} mm³")
+    if verbose:
+        print(f"  Done in {elapsed:.1f}s — {len(support_pieces)} pieces, "
+              f"{len(supports.faces)} faces, "
+              f"vol = {abs(supports.volume):.1f} mm³")
 
     return supports
 
 
 def _compute_negative_mesh(bb, inflated_mesh, margin, verbose):
-    """Compute negative space: outer box - inflated model, clipped to model bbox."""
+    """Compute negative space as a trimesh using mesh booleans."""
     pad = margin + 1.0
     outer_ext = [
         bb.max.X - bb.min.X + 2 * pad,
@@ -569,6 +461,7 @@ def _compute_negative_mesh(bb, inflated_mesh, margin, verbose):
         ),
     )
     return _manifold_boolean(negative, model_box, "intersection")
+
 
 
 def main():
@@ -607,14 +500,9 @@ def main():
         help="Also export the input STEP model as STL",
     )
     parser.add_argument(
-        "-q", "--quiet",
+        "--verbose", "-v",
         action="store_true",
-        help="Suppress progress display",
-    )
-    parser.add_argument(
-        "--debug",
-        action="store_true",
-        help="Print detailed per-face diagnostics",
+        help="Print progress information",
     )
 
     args = parser.parse_args()
@@ -623,13 +511,11 @@ def main():
         stem = args.input.rsplit(".", 1)[0]
         args.output = f"{stem}_supports.stl"
 
-    show_progress = not args.quiet or args.debug
-
-    if show_progress:
+    if args.verbose:
         print(f"Loading {args.input}...")
-    part, original_z_min = load_step(args.input, verbose=show_progress)
+    part, original_z_min = load_step(args.input, verbose=args.verbose)
 
-    if show_progress:
+    if args.verbose:
         print(f"\nComputing supports (margin={args.margin}mm, angle={args.angle}°)...")
     supports = compute_supports(
         part,
@@ -637,17 +523,18 @@ def main():
         min_volume=args.min_volume,
         stl_tolerance=args.tolerance,
         angle=args.angle,
-        verbose=show_progress,
-        debug=args.debug,
+        verbose=args.verbose,
     )
 
     if supports is None:
-        print("No supports generated.", file=sys.stdout)
+        print("No supports generated.", file=sys.stderr)
         sys.exit(1)
 
     # Translate supports back to original coordinate space
     if abs(original_z_min) > 1e-6:
         supports.apply_translation([0, 0, original_z_min])
+        if args.verbose:
+            print(f"  Translated supports back by z={original_z_min:.4f}")
 
     supports.export(args.output)
     print(f"Supports written to {args.output}")

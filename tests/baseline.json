@@ -1,0 +1,116 @@
+{
+  "model": "test_model.step",
+  "total_pieces": 6,
+  "total_volume": 123658.8,
+  "total_faces": 1968,
+  "pieces": [
+    {
+      "index": 0,
+      "volume": 52754.8,
+      "faces": 270,
+      "vertices": 137,
+      "bounds_min": [
+        -10.4,
+        -25.0,
+        0.0
+      ],
+      "bounds_max": [
+        30.3,
+        0.1,
+        54.2
+      ],
+      "is_volume": true,
+      "watertight": true
+    },
+    {
+      "index": 1,
+      "volume": 37224.1,
+      "faces": 384,
+      "vertices": 194,
+      "bounds_min": [
+        7.6,
+        -25.0,
+        0.0
+      ],
+      "bounds_max": [
+        40.2,
+        0.1,
+        54.2
+      ],
+      "is_volume": true,
+      "watertight": true
+    },
+    {
+      "index": 2,
+      "volume": 14675.2,
+      "faces": 356,
+      "vertices": 180,
+      "bounds_min": [
+        -20.0,
+        6.1,
+        0.0
+      ],
+      "bounds_max": [
+        0.1,
+        17.1,
+        66.8
+      ],
+      "is_volume": true,
+      "watertight": true
+    },
+    {
+      "index": 3,
+      "volume": 11532.6,
+      "faces": 28,
+      "vertices": 16,
+      "bounds_min": [
+        7.8,
+        -25.0,
+        67.8
+      ],
+      "bounds_max": [
+        50.2,
+        0.1,
+        78.7
+      ],
+      "is_volume": true,
+      "watertight": true
+    },
+    {
+      "index": 4,
+      "volume": 3952.0,
+      "faces": 480,
+      "vertices": 242,
+      "bounds_min": [
+        -24.2,
+        -25.0,
+        68.2
+      ],
+      "bounds_max": [
+        -13.1,
+        0.1,
+        83.9
+      ],
+      "is_volume": true,
+      "watertight": true
+    },
+    {
+      "index": 5,
+      "volume": 3520.0,
+      "faces": 450,
+      "vertices": 227,
+      "bounds_min": [
+        -20.0,
+        -0.1,
+        0.0
+      ],
+      "bounds_max": [
+        0.1,
+        3.1,
+        58.6
+      ],
+      "is_volume": true,
+      "watertight": true
+    }
+  ]
+}
