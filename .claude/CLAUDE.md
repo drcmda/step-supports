@@ -1,4 +1,4 @@
-# Project: STEP Support Generator
+# Project: STEP/Mesh Support Generator
 
 ## Testing Requirements
 
@@ -32,17 +32,23 @@ python3 tests/baseline.py --update
 
 ## Key Architecture Decisions
 
+- **Two input modes**: STEP files use B-Rep face topology for smart overhang
+  detection. Mesh files (STL/OBJ/PLY/3MF) generate full-shell supports
+  (entire negative space). Auto-detected by file extension.
+- **build123d optional**: Only imported when processing STEP files. Mesh-only
+  usage works without build123d installed.
 - **Minkowski sum inflation** for margins: model mesh is inflated outward by
   `margin` using `manifold3d.Manifold.minkowski_sum(sphere)`, then
   `box - inflated_model` gives negative space with built-in margin gap.
   This replaces the fragile B-Rep offset approach.
-- **B-Rep face detection**: STEP topology gives exact overhang faces with
-  proper normals on curved surfaces. Normals are sampled across curved faces.
-- **Per-face column extraction**: Each overhang face defines a vertical column
-  (XY bounding box). The column intersects the negative space to extract
-  that face's support region.
-- **Mid-air detection**: Faces that pass the angle threshold but start with
-  nothing below them get supports regardless of angle. Capped at angle+25°
-  to exclude near-vertical faces.
+- **B-Rep face detection** (STEP only): STEP topology gives exact overhang
+  faces with proper normals on curved surfaces. Normals are sampled across
+  curved faces.
+- **Per-face column extraction** (STEP only): Each overhang face defines a
+  vertical column (XY bounding box). The column intersects the negative space
+  to extract that face's support region.
+- **Mid-air detection** (STEP only): Faces that pass the angle threshold but
+  start with nothing below them get supports regardless of angle. Capped at
+  angle+25° to exclude near-vertical faces.
 - **Progress display**: Always shown by default (suppress with `-q`).
   Uses ANSI in-place rendering with braille spinner and progress bar.

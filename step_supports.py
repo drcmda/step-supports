@@ -1,17 +1,27 @@
 #!/usr/bin/env python3
-"""Generate 3D-print negative-space support structures from STEP files.
+"""Generate 3D-print negative-space support structures from STEP or mesh files.
 
-Uses B-Rep topology from STEP to identify overhang faces, then extracts
+STEP input uses B-Rep topology to identify overhang faces, then extracts
 the negative space under each face via boolean operations.
 
-Algorithm:
+Mesh input (STL/OBJ/PLY/3MF) generates full-shell supports — the entire
+negative space around the model. No overhang detection (no B-Rep topology),
+so all surfaces get support. Uses more material but works with any mesh format.
+
+Algorithm (STEP):
   1. Load STEP → tessellate model to mesh
   2. Inflate model mesh outward by margin (Minkowski sum with sphere)
   3. Compute full negative space (bounding box - inflated model)
-  4. Clip negative space to model bounding box
-  5. Find overhang faces (normal Z < threshold)
-  6. Per face: extract region of negative space under the face's XY footprint
-  7. Merge all support pieces, export as STL
+  4. Find overhang faces (normal Z < threshold)
+  5. Per face: extract region of negative space under the face's XY footprint
+  6. Merge all support pieces, export as STL
+
+Algorithm (mesh):
+  1. Load mesh directly
+  2. Inflate mesh outward by margin (Minkowski sum with sphere)
+  3. Compute full negative space (bounding box - inflated model)
+  4. Split into pieces, filter small fragments
+  5. Merge and export as STL
 """
 
 from __future__ import annotations
@@ -26,7 +36,14 @@ import warnings
 
 import numpy as np
 import trimesh
-from build123d import Location, Solid, export_stl, import_step
+
+# build123d is only needed for STEP input (B-Rep overhang detection).
+# Defer import so mesh-only usage works without it installed.
+try:
+    from build123d import Location, Solid, export_stl, import_step
+    _HAS_BUILD123D = True
+except ImportError:
+    _HAS_BUILD123D = False
 
 
 # ── Progress display ───────────────────────────────────────────────────
@@ -176,8 +193,12 @@ class ProgressDisplay:
         return f"\033[2m{s}\033[0m" if self._use_color else s
 
 
-def load_step(path: str, verbose: bool = False) -> tuple[Solid, float]:
+def load_step(path: str, verbose: bool = False) -> tuple:
     """Load a STEP file and translate so base sits at z=0."""
+    if not _HAS_BUILD123D:
+        raise ImportError(
+            "build123d is required for STEP files. Install it with: pip install build123d"
+        )
     part = import_step(path)
 
     if not isinstance(part, Solid):
@@ -202,6 +223,33 @@ def load_step(path: str, verbose: bool = False) -> tuple[Solid, float]:
               f"({bb.max.X:.1f}, {bb.max.Y:.1f}, {bb.max.Z:.1f})")
 
     return part, z_min
+
+
+# File extensions that trigger the STEP pipeline (B-Rep overhang detection)
+STEP_EXTENSIONS = {".step", ".stp"}
+
+
+def load_mesh(path: str, verbose: bool = False) -> tuple[trimesh.Trimesh, float]:
+    """Load a mesh file (STL/OBJ/PLY/3MF/etc.) and translate so base sits at z=0."""
+    mesh = trimesh.load(path)
+    if isinstance(mesh, trimesh.Scene):
+        # Multi-body mesh: combine all geometries
+        mesh = trimesh.util.concatenate(list(mesh.geometry.values()))
+    mesh = _repair_mesh(mesh)
+
+    z_min = float(mesh.bounds[0][2])
+    if abs(z_min) > 1e-6:
+        mesh.apply_translation([0, 0, -z_min])
+        if verbose:
+            print(f"  Translated z by {-z_min:.4f} to sit on build plate")
+
+    if verbose:
+        print(f"  Loaded: {len(mesh.faces):,} faces")
+        bounds = mesh.bounds
+        print(f"  Bounds: ({bounds[0][0]:.1f}, {bounds[0][1]:.1f}, {bounds[0][2]:.1f}) -> "
+              f"({bounds[1][0]:.1f}, {bounds[1][1]:.1f}, {bounds[1][2]:.1f})")
+
+    return mesh, z_min
 
 
 def find_overhang_faces(
@@ -447,10 +495,10 @@ def compute_supports(
     progress.finish_step(f"{len(inflated_mesh.faces):,} faces")
 
     # Step 3: Negative space
-    bb = part.bounding_box()
+    bbox_min, bbox_max = _bbox_from_part(part)
     progress.start_step("Negative space")
     try:
-        negative_mesh = _compute_negative_mesh(bb, inflated_mesh, margin, verbose=False)
+        negative_mesh = _compute_negative_mesh(bbox_min, bbox_max, inflated_mesh, margin)
         if negative_mesh is None or negative_mesh.is_empty:
             raise ValueError("empty negative space")
         progress.finish_step(f"{negative_mesh.volume:,.0f} mm³")
@@ -541,16 +589,37 @@ def compute_supports(
     return supports
 
 
-def _compute_negative_mesh(bb, inflated_mesh, margin, verbose):
-    """Compute negative space: outer box - inflated model, clipped to model bbox."""
+def _bbox_from_part(part) -> tuple[np.ndarray, np.ndarray]:
+    """Extract (min_corner, max_corner) from a build123d Solid bounding box."""
+    bb = part.bounding_box()
+    return (
+        np.array([bb.min.X, bb.min.Y, bb.min.Z]),
+        np.array([bb.max.X, bb.max.Y, bb.max.Z]),
+    )
+
+
+def _bbox_from_mesh(mesh: trimesh.Trimesh) -> tuple[np.ndarray, np.ndarray]:
+    """Extract (min_corner, max_corner) from a trimesh."""
+    return mesh.bounds[0].copy(), mesh.bounds[1].copy()
+
+
+def _compute_negative_mesh(bbox_min, bbox_max, inflated_mesh, margin):
+    """Compute negative space: outer box - inflated model, clipped to model bbox.
+
+    Args:
+        bbox_min: (3,) array — model bounding box minimum corner
+        bbox_max: (3,) array — model bounding box maximum corner
+        inflated_mesh: trimesh of the inflated model
+        margin: gap in mm
+    """
     pad = margin + 1.0
     outer_ext = [
-        bb.max.X - bb.min.X + 2 * pad,
-        bb.max.Y - bb.min.Y + 2 * pad,
-        bb.max.Z + pad,
+        bbox_max[0] - bbox_min[0] + 2 * pad,
+        bbox_max[1] - bbox_min[1] + 2 * pad,
+        bbox_max[2] + pad,
     ]
-    cx = (bb.min.X + bb.max.X) / 2
-    cy = (bb.min.Y + bb.max.Y) / 2
+    cx = (bbox_min[0] + bbox_max[0]) / 2
+    cy = (bbox_min[1] + bbox_max[1]) / 2
 
     outer_mesh = trimesh.creation.box(
         extents=outer_ext,
@@ -561,7 +630,7 @@ def _compute_negative_mesh(bb, inflated_mesh, margin, verbose):
     negative = _manifold_boolean(outer_mesh, inflated_mesh, "difference")
 
     # Clip to model bounding box (remove external wrapper)
-    model_ext = [bb.max.X - bb.min.X, bb.max.Y - bb.min.Y, bb.max.Z]
+    model_ext = [bbox_max[0] - bbox_min[0], bbox_max[1] - bbox_min[1], bbox_max[2]]
     model_box = trimesh.creation.box(
         extents=model_ext,
         transform=trimesh.transformations.translation_matrix(
@@ -571,11 +640,87 @@ def _compute_negative_mesh(bb, inflated_mesh, margin, verbose):
     return _manifold_boolean(negative, model_box, "intersection")
 
 
+def compute_supports_mesh(
+    model_mesh: trimesh.Trimesh,
+    margin: float = 0.2,
+    min_volume: float = 1.0,
+    verbose: bool = False,
+) -> trimesh.Trimesh | None:
+    """Compute full-shell supports from a mesh (no B-Rep overhang detection).
+
+    The entire negative space around the inflated model becomes support.
+    Works with any mesh format (STL, OBJ, PLY, 3MF, etc.).
+
+    Algorithm:
+      1. Inflate model mesh outward by margin (Minkowski sum with sphere)
+      2. Compute negative space: bounding box - inflated model
+      3. Split into pieces, filter small fragments
+      4. Merge and return
+    """
+    progress = ProgressDisplay(enabled=verbose)
+    t0 = time.time()
+
+    # Step 1: Inflate
+    progress.start_step("Inflate")
+    import manifold3d
+    model_man = _to_manifold(model_mesh)
+    sphere = manifold3d.Manifold.sphere(margin, 16)
+    inflated_man = model_man.minkowski_sum(sphere)
+    inflated_mesh = _from_manifold(inflated_man)
+    progress.finish_step(f"{len(inflated_mesh.faces):,} faces")
+
+    # Step 2: Negative space
+    bbox_min, bbox_max = _bbox_from_mesh(model_mesh)
+    progress.start_step("Negative space")
+    try:
+        negative_mesh = _compute_negative_mesh(bbox_min, bbox_max, inflated_mesh, margin)
+        if negative_mesh is None or negative_mesh.is_empty:
+            raise ValueError("empty negative space")
+        progress.finish_step(f"{negative_mesh.volume:,.0f} mm³")
+    except Exception as e:
+        progress.fail_step(str(e))
+        print(f"\nError: mesh boolean failed for this model ({e}).")
+        print("The model mesh may be non-manifold. Try repairing it")
+        print("in your modeling software or with trimesh/meshlab.")
+        return None
+
+    # Suppress trimesh warnings about degenerate triangles
+    warnings.filterwarnings("ignore", category=RuntimeWarning, module="trimesh")
+
+    # Step 3: Split & filter
+    progress.start_step("Split & filter")
+    components = negative_mesh.split(only_watertight=False)
+    support_pieces = []
+    for comp in components:
+        vol = abs(comp.volume)
+        if vol >= min_volume:
+            support_pieces.append(comp)
+
+    if not support_pieces:
+        progress.finish_step("none")
+        return None
+    progress.finish_step(f"{len(support_pieces)} pieces")
+
+    # Step 4: Merge
+    progress.start_step("Merge")
+    supports = trimesh.util.concatenate(support_pieces)
+    progress.finish_step(f"{len(supports.faces):,} faces")
+
+    elapsed = time.time() - t0
+    if verbose:
+        vol = abs(supports.volume)
+        print(f"\n  Done in {elapsed:.1f}s — {len(support_pieces)} pieces, "
+              f"{vol:,.1f} mm³")
+
+    return supports
+
+
 def main():
     parser = argparse.ArgumentParser(
-        description="Generate negative-space 3D print supports from STEP files."
+        description="Generate negative-space 3D print supports from STEP or mesh files."
     )
-    parser.add_argument("input", help="Path to input STEP file")
+    parser.add_argument("input", help="Path to input file (STEP/STP for overhang detection, "
+                        "STL/OBJ/PLY/3MF for full-shell supports)")
     parser.add_argument(
         "-o", "--output",
         help="Output STL path (default: INPUT_supports.stl)",
@@ -625,21 +770,42 @@ def main():
 
     show_progress = not args.quiet or args.debug
 
-    if show_progress:
-        print(f"Loading {args.input}...")
-    part, original_z_min = load_step(args.input, verbose=show_progress)
+    # Detect input format by extension
+    import os
+    ext = os.path.splitext(args.input)[1].lower()
+    is_step = ext in STEP_EXTENSIONS
 
-    if show_progress:
-        print(f"\nComputing supports (margin={args.margin}mm, angle={args.angle}°)...")
-    supports = compute_supports(
-        part,
-        margin=args.margin,
-        min_volume=args.min_volume,
-        stl_tolerance=args.tolerance,
-        angle=args.angle,
-        verbose=show_progress,
-        debug=args.debug,
-    )
+    if is_step:
+        # STEP pipeline: B-Rep overhang detection
+        if show_progress:
+            print(f"Loading {args.input}...")
+        part, original_z_min = load_step(args.input, verbose=show_progress)
+
+        if show_progress:
+            print(f"\nComputing supports (margin={args.margin}mm, angle={args.angle}°)...")
+        supports = compute_supports(
+            part,
+            margin=args.margin,
+            min_volume=args.min_volume,
+            stl_tolerance=args.tolerance,
+            angle=args.angle,
+            verbose=show_progress,
+            debug=args.debug,
+        )
+    else:
+        # Mesh pipeline: full-shell supports (no overhang detection)
+        if show_progress:
+            print(f"Loading {args.input} (mesh mode — full-shell supports)...")
+        model_mesh, original_z_min = load_mesh(args.input, verbose=show_progress)
+
+        if show_progress:
+            print(f"\nComputing full-shell supports (margin={args.margin}mm)...")
+        supports = compute_supports_mesh(
+            model_mesh,
+            margin=args.margin,
+            min_volume=args.min_volume,
+            verbose=show_progress,
+        )
 
     if supports is None:
         print("No supports generated.", file=sys.stdout)
@@ -653,7 +819,7 @@ def main():
     print(f"Supports written to {args.output}")
     print(f"  {len(supports.faces)} faces, volume = {abs(supports.volume):.1f} mm³")
 
-    if args.export_model:
+    if args.export_model and is_step:
         model_stl = args.input.rsplit(".", 1)[0] + ".stl"
         export_stl(part.moved(Location((0, 0, original_z_min))),
                    model_stl, tolerance=args.tolerance)
