@@ -40,15 +40,17 @@ export default function Try() {
   const [stats, setStats] = useState<Stats | null>(null);
   const [errorMsg, setErrorMsg] = useState('');
   const [downloadUrl, setDownloadUrl] = useState<string | null>(null);
+  const [downloadUrl3mf, setDownloadUrl3mf] = useState<string | null>(null);
   const [runCount, setRunCount] = useState(getRunCount);
   const workerRef = useRef<Worker | null>(null);
 
-  // Cleanup download URL on unmount
+  // Cleanup download URLs on unmount
   useEffect(() => {
     return () => {
       if (downloadUrl) URL.revokeObjectURL(downloadUrl);
+      if (downloadUrl3mf) URL.revokeObjectURL(downloadUrl3mf);
     };
-  }, [downloadUrl]);
+  }, [downloadUrl, downloadUrl3mf]);
 
   const updateStep = useCallback((name: string, detail?: string) => {
     setSteps((prev) => {
@@ -82,6 +84,10 @@ export default function Try() {
       URL.revokeObjectURL(downloadUrl);
       setDownloadUrl(null);
     }
+    if (downloadUrl3mf) {
+      URL.revokeObjectURL(downloadUrl3mf);
+      setDownloadUrl3mf(null);
+    }
 
     // Create worker
     const worker = new Worker(
@@ -96,9 +102,10 @@ export default function Try() {
         updateStep(msg.step, msg.detail);
       } else if (msg.type === 'result') {
         markAllDone();
-        const blob = new Blob([msg.stlBuffer], { type: 'application/octet-stream' });
-        const url = URL.createObjectURL(blob);
-        setDownloadUrl(url);
+        const stlBlob = new Blob([msg.stlBuffer], { type: 'application/octet-stream' });
+        setDownloadUrl(URL.createObjectURL(stlBlob));
+        const threemfBlob = new Blob([msg.threemfBuffer], { type: 'application/vnd.ms-package.3dmanufacturing-3dmodel+xml' });
+        setDownloadUrl3mf(URL.createObjectURL(threemfBlob));
         setStats(msg.stats);
         setPhase('done');
         incrementRunCount();
@@ -142,17 +149,22 @@ export default function Try() {
 
   const handleReset = useCallback(() => {
     if (downloadUrl) URL.revokeObjectURL(downloadUrl);
+    if (downloadUrl3mf) URL.revokeObjectURL(downloadUrl3mf);
     setDownloadUrl(null);
+    setDownloadUrl3mf(null);
     setPhase('upload');
     setFile(null);
     setSteps([]);
     setStats(null);
     setErrorMsg('');
-  }, [downloadUrl]);
+  }, [downloadUrl, downloadUrl3mf]);
 
   const outputName = file
     ? file.name.replace(/\.[^.]+$/, '_supports.stl')
     : 'supports.stl';
+  const outputName3mf = file
+    ? file.name.replace(/\.[^.]+$/, '.3mf')
+    : 'model.3mf';
 
   const exhausted = runCount >= MAX_FREE_RUNS;
   const remaining = MAX_FREE_RUNS - runCount;
@@ -255,14 +267,21 @@ export default function Try() {
                 </div>
               </div>
             </div>
-            <div className="flex gap-3">
+            <div className="flex gap-3 flex-wrap">
               <a
                 className="inline-flex items-center gap-2 px-5 py-2.5 rounded-lg text-sm font-medium no-underline bg-accent text-base hover:brightness-110 transition-all glow-accent"
+                href={downloadUrl3mf!}
+                download={outputName3mf}
+              >
+                Download 3MF
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className="opacity-60"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+              </a>
+              <a
+                className="inline-flex items-center gap-2 px-5 py-2.5 rounded-lg text-sm font-medium no-underline glass glass-hover text-primary/70"
                 href={downloadUrl!}
                 download={outputName}
               >
                 Download STL
-                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className="opacity-60"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
               </a>
               <button
                 className="inline-flex items-center px-5 py-2.5 rounded-lg text-sm font-medium glass glass-hover text-primary/70 cursor-pointer border-none"

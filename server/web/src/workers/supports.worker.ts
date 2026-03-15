@@ -13,6 +13,7 @@ import { parseSTL, exportSTL, type ParsedMesh } from '../lib/stl';
 import { parseOBJ } from '../lib/obj';
 import { parseSTEP, type STEPFaceInfo } from '../lib/step';
 import { computeBBox, translateZ, inflateMesh, repairMesh } from '../lib/mesh-utils';
+import { export3MF } from '../lib/threemf';
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 let wasm: any;
@@ -39,6 +40,7 @@ interface ProgressMessage {
 interface ResultMessage {
   type: 'result';
   stlBuffer: ArrayBuffer;
+  threemfBuffer: ArrayBuffer;
   stats: { pieces: number; faces: number; volume: number };
 }
 
@@ -48,6 +50,19 @@ interface ErrorMessage {
 }
 
 type OutMessage = ProgressMessage | ResultMessage | ErrorMessage;
+
+interface SupportMeshResult {
+  type: 'mesh';
+  supportMesh: ParsedMesh;
+  stats: { pieces: number; faces: number; volume: number };
+}
+
+interface SupportErrorResult {
+  type: 'error';
+  message: string;
+}
+
+type PipelineResult = SupportMeshResult | SupportErrorResult;
 
 function progress(step: string, detail?: string) {
   self.postMessage({ type: 'progress', step, detail } satisfies ProgressMessage);
@@ -95,7 +110,7 @@ function manifoldToMesh(m: any): ParsedMesh {
 
 // -- Mesh pipeline (mirrors Python compute_supports_mesh) --
 
-function generateSupports(parsed: ParsedMesh, margin: number, minVolume: number): OutMessage {
+function generateSupports(parsed: ParsedMesh, margin: number, minVolume: number): PipelineResult {
   // Translate to z=0
   const bbox = computeBBox(parsed.vertices);
   const zMin = bbox.min[2];
@@ -139,7 +154,7 @@ function generateSupports(parsed: ParsedMesh, margin: number, minVolume: number)
 
   if (negVol < 0.01) {
     clipped.delete();
-    return { type: 'error', message: 'No negative space found — model may be non-manifold.' };
+    return { type: 'error' as const, message: 'No negative space found — model may be non-manifold.' };
   }
 
   // Step 3: Decompose & filter
@@ -159,7 +174,7 @@ function generateSupports(parsed: ParsedMesh, margin: number, minVolume: number)
   }
 
   if (kept.length === 0) {
-    return { type: 'error', message: 'No support pieces found above minimum volume threshold.' };
+    return { type: 'error' as const, message: 'No support pieces found above minimum volume threshold.' };
   }
   progress('Split & filter', `${kept.length} pieces`);
 
@@ -186,13 +201,9 @@ function generateSupports(parsed: ParsedMesh, margin: number, minVolume: number)
     translateZ(outMesh.vertices, zMin);
   }
 
-  // Step 5: Export STL
-  progress('Export', 'Writing STL...');
-  const stlBuffer = exportSTL(outMesh);
-
   return {
-    type: 'result',
-    stlBuffer,
+    type: 'mesh' as const,
+    supportMesh: outMesh,
     stats: {
       pieces: kept.length,
       faces: faceCount,
@@ -209,7 +220,7 @@ function generateSupportsSTEP(
   margin: number,
   angle: number,
   minVolume: number,
-): OutMessage {
+): PipelineResult {
   const nzThreshold = -Math.cos((angle * Math.PI) / 180);
 
   // Translate to z=0
@@ -260,7 +271,7 @@ function generateSupportsSTEP(
 
   if (negVol < 0.01) {
     clippedNeg.delete();
-    return { type: 'error', message: 'No negative space found — model may be non-manifold.' };
+    return { type: 'error' as const, message: 'No negative space found — model may be non-manifold.' };
   }
 
   // Step 3: Detect overhang faces
@@ -277,7 +288,7 @@ function generateSupportsSTEP(
 
   if (overhangFaces.length === 0) {
     clippedNeg.delete();
-    return { type: 'error', message: 'No overhang faces detected — model may not need supports at this angle.' };
+    return { type: 'error' as const, message: 'No overhang faces detected — model may not need supports at this angle.' };
   }
   progress('Overhang detection', `${overhangFaces.length} overhang face(s) of ${faceInfos.length} total`);
 
@@ -362,7 +373,7 @@ function generateSupportsSTEP(
   clippedNeg.delete();
 
   if (allPieces.length === 0) {
-    return { type: 'error', message: 'No support pieces found for overhang faces.' };
+    return { type: 'error' as const, message: 'No support pieces found for overhang faces.' };
   }
 
   // Step 5: Merge
@@ -388,13 +399,9 @@ function generateSupportsSTEP(
     translateZ(outMesh.vertices, zMin);
   }
 
-  // Step 6: Export STL
-  progress('Export', 'Writing STL...');
-  const stlBuffer = exportSTL(outMesh);
-
   return {
-    type: 'result',
-    stlBuffer,
+    type: 'mesh' as const,
+    supportMesh: outMesh,
     stats: {
       pieces: allPieces.length,
       faces: faceCount,
@@ -458,21 +465,42 @@ self.onmessage = async (e: MessageEvent<InMessage>) => {
       progress('Repair', 'Mesh OK');
     }
 
+    // Save a copy of the model mesh for 3MF export (pipeline modifies vertices in-place)
+    const modelMesh: ParsedMesh = {
+      vertices: new Float32Array(parsed.vertices),
+      faces: new Uint32Array(parsed.faces),
+    };
+
     // Run the appropriate pipeline
-    let result: OutMessage;
+    let pipelineResult: PipelineResult;
     if (stepFaces) {
       // STEP mode: overhang detection + per-face column extraction
-      result = generateSupportsSTEP(parsed, stepFaces, msg.margin, msg.angle, msg.minVolume);
+      pipelineResult = generateSupportsSTEP(parsed, stepFaces, msg.margin, msg.angle, msg.minVolume);
     } else {
       // Mesh mode: full-shell negative space
-      result = generateSupports(parsed, msg.margin, msg.minVolume);
+      pipelineResult = generateSupports(parsed, msg.margin, msg.minVolume);
     }
 
-    if (result.type === 'result') {
-      self.postMessage(result, { transfer: [result.stlBuffer] });
-    } else {
-      self.postMessage(result);
+    if (pipelineResult.type === 'error') {
+      self.postMessage({ type: 'error', message: pipelineResult.message } satisfies ErrorMessage);
+      return;
     }
+
+    // Export STL
+    progress('Export', 'Writing STL...');
+    const stlBuffer = exportSTL(pipelineResult.supportMesh);
+
+    // Export 3MF (model + supports)
+    progress('Export', 'Writing 3MF...');
+    const threemfBuffer = export3MF(modelMesh, pipelineResult.supportMesh);
+
+    const result: ResultMessage = {
+      type: 'result',
+      stlBuffer,
+      threemfBuffer,
+      stats: pipelineResult.stats,
+    };
+    self.postMessage(result, { transfer: [stlBuffer, threemfBuffer] });
   } catch (err) {
     self.postMessage({
       type: 'error',

@@ -14,25 +14,25 @@ export default function Docs() {
             <div className="rounded-xl p-5 glass">
               <p className="label-xs mb-3">npm</p>
               <div className="bg-base/60 border border-border rounded-md px-3 py-2.5 mb-3 overflow-x-auto">
-                <code className="font-mono text-xs text-accent whitespace-pre">npm install -g negative-support</code>
+                <code className="font-mono text-xs text-code whitespace-pre">npm install -g negative-support</code>
               </div>
               <p className="text-dim text-sm mb-3 leading-relaxed">
                 Or run directly with npx (no install needed):
               </p>
               <div className="bg-base/60 border border-border rounded-md px-3 py-2.5 overflow-x-auto">
-                <code className="font-mono text-xs text-accent whitespace-pre">npx negative-support model.stl</code>
+                <code className="font-mono text-xs text-code whitespace-pre">npx negative-support model.stl</code>
               </div>
             </div>
             <div className="rounded-xl p-5 glass">
               <p className="label-xs mb-3">pip</p>
               <div className="bg-base/60 border border-border rounded-md px-3 py-2.5 mb-3 overflow-x-auto">
-                <code className="font-mono text-xs text-accent whitespace-pre">pip install negative-support</code>
+                <code className="font-mono text-xs text-code whitespace-pre">pip install negative-support</code>
               </div>
               <p className="text-dim text-sm mb-3 leading-relaxed">
                 For STEP file support (B-Rep overhang detection):
               </p>
               <div className="bg-base/60 border border-border rounded-md px-3 py-2.5 overflow-x-auto">
-                <code className="font-mono text-xs text-accent whitespace-pre">pip install negative-support[step]</code>
+                <code className="font-mono text-xs text-code whitespace-pre">pip install negative-support[step]</code>
               </div>
             </div>
           </div>
@@ -48,7 +48,7 @@ export default function Docs() {
             Both CLIs work the same way with the same arguments and output formats.
           </p>
           <div className="bg-base/60 border border-border rounded-lg px-4 py-3.5 mb-4 overflow-x-auto">
-            <code className="font-mono text-xs text-accent whitespace-pre leading-relaxed">
+            <code className="font-mono text-xs text-code whitespace-pre leading-relaxed">
               {`# Generate supports (STL output)
 negative-support model.stl
 
@@ -123,7 +123,7 @@ negative-support model.stl -o my_supports.stl`}
             your model and supports as separate objects. This is the recommended way to import into your slicer.
           </p>
           <div className="bg-base/60 border border-border rounded-lg px-4 py-3.5 mb-4 overflow-x-auto">
-            <code className="font-mono text-xs text-accent whitespace-pre leading-relaxed">
+            <code className="font-mono text-xs text-code whitespace-pre leading-relaxed">
               {`negative-support model.stl --3mf
 # → model_supports.stl
 # → model.3mf`}
@@ -143,7 +143,7 @@ negative-support model.stl -o my_supports.stl`}
           </div>
           <p className="text-dim text-sm mb-4 leading-relaxed">You can also use negative-support as a library:</p>
           <div className="bg-base/60 border border-border rounded-lg px-4 py-3.5 mb-4 overflow-x-auto">
-            <code className="font-mono text-xs text-accent whitespace-pre leading-relaxed">
+            <code className="font-mono text-xs text-code whitespace-pre leading-relaxed">
               {`import { generateSupports } from 'negative-support'
 import { readFileSync, writeFileSync } from 'fs'
 
@@ -223,7 +223,7 @@ console.log(result.stats) // { pieces, faces, volume }`}
           </div>
           <p className="text-dim text-sm mb-4 leading-relaxed">You can also use negative-support as a Python library:</p>
           <div className="bg-base/60 border border-border rounded-lg px-4 py-3.5 mb-4 overflow-x-auto">
-            <code className="font-mono text-xs text-accent whitespace-pre leading-relaxed">
+            <code className="font-mono text-xs text-code whitespace-pre leading-relaxed">
               {`from negative_support import load_step, compute_supports
 
 # STEP file
@@ -251,7 +251,7 @@ supports.export("supports.stl")`}
             lifetime license is required.
           </p>
           <div className="bg-base/60 border border-border rounded-lg px-4 py-3.5 mb-4 overflow-x-auto">
-            <code className="font-mono text-xs text-accent whitespace-pre leading-relaxed">
+            <code className="font-mono text-xs text-code whitespace-pre leading-relaxed">
               {`# Check license status
 negative-support --status
 

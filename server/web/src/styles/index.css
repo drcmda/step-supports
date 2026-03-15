@@ -53,12 +53,13 @@
   --color-surface-bright: rgba(255, 255, 255, 0.04);
   --color-border: rgba(255, 255, 255, 0.06);
   --color-border-bright: rgba(255, 255, 255, 0.12);
-  --color-primary: rgba(255, 255, 255, 0.85);
-  --color-dim: rgba(255, 255, 255, 0.4);
-  --color-muted: rgba(255, 255, 255, 0.25);
-  --color-accent: #22c55e;
-  --color-accent-dim: rgba(34, 197, 94, 0.15);
-  --color-accent-glow: rgba(34, 197, 94, 0.08);
+  --color-primary: #e4f0fb;
+  --color-dim: #a6accd;
+  --color-muted: #767c9d;
+  --color-accent: #5de4c7;
+  --color-accent-dim: rgba(93, 228, 199, 0.15);
+  --color-accent-glow: rgba(93, 228, 199, 0.08);
+  --color-code: #91b4d5;
   --font-sans: "Geist", system-ui, sans-serif;
   --font-mono: "Geist Mono", ui-monospace, monospace;
   --font-pixel: "Geist Pixel Triangle", "Geist Mono", monospace;
@@ -143,5 +144,5 @@
   font-size: 10px;
   letter-spacing: 0.12em;
   text-transform: uppercase;
-  color: rgba(255, 255, 255, 0.3);
+  color: var(--color-muted);
 }

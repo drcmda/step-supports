@@ -73,7 +73,7 @@ export default function Success() {
               <p className="label-xs mb-4 tracking-[0.14em]">Activate</p>
               <p className="text-dim text-sm mb-3 leading-relaxed">Run this command in your terminal:</p>
               <div className="bg-base/60 border border-border rounded-lg px-4 py-3 overflow-x-auto">
-                <code className="font-mono text-xs text-accent whitespace-pre">negative-support --activate {token}</code>
+                <code className="font-mono text-xs text-code whitespace-pre">negative-support --activate {token}</code>
               </div>
               <p className="text-muted text-xs font-mono mt-4 leading-relaxed">
                 Works on up to 3 machines. Token stored in ~/.negative-support/license.json

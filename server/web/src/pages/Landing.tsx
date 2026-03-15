@@ -63,7 +63,7 @@ export default function Landing() {
             <p className="label-xs mb-3">Browser</p>
             <p className="text-dim text-sm mb-3 leading-relaxed">Upload and generate instantly. No install needed.</p>
             <div className="bg-base/60 border border-border rounded-md px-3 py-2 mb-3 overflow-x-auto">
-              <code className="font-mono text-xs text-accent whitespace-pre">STL, OBJ, STEP</code>
+              <code className="font-mono text-xs text-code whitespace-pre">STL, OBJ, STEP</code>
             </div>
             <a href="/generate" className="font-mono text-[11px] tracking-[0.06em] text-accent/60 no-underline hover:text-accent transition-colors">
               Open generator &rarr;
@@ -73,10 +73,10 @@ export default function Landing() {
           <div className="py-8 px-6 max-md:px-0">
             <p className="label-xs mb-3">npm</p>
             <div className="bg-base/60 border border-border rounded-md px-3 py-2 mb-2 overflow-x-auto">
-              <code className="font-mono text-xs text-accent whitespace-pre">npx negative-support model.stl</code>
+              <code className="font-mono text-xs text-code whitespace-pre">npx negative-support model.stl</code>
             </div>
             <div className="bg-base/60 border border-border rounded-md px-3 py-2 mb-3 overflow-x-auto">
-              <code className="font-mono text-xs text-accent whitespace-pre">npx negative-support model.step --3mf</code>
+              <code className="font-mono text-xs text-code whitespace-pre">npx negative-support model.step --3mf</code>
             </div>
             <a
               href="https://www.npmjs.com/package/negative-support"
@@ -91,10 +91,10 @@ export default function Landing() {
           <div className="py-8 px-6 last:pr-0 max-md:px-0 max-md:last:pb-8">
             <p className="label-xs mb-3">pip</p>
             <div className="bg-base/60 border border-border rounded-md px-3 py-2 mb-2 overflow-x-auto">
-              <code className="font-mono text-xs text-accent whitespace-pre">pip install negative-support</code>
+              <code className="font-mono text-xs text-code whitespace-pre">pip install negative-support</code>
             </div>
             <div className="bg-base/60 border border-border rounded-md px-3 py-2 mb-3 overflow-x-auto">
-              <code className="font-mono text-xs text-accent whitespace-pre">negative-support model.stl</code>
+              <code className="font-mono text-xs text-code whitespace-pre">negative-support model.stl</code>
             </div>
             <a href="/docs" className="font-mono text-[11px] tracking-[0.06em] text-accent/60 no-underline hover:text-accent transition-colors">
               Read the docs &rarr;
