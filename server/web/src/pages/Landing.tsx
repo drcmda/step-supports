@@ -112,10 +112,23 @@ export default function Landing() {
         <div className='max-w-[1100px] mx-auto px-6'>
           <p className='label-xs mb-4 text-center tracking-[0.14em]'>Why negative-space?</p>
           <h2 className='text-center mb-5 text-2xl font-semibold tracking-[-0.01em]'>Tree supports vs. negative-space</h2>
-          <p className='text-dim text-center text-sm max-w-[520px] mx-auto mb-14 leading-relaxed'>
+          <p className='text-dim text-center text-sm max-w-[520px] mx-auto mb-10 leading-relaxed'>
             Traditional tree supports touch your model at many points, leaving marks and risking damage. Negative-space supports wrap around
             the geometry's exact shape with a precision air gap.
           </p>
+          <div className='flex justify-center mb-14'>
+            <div className='relative'>
+              <img src='/hero-outline.png' alt='Model with negative-space supports' className='h-[280px] w-auto opacity-70' />
+              <div className='absolute bottom-3 left-1/2 -translate-x-1/2 flex gap-6 text-[10px] font-mono tracking-wider'>
+                <span className='flex items-center gap-1.5 text-primary/50'>
+                  <span className='inline-block w-5 h-px bg-primary/50' /> model
+                </span>
+                <span className='flex items-center gap-1.5 text-accent/60'>
+                  <span className='inline-block w-5 h-px border-t border-dashed border-accent/60' /> supports
+                </span>
+              </div>
+            </div>
+          </div>
           <div className='grid grid-cols-2 gap-4 max-sm:grid-cols-1'>
             {/* Tree supports */}
             <div className='rounded-xl p-7 glass'>
