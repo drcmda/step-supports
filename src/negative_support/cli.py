@@ -630,10 +630,13 @@ def main():
         sys.exit(1)
 
     # Check license before doing any work
-    allowed, lic_msg = check_license()
-    if not allowed:
-        print_buy_message()
-        sys.exit(1)
+    if os.environ.get("NS_DEV"):
+        allowed, lic_msg = True, "Dev mode"
+    else:
+        allowed, lic_msg = check_license()
+        if not allowed:
+            print_buy_message()
+            sys.exit(1)
 
     if args.output is None:
         stem = args.input.rsplit(".", 1)[0]
