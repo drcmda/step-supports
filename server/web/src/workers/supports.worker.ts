@@ -10,7 +10,7 @@ import Module from 'manifold-3d';
 import wasmUrl from 'manifold-3d/manifold.wasm?url';
 import { parseSTL, exportSTL, type ParsedMesh } from '../lib/stl';
 import { parseOBJ } from '../lib/obj';
-import { computeBBox, translateZ, inflateMesh } from '../lib/mesh-utils';
+import { computeBBox, translateZ, inflateMesh, repairMesh } from '../lib/mesh-utils';
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 let wasm: any;
@@ -234,6 +234,17 @@ self.onmessage = async (e: MessageEvent<InMessage>) => {
     const vertCount = parsed.vertices.length / 3;
     const triCount = parsed.faces.length / 3;
     progress('Parse', `${vertCount.toLocaleString()} vertices, ${triCount.toLocaleString()} triangles`);
+
+    // Repair mesh (remove degenerate/duplicate faces, fix non-manifold edges)
+    progress('Repair', 'Checking mesh...');
+    const repaired = repairMesh(parsed);
+    if (repaired !== parsed) {
+      const removedFaces = triCount - repaired.faces.length / 3;
+      progress('Repair', `Fixed: removed ${removedFaces} bad faces`);
+      parsed = repaired;
+    } else {
+      progress('Repair', 'Mesh OK');
+    }
 
     // Run pipeline
     const result = generateSupports(parsed, msg.margin, msg.minVolume);
