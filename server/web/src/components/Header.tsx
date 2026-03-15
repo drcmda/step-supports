@@ -8,6 +8,7 @@ export default function Header() {
           negative-support
         </Link>
         <nav className="nav">
+          <Link to="/try">Try it</Link>
           <Link to="/docs">Docs</Link>
           <Link to="/#pricing">Pricing</Link>
         </nav>

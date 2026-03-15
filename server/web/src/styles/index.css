@@ -502,6 +502,292 @@ main {
   color: var(--text);
 }
 
+/* ── Try page ─────────────────────────────────────────────────────── */
+
+.try-page {
+  padding: 60px 0;
+}
+
+.try-page h1 {
+  font-size: 2rem;
+  margin-bottom: 12px;
+}
+
+.try-page__subtitle {
+  color: var(--text-dim);
+  margin-bottom: 8px;
+}
+
+.try-page__warning {
+  color: var(--text-dim);
+  font-size: 0.85rem;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 12px 16px;
+  margin-bottom: 32px;
+}
+
+.try-page__warning code {
+  font-family: var(--mono);
+  font-size: 0.8rem;
+  color: var(--green);
+}
+
+/* Drop zone */
+.drop-zone {
+  border: 2px dashed var(--border);
+  border-radius: 12px;
+  padding: 48px 24px;
+  text-align: center;
+  cursor: pointer;
+  transition: all 0.2s;
+  margin-bottom: 24px;
+}
+
+.drop-zone:hover,
+.drop-zone--active {
+  border-color: var(--accent);
+  background: rgba(59, 130, 246, 0.05);
+}
+
+.drop-zone--disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.drop-zone__icon {
+  color: var(--text-dim);
+  margin-bottom: 16px;
+}
+
+.drop-zone__text {
+  color: var(--text-dim);
+  font-size: 0.95rem;
+}
+
+.drop-zone__browse {
+  color: var(--accent);
+  text-decoration: underline;
+}
+
+.drop-zone__file {
+  font-family: var(--mono);
+  color: var(--green);
+  font-size: 0.95rem;
+}
+
+.drop-zone__error {
+  color: #fca5a5;
+  font-size: 0.85rem;
+  margin-top: 8px;
+}
+
+/* Controls */
+.try-page__controls {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+
+.try-page__margin {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 0.9rem;
+  color: var(--text-dim);
+}
+
+.try-page__margin input {
+  width: 72px;
+  padding: 6px 8px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  color: var(--text);
+  font-family: var(--mono);
+  font-size: 0.85rem;
+}
+
+.try-page__runs {
+  color: var(--text-dim);
+  font-size: 0.85rem;
+  margin-left: auto;
+}
+
+.try-page__exhausted {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 16px 20px;
+  flex: 1;
+}
+
+.try-page__exhausted p {
+  color: var(--text-dim);
+  font-size: 0.9rem;
+  margin-bottom: 4px;
+}
+
+.try-page__exhausted a {
+  color: var(--accent);
+}
+
+/* Button variants for try page */
+.btn--primary {
+  background: var(--accent);
+  color: #fff;
+}
+
+.btn--primary:hover {
+  background: var(--accent-hover);
+}
+
+.btn--primary:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.btn--secondary {
+  background: var(--surface);
+  color: var(--text);
+  border: 1px solid var(--border);
+}
+
+.btn--secondary:hover {
+  border-color: var(--text-dim);
+}
+
+/* Progress steps */
+.try-page__processing {
+  margin-top: 24px;
+}
+
+.progress-steps {
+  margin-bottom: 24px;
+}
+
+.progress-step {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 0;
+}
+
+.progress-step__indicator {
+  width: 24px;
+  height: 24px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.progress-step--done .progress-step__indicator {
+  color: var(--green);
+}
+
+.progress-step--active .progress-step__indicator {
+  color: var(--accent);
+}
+
+.progress-step--pending .progress-step__indicator {
+  color: var(--text-dim);
+}
+
+.progress-step__dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--border);
+}
+
+.spinner {
+  width: 16px;
+  height: 16px;
+  border: 2px solid var(--border);
+  border-top-color: var(--accent);
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+.progress-step__content {
+  display: flex;
+  gap: 12px;
+  align-items: baseline;
+}
+
+.progress-step__name {
+  font-weight: 500;
+  font-size: 0.95rem;
+}
+
+.progress-step__detail {
+  color: var(--text-dim);
+  font-size: 0.85rem;
+  font-family: var(--mono);
+}
+
+/* Done state */
+.try-page__done {
+  margin-top: 24px;
+}
+
+.try-page__stats {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 24px;
+  margin-bottom: 24px;
+}
+
+.try-page__stats h2 {
+  font-size: 1.3rem;
+  margin-bottom: 16px;
+  color: var(--green);
+}
+
+.try-page__stats dl {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: 8px 24px;
+}
+
+.try-page__stats dt {
+  color: var(--text-dim);
+  font-size: 0.9rem;
+}
+
+.try-page__stats dd {
+  font-family: var(--mono);
+  font-size: 0.9rem;
+}
+
+.try-page__actions {
+  display: flex;
+  gap: 12px;
+}
+
+/* Error state */
+.try-page__error {
+  margin-top: 24px;
+}
+
+.try-page__error-msg {
+  background: #1a0000;
+  border: 1px solid #5c1a1a;
+  border-radius: 8px;
+  padding: 16px 20px;
+  color: #fca5a5;
+  font-size: 0.9rem;
+  margin-bottom: 16px;
+}
+
 /* ── Responsive ───────────────────────────────────────────────────── */
 
 @media (max-width: 640px) {

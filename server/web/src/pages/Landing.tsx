@@ -32,10 +32,13 @@ export default function Landing() {
             model. Works with STEP and STL files.
           </p>
           <div className="hero-actions">
+            <a href="/try" className="btn btn-primary">
+              Try in browser
+            </a>
             <a href="/docs" className="btn btn-secondary">
               Get started
             </a>
-            <a href="#pricing" className="btn btn-primary">
+            <a href="#pricing" className="btn btn-secondary">
               Buy license
             </a>
           </div>

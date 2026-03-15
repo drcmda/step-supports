@@ -4,6 +4,7 @@ import Footer from "./components/Footer";
 import Landing from "./pages/Landing";
 import Success from "./pages/Success";
 import Docs from "./pages/Docs";
+import Try from "./pages/Try";
 
 export default function App() {
   return (
@@ -12,6 +13,7 @@ export default function App() {
       <main>
         <Routes>
           <Route path="/" element={<Landing />} />
+          <Route path="/try" element={<Try />} />
           <Route path="/success" element={<Success />} />
           <Route path="/docs" element={<Docs />} />
         </Routes>
