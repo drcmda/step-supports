@@ -14,6 +14,12 @@ import {
   handleCheckout,
   handleRecover,
 } from "./api";
+import {
+  handleGitHubLogin,
+  handleGitHubCallback,
+  handleMe,
+  handleLogout,
+} from "./auth";
 import { getAssetFromKV } from "@cloudflare/kv-asset-handler";
 // @ts-ignore — injected by wrangler [site] config
 import manifestJSON from "__STATIC_CONTENT_MANIFEST";
@@ -24,13 +30,15 @@ interface Env extends ApiEnv {
   __STATIC_CONTENT: KVNamespace;
 }
 
-function corsResponse(): Response {
+function corsResponse(request: Request): Response {
+  const origin = new URL(request.url).origin;
   return new Response(null, {
     status: 204,
     headers: {
-      "Access-Control-Allow-Origin": "*",
+      "Access-Control-Allow-Origin": origin,
       "Access-Control-Allow-Methods": "GET, POST, OPTIONS",
       "Access-Control-Allow-Headers": "Content-Type",
+      "Access-Control-Allow-Credentials": "true",
     },
   });
 }
@@ -48,7 +56,7 @@ export default {
 
     // CORS preflight
     if (request.method === "OPTIONS") {
-      return corsResponse();
+      return corsResponse(request);
     }
 
     // API routes
@@ -68,6 +76,14 @@ export default {
           return handleCheckout(request, env);
         case "/api/recover":
           return handleRecover(request, env);
+        case "/api/auth/github":
+          return handleGitHubLogin(request, env);
+        case "/api/auth/github/callback":
+          return handleGitHubCallback(request, env);
+        case "/api/auth/me":
+          return handleMe(request, env);
+        case "/api/auth/logout":
+          return handleLogout(request, env);
         default:
           return notFound();
       }

@@ -8,6 +8,9 @@ routes = [
 [site]
 bucket = "./web/dist"
 
+[vars]
+GITHUB_CLIENT_ID = "Ov23litsiPDgaJ1JPmep"
+
 [[d1_databases]]
 binding = "DB"
 database_name = "negative-support-db"

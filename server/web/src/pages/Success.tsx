@@ -1,11 +1,12 @@
 import { useEffect, useState } from "react";
 import { useSearchParams } from "react-router-dom";
 import CopyToken from "../components/CopyToken";
-import { storeToken } from "../lib/license";
+import { useAuth } from "../lib/AuthContext";
 
 export default function Success() {
   const [searchParams] = useSearchParams();
   const sessionId = searchParams.get("session_id");
+  const auth = useAuth();
 
   const [token, setToken] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
@@ -20,11 +21,12 @@ export default function Success() {
 
     const fetchToken = async () => {
       try {
-        const resp = await fetch(`/api/token?session_id=${sessionId}`);
+        const resp = await fetch(`/api/token?session_id=${sessionId}`, { credentials: "include" });
         const data = await resp.json();
         if (data.token) {
           setToken(data.token);
-          storeToken(data.token);
+          // Refresh auth context so the header updates
+          auth.refresh();
         } else {
           setError(data.error || "Token not found.");
         }
@@ -72,13 +74,16 @@ export default function Success() {
             <p className="text-dim text-sm mb-2">Your license token:</p>
             <CopyToken token={token} />
             <div className="max-w-[500px] mx-auto mt-10 text-left space-y-6">
-              <div>
-                <p className="label-xs mb-4 tracking-[0.14em]">Browser</p>
-                <p className="text-dim text-sm leading-relaxed">
-                  This browser is now licensed. You have unlimited runs on the{" "}
-                  <a href="/generate" className="text-accent no-underline hover:underline">generate page</a>.
-                </p>
-              </div>
+              {auth.user && (
+                <div>
+                  <p className="label-xs mb-4 tracking-[0.14em]">Account</p>
+                  <p className="text-dim text-sm leading-relaxed">
+                    Your license has been linked to your account. You have unlimited runs on the{" "}
+                    <a href="/generate" className="text-accent no-underline hover:underline">generate page</a>.
+                    You can also find your token in the user menu.
+                  </p>
+                </div>
+              )}
               <div>
                 <p className="label-xs mb-4 tracking-[0.14em]">CLI activation</p>
                 <p className="text-dim text-sm mb-3 leading-relaxed">Run this command in your terminal:</p>

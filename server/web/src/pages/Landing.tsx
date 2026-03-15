@@ -9,6 +9,7 @@ export default function Landing() {
       const resp = await fetch("/api/checkout", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
+        credentials: "include",
         body: JSON.stringify({}),
       });
       const data = await resp.json();
@@ -138,7 +139,7 @@ export default function Landing() {
               <ul className="list-none mb-7 space-y-2.5">
                 <li className="text-dim text-sm flex items-center gap-2 justify-center">
                   <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className="text-accent shrink-0"><polyline points="20 6 9 17 4 12"/></svg>
-                  3 runs per machine
+                  10 free runs
                 </li>
                 <li className="text-dim text-sm flex items-center gap-2 justify-center">
                   <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className="text-accent shrink-0"><polyline points="20 6 9 17 4 12"/></svg>
@@ -146,7 +147,7 @@ export default function Landing() {
                 </li>
                 <li className="text-dim text-sm flex items-center gap-2 justify-center">
                   <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className="text-accent shrink-0"><polyline points="20 6 9 17 4 12"/></svg>
-                  No account needed
+                  GitHub login
                 </li>
               </ul>
               <a

@@ -17,11 +17,13 @@ export interface Env {
   STRIPE_SECRET_KEY: string;
   STRIPE_WEBHOOK_SECRET: string;
   RESEND_API_KEY: string;
+  GITHUB_CLIENT_ID: string;
+  GITHUB_CLIENT_SECRET: string;
 }
 
 // ── Constants ────────────────────────────────────────────────────────
 
-const FREE_RUNS = 3;
+const FREE_RUNS = 10;
 const MAX_MACHINES_PER_TOKEN = 3;
 const STRIPE_API = "https://api.stripe.com/v1";
 const PRICE_ID = "price_1TBB3d9HnoOYYyWYyX2sg3Gq";
@@ -35,9 +37,10 @@ function json(data: unknown, status = 200): Response {
     status,
     headers: {
       "Content-Type": "application/json",
-      "Access-Control-Allow-Origin": "*",
+      "Access-Control-Allow-Origin": "https://negative.support",
       "Access-Control-Allow-Methods": "GET, POST, OPTIONS",
       "Access-Control-Allow-Headers": "Content-Type",
+      "Access-Control-Allow-Credentials": "true",
     },
   });
 }
@@ -122,8 +125,40 @@ function timingSafeEqual(a: string, b: string): boolean {
 
 export async function handleFreeTier(request: Request, env: Env): Promise<Response> {
   const body = await readJson(request);
+
+  // Token-based tracking (web + CLI)
+  if (isValidToken(body.token)) {
+    const row = await env.DB.prepare(
+      `SELECT plan, runs_used FROM licenses WHERE token = ?`
+    )
+      .bind(body.token)
+      .first<{ plan: string; runs_used: number }>();
+
+    if (!row) {
+      return json({ error: "Token not found" }, 404);
+    }
+
+    // Lifetime licenses have unlimited runs
+    if (row.plan === "lifetime") {
+      return json({ free_remaining: -1 });
+    }
+
+    // Increment and return remaining
+    if (row.runs_used < FREE_RUNS) {
+      await env.DB.prepare(
+        `UPDATE licenses SET runs_used = runs_used + 1 WHERE token = ? AND runs_used < ?`
+      )
+        .bind(body.token, FREE_RUNS)
+        .run();
+      return json({ free_remaining: Math.max(0, FREE_RUNS - row.runs_used - 1) });
+    }
+
+    return json({ free_remaining: 0 });
+  }
+
+  // Legacy machine-based tracking (old CLI versions)
   if (!isValidMachineId(body.machine_id)) {
-    return json({ error: "Invalid machine_id" }, 400);
+    return json({ error: "Invalid token or machine_id" }, 400);
   }
 
   const ts = now();
@@ -149,16 +184,17 @@ export async function handleValidate(request: Request, env: Env): Promise<Respon
   }
 
   const row = await env.DB.prepare(
-    `SELECT plan FROM licenses WHERE token = ?`
+    `SELECT plan, runs_used FROM licenses WHERE token = ?`
   )
     .bind(body.token)
-    .first<{ plan: string }>();
+    .first<{ plan: string; runs_used: number }>();
 
   if (!row) {
     return json({ valid: false, error: "Token not found" });
   }
 
-  return json({ valid: true, plan: row.plan });
+  const freeRemaining = row.plan === "lifetime" ? -1 : Math.max(0, FREE_RUNS - row.runs_used);
+  return json({ valid: true, plan: row.plan, free_remaining: freeRemaining });
 }
 
 export async function handleActivate(request: Request, env: Env): Promise<Response> {
@@ -236,6 +272,7 @@ export async function handleStripeWebhook(request: Request, env: Env): Promise<R
   const session = event.data.object;
   const email = session.customer_details?.email ?? session.customer_email ?? "unknown";
   const sessionId = session.id;
+  const userId = session.metadata?.user_id ? parseInt(session.metadata.user_id, 10) : null;
 
   // Idempotent: skip if we already processed this session
   const existing = await env.DB.prepare(
@@ -248,12 +285,31 @@ export async function handleStripeWebhook(request: Request, env: Env): Promise<R
     return json({ received: true });
   }
 
+  // If user_id is present, upgrade their existing free license to lifetime
+  if (userId) {
+    const userLicense = await env.DB.prepare(
+      `SELECT token FROM licenses WHERE user_id = ? LIMIT 1`
+    )
+      .bind(userId)
+      .first<{ token: string }>();
+
+    if (userLicense) {
+      await env.DB.prepare(
+        `UPDATE licenses SET plan = 'lifetime', stripe_session_id = ? WHERE token = ?`
+      )
+        .bind(sessionId, userLicense.token)
+        .run();
+      return json({ received: true });
+    }
+  }
+
+  // No user_id or no existing license — create a new one (backward compat)
   const token = generateToken();
   await env.DB.prepare(
-    `INSERT INTO licenses (token, email, plan, stripe_session_id, created_at)
-     VALUES (?, ?, 'lifetime', ?, ?)`
+    `INSERT INTO licenses (token, email, plan, stripe_session_id, user_id, runs_used, created_at)
+     VALUES (?, ?, 'lifetime', ?, ?, 0, ?)`
   )
-    .bind(token, email, sessionId, now())
+    .bind(token, email, sessionId, userId, now())
     .run();
 
   return json({ received: true });
@@ -334,6 +390,8 @@ export async function handleRecover(request: Request, env: Env): Promise<Respons
 }
 
 export async function handleCheckout(request: Request, env: Env): Promise<Response> {
+  // Lazy import to avoid circular dep
+  const { getSessionUser } = await import("./auth");
   const body = await readJson(request);
   const machineId = isValidMachineId(body.machine_id) ? body.machine_id : undefined;
 
@@ -347,6 +405,15 @@ export async function handleCheckout(request: Request, env: Env): Promise<Respon
 
   if (machineId) {
     params.set("metadata[machine_id]", machineId);
+  }
+
+  // If logged in, attach user_id and prefill email
+  const user = await getSessionUser(request, env);
+  if (user) {
+    params.set("metadata[user_id]", String(user.id));
+    if (user.email) {
+      params.set("customer_email", user.email);
+    }
   }
 
   const resp = await fetch(`${STRIPE_API}/checkout/sessions`, {
