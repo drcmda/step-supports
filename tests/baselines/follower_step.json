@@ -1,0 +1,9 @@
+{
+  "model": "follower.step",
+  "pipeline": "step",
+  "params": {
+    "margin": 0.2,
+    "angle": 45.0
+  },
+  "error": "No supports generated"
+}

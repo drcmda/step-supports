@@ -1,0 +1,14 @@
+{
+  "model": "follower.stl",
+  "pipeline": "mesh",
+  "params": {
+    "margin": 0.2
+  },
+  "total_pieces": 1,
+  "total_volume": 29112.7,
+  "pieces": [
+    {
+      "volume": 29112.7
+    }
+  ]
+}

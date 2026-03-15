@@ -1,0 +1,49 @@
+{
+  "name": "negative-support",
+  "version": "0.2.1",
+  "description": "Generate 3D-print negative-space support structures from STL, OBJ, or STEP files",
+  "type": "module",
+  "main": "dist/index.cjs",
+  "module": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js",
+      "require": "./dist/index.cjs"
+    }
+  },
+  "bin": {
+    "negative-support": "./dist/cli.js"
+  },
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "build": "tsup",
+    "test": "node ../../tests/test_npm.mjs"
+  },
+  "dependencies": {
+    "manifold-3d": "^3.4.0",
+    "occt-import-js": "^0.0.23"
+  },
+  "devDependencies": {
+    "occt-import-js": "^0.0.23",
+    "tsup": "^8.0.0",
+    "typescript": "^5.0.0"
+  },
+  "keywords": [
+    "3d-printing",
+    "supports",
+    "stl",
+    "step",
+    "cad",
+    "manifold",
+    "negative-space"
+  ],
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/drcmda/stl-supports.git"
+  }
+}

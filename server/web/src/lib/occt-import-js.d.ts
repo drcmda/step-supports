@@ -1,4 +1,12 @@
 declare module 'occt-import-js' {
+  interface BRepFace {
+    /** First triangle index (inclusive) */
+    first: number;
+    /** Last triangle index (inclusive) */
+    last: number;
+    color: [number, number, number] | null;
+  }
+
   interface OcctMesh {
     name: string;
     color?: [number, number, number];
@@ -7,11 +15,13 @@ declare module 'occt-import-js' {
       normal?: { array: Float32Array };
     };
     index: { array: Uint32Array };
+    /** Per-face triangle ranges from B-Rep topology */
+    brep_faces: BRepFace[];
   }
 
   interface OcctResult {
     success: boolean;
-    root: { name: string; meshIndices: number[]; children: unknown[] };
+    root: { name: string; meshes: number[]; children: unknown[] };
     meshes: OcctMesh[];
   }
 

@@ -1,0 +1,30 @@
+{
+  "model": "test_model.step",
+  "pipeline": "step",
+  "params": {
+    "margin": 0.2,
+    "angle": 45.0
+  },
+  "total_pieces": 6,
+  "total_volume": 40066.7,
+  "pieces": [
+    {
+      "volume": 11692.1
+    },
+    {
+      "volume": 11157.6
+    },
+    {
+      "volume": 6602.3
+    },
+    {
+      "volume": 5614.0
+    },
+    {
+      "volume": 3963.7
+    },
+    {
+      "volume": 1037.0
+    }
+  ]
+}

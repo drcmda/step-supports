@@ -2,20 +2,12 @@
  * STEP file parser using occt-import-js (OpenCascade WASM).
  *
  * Tessellates B-Rep geometry → triangle mesh compatible with manifold-3d.
- * The WASM binary (7.6 MB) is only loaded when this module is first called.
+ * Returns per-face metadata via brep_faces for overhang detection.
  *
- * occt-import-js outputs non-indexed meshes (each triangle has unique vertices),
- * so we must deduplicate vertices for manifold-3d to work correctly.
- *
- * Returns per-face metadata via `brep_faces` (bounding box, min normal Z) for
- * overhang detection — enabling STEP-specific targeted support generation.
+ * Requires occt-import-js as an optional peer dependency.
  */
 
-import type { ParsedMesh } from './stl';
-import occtInit from 'occt-import-js';
-
-// @ts-ignore — Vite ?url import for WASM file
-import occtWasmUrl from 'occt-import-js/dist/occt-import-js.wasm?url';
+import type { ParsedMesh, STEPFaceInfo, STEPParseResult } from './types';
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 let occtInstance: any = null;
@@ -24,27 +16,16 @@ let occtInstance: any = null;
 async function getOcct() {
   if (occtInstance) return occtInstance;
 
-  occtInstance = await occtInit({
-    locateFile: (path: string) => {
-      if (path.endsWith('.wasm')) return occtWasmUrl;
-      return path;
-    },
-  });
-  return occtInstance;
-}
-
-/** Per-face metadata from STEP B-Rep topology. */
-export interface STEPFaceInfo {
-  /** Full bounding box of the face */
-  minX: number; minY: number; minZ: number;
-  maxX: number; maxY: number; maxZ: number;
-  /** Minimum normal Z component across all vertices (most downward-facing) */
-  minNormalZ: number;
-}
-
-export interface STEPParseResult {
-  mesh: ParsedMesh;
-  faces: STEPFaceInfo[];
+  try {
+    // Dynamic import — works in Node.js if occt-import-js is installed
+    const occtInit = (await import('occt-import-js')).default;
+    occtInstance = await occtInit();
+    return occtInstance;
+  } catch {
+    throw new Error(
+      'occt-import-js is required for STEP files. Install it with: npm install occt-import-js'
+    );
+  }
 }
 
 /**
@@ -62,7 +43,6 @@ export async function parseSTEP(buffer: ArrayBuffer): Promise<STEPParseResult> {
     throw new Error('Failed to parse STEP file — no geometry found.');
   }
 
-  // Collect all positions and indices across meshes, plus per-face info
   const allPositions: number[] = [];
   const allRawIndices: number[] = [];
   let globalVertOffset = 0;
@@ -73,7 +53,6 @@ export async function parseSTEP(buffer: ArrayBuffer): Promise<STEPParseResult> {
     const idx = m.index.array;
     const norm = m.attributes.normal?.array;
 
-    // Accumulate merged mesh data
     for (let i = 0; i < pos.length; i++) allPositions.push(pos[i]);
     for (let i = 0; i < idx.length; i++) allRawIndices.push(idx[i] + globalVertOffset);
 
@@ -102,7 +81,6 @@ export async function parseSTEP(buffer: ArrayBuffer): Promise<STEPParseResult> {
           }
         }
 
-        // If no normals, compute from triangle cross products
         if (!norm) {
           for (let ti = bf.first; ti <= bf.last; ti++) {
             const a = idx[ti * 3] * 3, b = idx[ti * 3 + 1] * 3, c = idx[ti * 3 + 2] * 3;
@@ -112,8 +90,7 @@ export async function parseSTEP(buffer: ArrayBuffer): Promise<STEPParseResult> {
             const ny = e1z * e2x - e1x * e2z;
             const nz = e1x * e2y - e1y * e2x;
             const len = Math.sqrt(nx * nx + ny * ny + nz * nz) || 1;
-            const normalZ = nz / len;
-            if (normalZ < minNormalZ) minNormalZ = normalZ;
+            if (nz / len < minNormalZ) minNormalZ = nz / len;
           }
         }
 
@@ -124,7 +101,7 @@ export async function parseSTEP(buffer: ArrayBuffer): Promise<STEPParseResult> {
     globalVertOffset += pos.length / 3;
   }
 
-  // Deduplicate vertices (occt-import-js outputs non-shared vertices per face)
+  // Deduplicate vertices
   const vertMap = new Map<string, number>();
   const uniqueVerts: number[] = [];
   const remappedIndices = new Uint32Array(allRawIndices.length);
@@ -144,10 +121,7 @@ export async function parseSTEP(buffer: ArrayBuffer): Promise<STEPParseResult> {
   }
 
   return {
-    mesh: {
-      vertices: new Float32Array(uniqueVerts),
-      faces: remappedIndices,
-    },
+    mesh: { vertices: new Float32Array(uniqueVerts), faces: remappedIndices },
     faces,
   };
 }

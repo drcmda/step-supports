@@ -59,7 +59,9 @@ export default function FileDropZone({ onFile, disabled }: Props) {
   return (
     <div>
       <div
-        className={`drop-zone ${isDragging ? 'drop-zone--active' : ''} ${disabled ? 'drop-zone--disabled' : ''}`}
+        className={`border-2 border-dashed rounded-xl py-12 px-6 text-center cursor-pointer transition-all mb-6 ${
+          isDragging ? 'border-blue-500 bg-blue-500/5' : 'border-border hover:border-blue-500 hover:bg-blue-500/5'
+        } ${disabled ? 'opacity-50 cursor-not-allowed' : ''}`}
         onDrop={onDrop}
         onDragOver={onDragOver}
         onDragLeave={onDragLeave}
@@ -70,9 +72,9 @@ export default function FileDropZone({ onFile, disabled }: Props) {
           type="file"
           accept=".stl,.obj,.step,.stp"
           onChange={onChange}
-          style={{ display: 'none' }}
+          className="hidden"
         />
-        <div className="drop-zone__icon">
+        <div className="text-dim mb-4">
           <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
             <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
             <polyline points="17 8 12 3 7 8" />
@@ -80,14 +82,14 @@ export default function FileDropZone({ onFile, disabled }: Props) {
           </svg>
         </div>
         {fileName ? (
-          <p className="drop-zone__file">{fileName}</p>
+          <p className="font-mono text-green-500 text-[0.95rem]">{fileName}</p>
         ) : (
-          <p className="drop-zone__text">
-            Drop an STL, OBJ, or STEP file here, or <span className="drop-zone__browse">browse</span>
+          <p className="text-dim text-[0.95rem]">
+            Drop an STL, OBJ, or STEP file here, or <span className="text-blue-500 underline">browse</span>
           </p>
         )}
       </div>
-      {error && <p className="drop-zone__error">{error}</p>}
+      {error && <p className="text-[#fca5a5] text-sm mt-2">{error}</p>}
     </div>
   );
 }

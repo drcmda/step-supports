@@ -5,7 +5,8 @@ import ProgressSteps, { type Step } from '../components/ProgressSteps';
 type Phase = 'upload' | 'processing' | 'done' | 'error';
 
 const FREE_RUNS_KEY = 'ns_web_runs';
-const MAX_FREE_RUNS = 3;
+const IS_DEV = import.meta.env.DEV || window.location.hostname === 'localhost';
+const MAX_FREE_RUNS = IS_DEV ? Infinity : 3;
 
 function getRunCount(): number {
   try {
@@ -16,6 +17,7 @@ function getRunCount(): number {
 }
 
 function incrementRunCount(): void {
+  if (IS_DEV) return;
   try {
     localStorage.setItem(FREE_RUNS_KEY, String(getRunCount() + 1));
   } catch {
@@ -33,6 +35,7 @@ export default function Try() {
   const [phase, setPhase] = useState<Phase>('upload');
   const [file, setFile] = useState<File | null>(null);
   const [margin, setMargin] = useState(0.2);
+  const [angle, setAngle] = useState(45);
   const [steps, setSteps] = useState<Step[]>([]);
   const [stats, setStats] = useState<Stats | null>(null);
   const [errorMsg, setErrorMsg] = useState('');
@@ -122,12 +125,13 @@ export default function Try() {
           fileBuffer: buffer,
           fileName: file.name,
           margin,
+          angle,
           minVolume: 1.0,
         },
         [buffer]
       );
     });
-  }, [file, margin, runCount, downloadUrl, updateStep, markAllDone]);
+  }, [file, margin, angle, runCount, downloadUrl, updateStep, markAllDone]);
 
   const handleCancel = useCallback(() => {
     workerRef.current?.terminate();
@@ -154,25 +158,20 @@ export default function Try() {
   const remaining = MAX_FREE_RUNS - runCount;
 
   return (
-    <div className="try-page">
-      <div className="container">
-        <h1>Try it in your browser</h1>
-        <p className="try-page__subtitle">
-          Upload an STL or OBJ file and generate negative-space supports right here.
-          No install needed.
-        </p>
-        <p className="try-page__warning">
-          Browser processing may take a few minutes for complex models.
-          For fastest results, install the CLI:{' '}
-          <code>pip install negative-support</code>
+    <div className="py-15">
+      <div className="max-w-[960px] mx-auto px-6">
+        <h1 className="text-3xl mb-3">Generate supports</h1>
+        <p className="text-dim mb-2">
+          Upload an STL, OBJ, or STEP file and generate negative-space supports.
+          Runs entirely in your browser — no install needed.
         </p>
 
         {phase === 'upload' && (
-          <div className="try-page__upload">
+          <div>
             <FileDropZone onFile={setFile} disabled={exhausted} />
 
-            <div className="try-page__controls">
-              <label className="try-page__margin">
+            <div className="flex items-center gap-4 flex-wrap">
+              <label className="flex items-center gap-2 text-sm text-dim">
                 <span>Margin (mm)</span>
                 <input
                   type="number"
@@ -181,27 +180,40 @@ export default function Try() {
                   step={0.05}
                   value={margin}
                   onChange={(e) => setMargin(parseFloat(e.target.value) || 0.2)}
+                  className="w-[72px] px-2 py-1.5 bg-surface border border-border rounded-md text-primary font-mono text-sm"
+                />
+              </label>
+              <label className="flex items-center gap-2 text-sm text-dim">
+                <span>Overhang angle (°)</span>
+                <input
+                  type="number"
+                  min={20}
+                  max={80}
+                  step={5}
+                  value={angle}
+                  onChange={(e) => setAngle(parseInt(e.target.value, 10) || 45)}
+                  className="w-[72px] px-2 py-1.5 bg-surface border border-border rounded-md text-primary font-mono text-sm"
                 />
               </label>
 
               {exhausted ? (
-                <div className="try-page__exhausted">
-                  <p>You've used all {MAX_FREE_RUNS} free browser runs.</p>
-                  <p>
+                <div className="bg-surface border border-border rounded-lg px-5 py-4 flex-1">
+                  <p className="text-dim text-sm mb-1">You've used all {MAX_FREE_RUNS} free browser runs.</p>
+                  <p className="text-dim text-sm">
                     Get unlimited runs with the CLI:{' '}
-                    <a href="/#pricing">Buy a license</a>
+                    <a href="/#pricing" className="text-blue-500">Buy a license</a>
                   </p>
                 </div>
               ) : (
                 <>
                   <button
-                    className="btn btn--primary"
+                    className="inline-block px-6 py-2.5 rounded-lg text-[0.95rem] font-medium bg-blue-500 text-white border-none cursor-pointer hover:bg-blue-600 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
                     onClick={handleGenerate}
                     disabled={!file}
                   >
                     Generate supports
                   </button>
-                  <p className="try-page__runs">
+                  <p className="text-dim text-sm ml-auto">
                     {remaining} of {MAX_FREE_RUNS} free runs remaining
                   </p>
                 </>
@@ -211,32 +223,42 @@ export default function Try() {
         )}
 
         {phase === 'processing' && (
-          <div className="try-page__processing">
+          <div className="mt-6">
             <ProgressSteps steps={steps} />
-            <button className="btn btn--secondary" onClick={handleCancel}>
+            <button
+              className="inline-block px-6 py-2.5 rounded-lg text-[0.95rem] font-medium bg-surface text-primary border border-border cursor-pointer hover:border-dim transition-all"
+              onClick={handleCancel}
+            >
               Cancel
             </button>
           </div>
         )}
 
         {phase === 'done' && stats && (
-          <div className="try-page__done">
-            <div className="try-page__stats">
-              <h2>Supports generated</h2>
-              <dl>
-                <dt>Pieces</dt>
-                <dd>{stats.pieces}</dd>
-                <dt>Faces</dt>
-                <dd>{stats.faces.toLocaleString()}</dd>
-                <dt>Volume</dt>
-                <dd>{stats.volume.toLocaleString(undefined, { maximumFractionDigits: 1 })} mm&sup3;</dd>
+          <div className="mt-6">
+            <div className="bg-surface border border-border rounded-xl p-6 mb-6">
+              <h2 className="text-xl mb-4 text-green-500">Supports generated</h2>
+              <dl className="grid grid-cols-[auto_1fr] gap-x-6 gap-y-2">
+                <dt className="text-dim text-sm">Pieces</dt>
+                <dd className="font-mono text-sm">{stats.pieces}</dd>
+                <dt className="text-dim text-sm">Faces</dt>
+                <dd className="font-mono text-sm">{stats.faces.toLocaleString()}</dd>
+                <dt className="text-dim text-sm">Volume</dt>
+                <dd className="font-mono text-sm">{stats.volume.toLocaleString(undefined, { maximumFractionDigits: 1 })} mm&sup3;</dd>
               </dl>
             </div>
-            <div className="try-page__actions">
-              <a className="btn btn--primary" href={downloadUrl!} download={outputName}>
+            <div className="flex gap-3">
+              <a
+                className="inline-block px-6 py-2.5 rounded-lg text-[0.95rem] font-medium no-underline bg-blue-500 text-white hover:bg-blue-600 transition-all"
+                href={downloadUrl!}
+                download={outputName}
+              >
                 Download STL
               </a>
-              <button className="btn btn--secondary" onClick={handleReset}>
+              <button
+                className="inline-block px-6 py-2.5 rounded-lg text-[0.95rem] font-medium bg-surface text-primary border border-border cursor-pointer hover:border-dim transition-all"
+                onClick={handleReset}
+              >
                 Generate another
               </button>
             </div>
@@ -244,9 +266,12 @@ export default function Try() {
         )}
 
         {phase === 'error' && (
-          <div className="try-page__error">
-            <p className="try-page__error-msg">{errorMsg}</p>
-            <button className="btn btn--secondary" onClick={handleReset}>
+          <div className="mt-6">
+            <p className="bg-[#1a0000] border border-[#5c1a1a] rounded-lg px-5 py-4 text-[#fca5a5] text-sm mb-4">{errorMsg}</p>
+            <button
+              className="inline-block px-6 py-2.5 rounded-lg text-[0.95rem] font-medium bg-surface text-primary border border-border cursor-pointer hover:border-dim transition-all"
+              onClick={handleReset}
+            >
               Try again
             </button>
           </div>

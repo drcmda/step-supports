@@ -1,0 +1,81 @@
+{
+  "model": "handle.step",
+  "pipeline": "step",
+  "params": {
+    "margin": 0.2,
+    "angle": 45.0
+  },
+  "total_pieces": 23,
+  "total_volume": 26873.0,
+  "pieces": [
+    {
+      "volume": 7391.9
+    },
+    {
+      "volume": 4938.6
+    },
+    {
+      "volume": 3238.8
+    },
+    {
+      "volume": 2216.8
+    },
+    {
+      "volume": 1244.5
+    },
+    {
+      "volume": 1244.4
+    },
+    {
+      "volume": 939.1
+    },
+    {
+      "volume": 936.3
+    },
+    {
+      "volume": 861.0
+    },
+    {
+      "volume": 860.9
+    },
+    {
+      "volume": 786.8
+    },
+    {
+      "volume": 617.5
+    },
+    {
+      "volume": 443.0
+    },
+    {
+      "volume": 242.6
+    },
+    {
+      "volume": 209.0
+    },
+    {
+      "volume": 209.0
+    },
+    {
+      "volume": 123.1
+    },
+    {
+      "volume": 113.4
+    },
+    {
+      "volume": 113.4
+    },
+    {
+      "volume": 102.0
+    },
+    {
+      "volume": 15.1
+    },
+    {
+      "volume": 15.1
+    },
+    {
+      "volume": 10.8
+    }
+  ]
+}

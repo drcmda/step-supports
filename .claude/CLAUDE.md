@@ -1,6 +1,6 @@
 # Project: negative-support
 
-Negative-space 3D print support generator, published as `negative-support` on PyPI.
+Negative-space 3D print support generator. Available on PyPI (`negative-support`), npm (`negative-support`), and as a browser app at negative.support/try.
 
 ## Quick Reference
 
@@ -10,29 +10,41 @@ source .venv/bin/activate
 negative-support --version
 python tests/baseline.py
 
-# Build package
-pip install build && python -m build
+# npm package
+cd packages/negative-support && npm run build
+node -e "import {generateSupports} from './dist/index.js'"
 
 # Server (local)
 cd server && npm run dev          # API on :8787
 cd server/web && npm run dev      # React on :5173
+
+# Run all platform tests
+python tests/run_all.py
 ```
 
 ## Testing
 
-**IMPORTANT**: After ANY change to `src/negative_support/cli.py`, run the baseline test:
+**IMPORTANT**: After ANY change to the algorithm, run the unified test suite:
 
 ```bash
-python tests/baseline.py
+python tests/run_all.py
 ```
 
-Compares output against known-good snapshot (test_model.step):
-- Volume tolerance: 5% for totals, 10% per piece
-- Piece count must match exactly
+This runs:
+1. Python pipeline tests against golden baselines
+2. Builds npm package
+3. npm pipeline tests against same baselines
+4. Browser build check
 
-Update baseline after intentional changes:
+Update baselines after intentional algorithm changes:
 ```bash
-python tests/baseline.py --update
+python tests/generate_baselines.py
+```
+
+Legacy STEP-specific baseline (kept for backwards compat):
+```bash
+python tests/baseline.py          # compare
+python tests/baseline.py --update # update
 ```
 
 ## Project Structure
@@ -44,24 +56,40 @@ src/negative_support/
   license.py        # License checking, free tier, token validation
   progress.py       # ProgressDisplay (spinner, progress bar, ANSI)
 
+packages/negative-support/  # npm package
+  src/index.ts      # Public API: generateSupports()
+  src/supports.ts   # Core algorithm (mesh + STEP pipelines)
+  src/stl.ts        # STL parser/exporter
+  src/obj.ts        # OBJ parser
+  src/step.ts       # STEP parser (occt-import-js)
+  src/mesh-utils.ts # Repair, inflate, bbox, volume
+
 server/
   src/index.ts      # Cloudflare Worker entry, routes /api/* and static
   src/api.ts        # API handlers (free-tier, validate, activate, stripe, checkout)
   schema.sql        # D1 tables: machines, licenses, machine_licenses
-  web/              # React SPA (Vite): Landing, Success, Docs pages
+  web/              # React SPA (Vite): Landing, /try page, Success, Docs
 
-step_supports.py    # Backwards-compat wrapper → imports from negative_support
-tests/baseline.py   # Regression test (imports from negative_support.cli)
+tests/
+  baselines/        # Golden baseline JSONs (per model × pipeline)
+  run_all.py        # Unified cross-platform test runner
+  test_python.py    # Python pipeline validation
+  test_npm.mjs      # npm package validation
+  generate_baselines.py  # Regenerate golden baselines from Python
+  baseline.py       # Legacy STEP regression test
+
 pyproject.toml      # Hatchling build, entry point: negative-support
 ```
 
 ## Architecture
 
+- **Three platforms**: Python (pip), JavaScript (npm), Browser (WASM). All use the same algorithm.
+- **Vertex-normal offset inflation**: Each vertex is moved outward along its area-weighted normal by `margin`. Replaces Minkowski sum — within 0.3% for typical models, significantly faster.
 - **Two input modes**: STEP (B-Rep overhang detection) and mesh (full-shell). Auto-detected by extension.
-- **build123d optional**: Only imported for STEP files. Mesh-only works without it.
-- **Minkowski sum inflation**: `manifold3d.Manifold.minkowski_sum(sphere)` for margin gap.
-- **B-Rep face detection** (STEP only): Normals sampled across curved faces, mid-air detection via raycasting.
-- **Per-face column extraction** (STEP only): Each overhang face's XY bbox defines a vertical column intersected with negative space.
+- **build123d optional** (Python only): Only imported for STEP files. Mesh-only works without it.
+- **occt-import-js optional** (npm only): Peer dependency for STEP file support in JavaScript.
+- **B-Rep face detection** (STEP): Per-face normals determine overhangs. Column extraction isolates supports per face.
+- **manifold-3d/manifold3d**: Boolean operations (subtract, intersect, union, decompose) shared across all platforms.
 
 ## Licensing System
 
@@ -82,6 +110,13 @@ pyproject.toml      # Hatchling build, entry point: negative-support
 pip install build twine
 python -m build
 twine upload dist/*
+```
+
+### npm
+```bash
+cd packages/negative-support
+npm run build
+npm publish
 ```
 
 ### Server (Cloudflare)

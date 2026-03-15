@@ -39,16 +39,16 @@ export default function Success() {
   }, [sessionId]);
 
   return (
-    <div className="success-page">
-      <div className="container">
-        <h1>Payment successful!</h1>
+    <div className="py-20">
+      <div className="max-w-[960px] mx-auto px-6">
+        <h1 className="text-3xl mb-6 text-center">Payment successful!</h1>
 
-        {loading && <p className="loading">Retrieving your license token...</p>}
+        {loading && <p className="text-center text-dim">Retrieving your license token...</p>}
 
         {error && (
-          <div className="error-box">
-            <p>{error}</p>
-            <p>
+          <div className="bg-[#1a0000] border border-[#5c1a1a] rounded-lg p-5 max-w-[500px] mx-auto">
+            <p className="text-[#fca5a5] text-sm">{error}</p>
+            <p className="text-[#fca5a5] text-sm">
               If your payment went through, please refresh in a few seconds.
               Contact support if this persists.
             </p>
@@ -59,15 +59,15 @@ export default function Success() {
           <>
             <p>Here is your license token:</p>
             <CopyToken token={token} />
-            <div className="activate-instructions">
-              <h2>Activate your license</h2>
-              <p>Run this command in your terminal:</p>
-              <div className="code-block">
-                <code>negative-support --activate {token}</code>
+            <div className="max-w-[500px] mx-auto mt-8">
+              <h2 className="text-xl mb-3">Activate your license</h2>
+              <p className="text-dim mb-3">Run this command in your terminal:</p>
+              <div className="bg-surface border border-border rounded-lg p-4 my-3 overflow-x-auto">
+                <code className="font-mono text-sm text-green-500 whitespace-pre">negative-support --activate {token}</code>
               </div>
-              <p className="hint">
+              <p className="text-dim text-sm mt-3">
                 Your token works on up to 3 machines. Keep it safe — you can
-                always find it in <code>~/.negative-support/license.json</code>.
+                always find it in <code className="font-mono text-xs bg-surface px-1.5 py-0.5 rounded">~/.negative-support/license.json</code>.
               </p>
             </div>
           </>

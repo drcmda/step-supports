@@ -8,11 +8,13 @@
     "preview": "vite preview"
   },
   "dependencies": {
+    "@tailwindcss/vite": "^4.2.1",
     "manifold-3d": "^3.4.0",
     "occt-import-js": "^0.0.23",
     "react": "^19.0.0",
     "react-dom": "^19.0.0",
     "react-router-dom": "^7.0.0",
+    "tailwindcss": "^4.2.1",
     "vite-plugin-top-level-await": "^1.6.0",
     "vite-plugin-wasm": "^3.5.0"
   },
