@@ -79,7 +79,7 @@ export default function Header() {
                 </button>
 
                 {open && (
-                  <div className="absolute right-0 top-[calc(100%+8px)] w-[280px] rounded-xl bg-surface border border-border p-4 z-50 shadow-lg shadow-black/40">
+                  <div className="absolute right-0 top-[calc(100%+8px)] w-[280px] rounded-xl bg-base-alt border border-border p-4 z-50 shadow-lg shadow-black/40">
                     {/* User info */}
                     <div className="mb-3 pb-3 border-b border-border">
                       <p className="text-primary text-sm font-medium">{user.login}</p>
