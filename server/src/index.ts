@@ -12,6 +12,7 @@ import {
   handleStripeWebhook,
   handleGetToken,
   handleCheckout,
+  handleRecover,
 } from "./api";
 import { getAssetFromKV } from "@cloudflare/kv-asset-handler";
 // @ts-ignore — injected by wrangler [site] config
@@ -65,6 +66,8 @@ export default {
           return handleGetToken(url, env);
         case "/api/checkout":
           return handleCheckout(request, env);
+        case "/api/recover":
+          return handleRecover(request, env);
         default:
           return notFound();
       }

@@ -16,6 +16,7 @@ export interface Env {
   DB: D1Database;
   STRIPE_SECRET_KEY: string;
   STRIPE_WEBHOOK_SECRET: string;
+  RESEND_API_KEY: string;
 }
 
 // ── Constants ────────────────────────────────────────────────────────
@@ -275,6 +276,61 @@ export async function handleGetToken(url: URL, env: Env): Promise<Response> {
   }
 
   return json({ token: row.token, plan: row.plan });
+}
+
+export async function handleRecover(request: Request, env: Env): Promise<Response> {
+  const body = await readJson(request);
+  const email = typeof body.email === "string" ? body.email.trim().toLowerCase() : "";
+
+  if (!email || !email.includes("@")) {
+    return json({ error: "Please enter a valid email address." }, 400);
+  }
+
+  // Look up token by email
+  const row = await env.DB.prepare(
+    `SELECT token FROM licenses WHERE LOWER(email) = ? LIMIT 1`
+  )
+    .bind(email)
+    .first<{ token: string }>();
+
+  // Always return success to prevent email enumeration
+  if (!row) {
+    return json({ ok: true, message: "If a license exists for that email, you'll receive it shortly." });
+  }
+
+  // Send email via Resend
+  try {
+    const resp = await fetch("https://api.resend.com/emails", {
+      method: "POST",
+      headers: {
+        Authorization: `Bearer ${env.RESEND_API_KEY}`,
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        from: "negative-support <license@negative.support>",
+        to: [email],
+        subject: "Your negative-support license token",
+        html: `<div style="font-family: system-ui, sans-serif; max-width: 480px; margin: 0 auto; padding: 32px 0;">
+  <h2 style="font-size: 18px; font-weight: 600; margin-bottom: 16px;">Your license token</h2>
+  <p style="color: #666; font-size: 14px; margin-bottom: 24px;">Here's your negative-support lifetime license token:</p>
+  <div style="background: #f5f5f5; border-radius: 8px; padding: 16px; font-family: monospace; font-size: 13px; word-break: break-all; margin-bottom: 24px;">${row.token}</div>
+  <p style="color: #666; font-size: 14px; margin-bottom: 8px;"><strong>Browser:</strong> Paste this token on the <a href="https://negative.support/generate">generate page</a> to activate.</p>
+  <p style="color: #666; font-size: 14px; margin-bottom: 24px;"><strong>CLI:</strong> Run <code style="background: #f5f5f5; padding: 2px 6px; border-radius: 4px; font-size: 12px;">negative-support --activate ${row.token}</code></p>
+  <p style="color: #999; font-size: 12px;">Works on up to 3 machines. If you didn't request this, you can ignore this email.</p>
+</div>`,
+      }),
+    });
+
+    if (!resp.ok) {
+      console.error("Resend error:", await resp.text());
+      return json({ error: "Failed to send email. Please try again." }, 500);
+    }
+  } catch (err) {
+    console.error("Resend fetch error:", err);
+    return json({ error: "Failed to send email. Please try again." }, 500);
+  }
+
+  return json({ ok: true, message: "If a license exists for that email, you'll receive it shortly." });
 }
 
 export async function handleCheckout(request: Request, env: Env): Promise<Response> {

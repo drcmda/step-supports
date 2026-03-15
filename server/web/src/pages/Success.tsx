@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { useSearchParams } from "react-router-dom";
 import CopyToken from "../components/CopyToken";
+import { storeToken } from "../lib/license";
 
 export default function Success() {
   const [searchParams] = useSearchParams();
@@ -23,6 +24,7 @@ export default function Success() {
         const data = await resp.json();
         if (data.token) {
           setToken(data.token);
+          storeToken(data.token);
         } else {
           setError(data.error || "Token not found.");
         }
@@ -69,14 +71,24 @@ export default function Success() {
           <>
             <p className="text-dim text-sm mb-2">Your license token:</p>
             <CopyToken token={token} />
-            <div className="max-w-[500px] mx-auto mt-10 text-left">
-              <p className="label-xs mb-4 tracking-[0.14em]">Activate</p>
-              <p className="text-dim text-sm mb-3 leading-relaxed">Run this command in your terminal:</p>
-              <div className="bg-base/60 border border-border rounded-lg px-4 py-3 overflow-x-auto">
-                <code className="font-mono text-xs text-code whitespace-pre">negative-support --activate {token}</code>
+            <div className="max-w-[500px] mx-auto mt-10 text-left space-y-6">
+              <div>
+                <p className="label-xs mb-4 tracking-[0.14em]">Browser</p>
+                <p className="text-dim text-sm leading-relaxed">
+                  This browser is now licensed. You have unlimited runs on the{" "}
+                  <a href="/generate" className="text-accent no-underline hover:underline">generate page</a>.
+                </p>
               </div>
-              <p className="text-muted text-xs font-mono mt-4 leading-relaxed">
-                Works on up to 3 machines. Token stored in ~/.negative-support/license.json
+              <div>
+                <p className="label-xs mb-4 tracking-[0.14em]">CLI activation</p>
+                <p className="text-dim text-sm mb-3 leading-relaxed">Run this command in your terminal:</p>
+                <div className="bg-base/60 border border-border rounded-lg px-4 py-3 overflow-x-auto">
+                  <code className="font-mono text-xs text-code whitespace-pre">negative-support --activate {token}</code>
+                </div>
+              </div>
+              <p className="text-muted text-xs font-mono leading-relaxed">
+                Works on up to 3 machines. Lost your token?{" "}
+                <a href="/recover" className="text-pink/60 no-underline hover:text-pink">Recover it via email</a>.
               </p>
             </div>
           </>

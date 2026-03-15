@@ -1,6 +1,7 @@
 import { useState, useRef, useCallback, useEffect } from 'react';
 import FileDropZone from '../components/FileDropZone';
 import ProgressSteps, { type Step } from '../components/ProgressSteps';
+import { getStoredToken, validateToken, storeToken, isTokenFormat } from '../lib/license';
 
 type Phase = 'upload' | 'processing' | 'done' | 'error';
 
@@ -44,6 +45,27 @@ export default function Try() {
   const [runCount, setRunCount] = useState(getRunCount);
   const workerRef = useRef<Worker | null>(null);
 
+  // License state
+  const [licensed, setLicensed] = useState(false);
+  const [licenseChecked, setLicenseChecked] = useState(false);
+  const [showTokenInput, setShowTokenInput] = useState(false);
+  const [tokenInput, setTokenInput] = useState('');
+  const [tokenError, setTokenError] = useState('');
+  const [tokenValidating, setTokenValidating] = useState(false);
+
+  // Check stored license on mount
+  useEffect(() => {
+    const token = getStoredToken();
+    if (token && isTokenFormat(token)) {
+      validateToken(token).then((valid) => {
+        setLicensed(valid);
+        setLicenseChecked(true);
+      });
+    } else {
+      setLicenseChecked(true);
+    }
+  }, []);
+
   // Cleanup download URLs on unmount
   useEffect(() => {
     return () => {
@@ -51,6 +73,26 @@ export default function Try() {
       if (downloadUrl3mf) URL.revokeObjectURL(downloadUrl3mf);
     };
   }, [downloadUrl, downloadUrl3mf]);
+
+  const handleActivateToken = useCallback(async () => {
+    const token = tokenInput.trim();
+    if (!isTokenFormat(token)) {
+      setTokenError('Invalid token format. Expected ns_live_...');
+      return;
+    }
+    setTokenValidating(true);
+    setTokenError('');
+    const valid = await validateToken(token);
+    setTokenValidating(false);
+    if (valid) {
+      storeToken(token);
+      setLicensed(true);
+      setShowTokenInput(false);
+      setTokenInput('');
+    } else {
+      setTokenError('Token not found or invalid.');
+    }
+  }, [tokenInput]);
 
   const updateStep = useCallback((name: string, detail?: string) => {
     setSteps((prev) => {
@@ -72,9 +114,11 @@ export default function Try() {
     setSteps((prev) => prev.map((s) => ({ ...s, status: 'done' as const })));
   }, []);
 
+  const canGenerate = licensed || runCount < MAX_FREE_RUNS;
+
   const handleGenerate = useCallback(() => {
     if (!file) return;
-    if (runCount >= MAX_FREE_RUNS) return;
+    if (!canGenerate) return;
 
     setPhase('processing');
     setSteps([]);
@@ -108,8 +152,10 @@ export default function Try() {
         setDownloadUrl3mf(URL.createObjectURL(threemfBlob));
         setStats(msg.stats);
         setPhase('done');
-        incrementRunCount();
-        setRunCount(getRunCount());
+        if (!licensed) {
+          incrementRunCount();
+          setRunCount(getRunCount());
+        }
         worker.terminate();
       } else if (msg.type === 'error') {
         setErrorMsg(msg.message);
@@ -138,7 +184,7 @@ export default function Try() {
         [buffer]
       );
     });
-  }, [file, margin, angle, runCount, downloadUrl, updateStep, markAllDone]);
+  }, [file, margin, angle, canGenerate, licensed, downloadUrl, updateStep, markAllDone]);
 
   const handleCancel = useCallback(() => {
     workerRef.current?.terminate();
@@ -166,13 +212,21 @@ export default function Try() {
     ? file.name.replace(/\.[^.]+$/, '.3mf')
     : 'model.3mf';
 
-  const exhausted = runCount >= MAX_FREE_RUNS;
+  const exhausted = !licensed && runCount >= MAX_FREE_RUNS;
   const remaining = MAX_FREE_RUNS - runCount;
 
   return (
     <div className="py-16">
       <div className="max-w-[1100px] mx-auto px-6">
-        <p className="label-xs mb-4 tracking-[0.14em]">Browser</p>
+        <div className="flex items-center gap-3 mb-4">
+          <p className="label-xs tracking-[0.14em]">Browser</p>
+          {licenseChecked && licensed && (
+            <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[10px] font-mono tracking-wider text-accent border border-accent/20 bg-accent-glow">
+              <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3"><polyline points="20 6 9 17 4 12"/></svg>
+              Licensed
+            </span>
+          )}
+        </div>
         <h1 className="text-2xl font-semibold mb-2 tracking-[-0.01em]">Generate supports</h1>
         <p className="text-dim text-sm mb-8 leading-relaxed max-w-[520px]">
           Upload an STL, OBJ, or STEP file and generate negative-space supports.
@@ -211,11 +265,39 @@ export default function Try() {
 
               {exhausted ? (
                 <div className="rounded-xl px-5 py-4 flex-1 glass">
-                  <p className="text-dim text-sm mb-1">You've used all {MAX_FREE_RUNS} free browser runs.</p>
-                  <p className="text-dim text-sm">
-                    Get unlimited runs with the CLI:{' '}
-                    <a href="/#pricing" className="text-accent no-underline hover:underline">Buy a license</a>
-                  </p>
+                  <p className="text-dim text-sm mb-2">You've used all {MAX_FREE_RUNS} free runs.</p>
+                  <div className="flex items-center gap-3 flex-wrap">
+                    <a href="/#pricing" className="text-accent text-sm no-underline hover:underline">Buy a license</a>
+                    <span className="text-muted text-xs">or</span>
+                    <button
+                      className="text-pink/70 text-sm bg-transparent border-none cursor-pointer hover:text-pink transition-colors p-0"
+                      onClick={() => setShowTokenInput(!showTokenInput)}
+                    >
+                      {showTokenInput ? 'Cancel' : 'Activate a token'}
+                    </button>
+                  </div>
+                  {showTokenInput && (
+                    <div className="mt-3 flex items-center gap-2">
+                      <input
+                        type="text"
+                        placeholder="ns_live_..."
+                        value={tokenInput}
+                        onChange={(e) => setTokenInput(e.target.value)}
+                        onKeyDown={(e) => e.key === 'Enter' && handleActivateToken()}
+                        className="flex-1 px-3 py-2 bg-base/60 border border-border rounded-md text-primary font-mono text-xs focus:border-accent/40 focus:outline-none transition-colors"
+                      />
+                      <button
+                        className="px-4 py-2 rounded-md text-xs font-medium bg-accent text-base border-none cursor-pointer hover:brightness-110 transition-all disabled:opacity-50"
+                        onClick={handleActivateToken}
+                        disabled={tokenValidating}
+                      >
+                        {tokenValidating ? '...' : 'Activate'}
+                      </button>
+                    </div>
+                  )}
+                  {tokenError && (
+                    <p className="text-red-400 text-xs mt-2">{tokenError}</p>
+                  )}
                 </div>
               ) : (
                 <>
@@ -227,9 +309,13 @@ export default function Try() {
                     Generate supports
                     <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className="opacity-60"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
                   </button>
-                  <p className="text-muted text-xs font-mono ml-auto">
-                    {remaining}/{MAX_FREE_RUNS} free
-                  </p>
+                  {licensed ? (
+                    <p className="text-accent/50 text-xs font-mono ml-auto">∞ unlimited</p>
+                  ) : (
+                    <p className="text-muted text-xs font-mono ml-auto">
+                      {remaining}/{MAX_FREE_RUNS} free
+                    </p>
+                  )}
                 </>
               )}
             </div>

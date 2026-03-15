@@ -5,6 +5,7 @@ import Landing from "./pages/Landing";
 import Success from "./pages/Success";
 import Docs from "./pages/Docs";
 import Try from "./pages/Try";
+import Recover from "./pages/Recover";
 
 export default function App() {
   return (
@@ -16,6 +17,7 @@ export default function App() {
           <Route path="/generate" element={<Try />} />
           <Route path="/success" element={<Success />} />
           <Route path="/docs" element={<Docs />} />
+          <Route path="/recover" element={<Recover />} />
         </Routes>
       </main>
       <Footer />
