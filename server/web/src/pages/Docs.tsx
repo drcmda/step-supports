@@ -1,50 +1,54 @@
 export default function Docs() {
   return (
-    <div className="py-15">
-      <div className="max-w-[960px] mx-auto px-6">
-        <h1 className="text-3xl mb-10">Documentation</h1>
+    <div className="py-16">
+      <div className="max-w-[1100px] mx-auto px-6">
+        <p className="label-xs mb-4 tracking-[0.14em]">Reference</p>
+        <h1 className="text-2xl font-semibold mb-12 tracking-[-0.01em]">Documentation</h1>
 
         {/* Install */}
-        <section className="mb-12">
-          <h2 className="text-xl mb-4 pt-4 border-t border-border">Installation</h2>
-          <div className="grid grid-cols-2 gap-6 mb-4 max-sm:grid-cols-1">
-            <div>
-              <h3 className="text-base mb-2">npm</h3>
-              <div className="bg-surface border border-border rounded-lg p-4 my-3 overflow-x-auto">
-                <code className="font-mono text-sm text-green-500 whitespace-pre">npm install -g negative-support</code>
+        <section className="mb-14">
+          <div className="flex items-center gap-3 mb-5 pt-5 border-t border-border">
+            <h2 className="text-lg font-medium">Installation</h2>
+          </div>
+          <div className="grid grid-cols-2 gap-4 mb-4 max-sm:grid-cols-1">
+            <div className="rounded-xl p-5 glass">
+              <p className="label-xs mb-3">npm</p>
+              <div className="bg-base/60 border border-border rounded-md px-3 py-2.5 mb-3 overflow-x-auto">
+                <code className="font-mono text-xs text-accent whitespace-pre">npm install -g negative-support</code>
               </div>
-              <p className="text-dim mb-3">
+              <p className="text-dim text-sm mb-3 leading-relaxed">
                 Or run directly with npx (no install needed):
               </p>
-              <div className="bg-surface border border-border rounded-lg p-4 my-3 overflow-x-auto">
-                <code className="font-mono text-sm text-green-500 whitespace-pre">npx negative-support model.stl</code>
+              <div className="bg-base/60 border border-border rounded-md px-3 py-2.5 overflow-x-auto">
+                <code className="font-mono text-xs text-accent whitespace-pre">npx negative-support model.stl</code>
               </div>
             </div>
-            <div>
-              <h3 className="text-base mb-2">pip</h3>
-              <div className="bg-surface border border-border rounded-lg p-4 my-3 overflow-x-auto">
-                <code className="font-mono text-sm text-green-500 whitespace-pre">pip install negative-support</code>
+            <div className="rounded-xl p-5 glass">
+              <p className="label-xs mb-3">pip</p>
+              <div className="bg-base/60 border border-border rounded-md px-3 py-2.5 mb-3 overflow-x-auto">
+                <code className="font-mono text-xs text-accent whitespace-pre">pip install negative-support</code>
               </div>
-              <p className="text-dim mb-3">
+              <p className="text-dim text-sm mb-3 leading-relaxed">
                 For STEP file support (B-Rep overhang detection):
               </p>
-              <div className="bg-surface border border-border rounded-lg p-4 my-3 overflow-x-auto">
-                <code className="font-mono text-sm text-green-500 whitespace-pre">pip install negative-support[step]</code>
+              <div className="bg-base/60 border border-border rounded-md px-3 py-2.5 overflow-x-auto">
+                <code className="font-mono text-xs text-accent whitespace-pre">pip install negative-support[step]</code>
               </div>
             </div>
           </div>
-          <p className="text-dim mb-3">Requires Node.js 18+ (npm) or Python 3.10+ (pip).</p>
+          <p className="text-muted text-xs font-mono">Requires Node.js 18+ (npm) or Python 3.10+ (pip).</p>
         </section>
 
         {/* Quick start */}
-        <section className="mb-12">
-          <h2 className="text-xl mb-4 pt-4 border-t border-border">Quick start</h2>
-          <p className="text-dim mb-3">
-            Both CLIs work the same way with the same arguments and output
-            formats.
+        <section className="mb-14">
+          <div className="flex items-center gap-3 mb-5 pt-5 border-t border-border">
+            <h2 className="text-lg font-medium">Quick start</h2>
+          </div>
+          <p className="text-dim text-sm mb-4 leading-relaxed">
+            Both CLIs work the same way with the same arguments and output formats.
           </p>
-          <div className="bg-surface border border-border rounded-lg p-4 my-3 overflow-x-auto">
-            <code className="font-mono text-sm text-green-500 whitespace-pre">
+          <div className="bg-base/60 border border-border rounded-lg px-4 py-3.5 mb-4 overflow-x-auto">
+            <code className="font-mono text-xs text-accent whitespace-pre leading-relaxed">
               {`# Generate supports (STL output)
 negative-support model.stl
 
@@ -61,99 +65,71 @@ negative-support model.stl -m 0.3 --min-volume 2.0
 negative-support model.stl -o my_supports.stl`}
             </code>
           </div>
-          <p className="text-dim mb-3">
-            Outputs a <code className="font-mono text-xs bg-surface px-1.5 py-0.5 rounded">*_supports.stl</code> file (and optionally
-            a <code className="font-mono text-xs bg-surface px-1.5 py-0.5 rounded">.3mf</code>) that you import alongside your model in your
-            slicer.
+          <p className="text-dim text-sm leading-relaxed">
+            Outputs a <code className="font-mono text-[11px] bg-surface px-1.5 py-0.5 rounded text-primary/70">*_supports.stl</code> file (and optionally
+            a <code className="font-mono text-[11px] bg-surface px-1.5 py-0.5 rounded text-primary/70">.3mf</code>) that you import alongside your model in your slicer.
           </p>
         </section>
 
         {/* CLI reference */}
-        <section className="mb-12">
-          <h2 className="text-xl mb-4 pt-4 border-t border-border">CLI reference</h2>
-          <p className="text-dim mb-3">
-            Both <code className="font-mono text-xs bg-surface px-1.5 py-0.5 rounded text-primary">npx negative-support</code> and{" "}
-            <code className="font-mono text-xs bg-surface px-1.5 py-0.5 rounded text-primary">negative-support</code> (pip) accept the same flags:
+        <section className="mb-14">
+          <div className="flex items-center gap-3 mb-5 pt-5 border-t border-border">
+            <h2 className="text-lg font-medium">CLI reference</h2>
+          </div>
+          <p className="text-dim text-sm mb-4 leading-relaxed">
+            Both <code className="font-mono text-[11px] bg-surface px-1.5 py-0.5 rounded text-primary/70">npx negative-support</code> and{" "}
+            <code className="font-mono text-[11px] bg-surface px-1.5 py-0.5 rounded text-primary/70">negative-support</code> (pip) accept the same flags:
           </p>
-          <table className="w-full border-collapse my-3">
-            <thead>
-              <tr>
-                <th className="text-left px-3 py-2.5 border-b border-border text-primary font-semibold text-xs uppercase tracking-wider">Flag</th>
-                <th className="text-left px-3 py-2.5 border-b border-border text-primary font-semibold text-xs uppercase tracking-wider">Default</th>
-                <th className="text-left px-3 py-2.5 border-b border-border text-primary font-semibold text-xs uppercase tracking-wider">Description</th>
-              </tr>
-            </thead>
-            <tbody className="text-sm text-dim">
-              <tr>
-                <td className="px-3 py-2.5 border-b border-border"><code className="font-mono text-xs bg-surface px-1.5 py-0.5 rounded text-primary">-o, --output</code></td>
-                <td className="px-3 py-2.5 border-b border-border"><code className="font-mono text-xs bg-surface px-1.5 py-0.5 rounded text-primary">*_supports.stl</code></td>
-                <td className="px-3 py-2.5 border-b border-border">Output file path</td>
-              </tr>
-              <tr>
-                <td className="px-3 py-2.5 border-b border-border"><code className="font-mono text-xs bg-surface px-1.5 py-0.5 rounded text-primary">-m, --margin</code></td>
-                <td className="px-3 py-2.5 border-b border-border"><code className="font-mono text-xs bg-surface px-1.5 py-0.5 rounded text-primary">0.2</code></td>
-                <td className="px-3 py-2.5 border-b border-border">Gap between supports and model (mm)</td>
-              </tr>
-              <tr>
-                <td className="px-3 py-2.5 border-b border-border"><code className="font-mono text-xs bg-surface px-1.5 py-0.5 rounded text-primary">--min-volume</code></td>
-                <td className="px-3 py-2.5 border-b border-border"><code className="font-mono text-xs bg-surface px-1.5 py-0.5 rounded text-primary">1.0</code></td>
-                <td className="px-3 py-2.5 border-b border-border">Discard support pieces smaller than this (mm<sup>3</sup>)</td>
-              </tr>
-              <tr>
-                <td className="px-3 py-2.5 border-b border-border"><code className="font-mono text-xs bg-surface px-1.5 py-0.5 rounded text-primary">-a, --angle</code></td>
-                <td className="px-3 py-2.5 border-b border-border"><code className="font-mono text-xs bg-surface px-1.5 py-0.5 rounded text-primary">45</code></td>
-                <td className="px-3 py-2.5 border-b border-border">Overhang angle threshold in degrees (STEP only)</td>
-              </tr>
-              <tr>
-                <td className="px-3 py-2.5 border-b border-border"><code className="font-mono text-xs bg-surface px-1.5 py-0.5 rounded text-primary">--3mf</code></td>
-                <td className="px-3 py-2.5 border-b border-border">&mdash;</td>
-                <td className="px-3 py-2.5 border-b border-border">Export 3MF with model + supports</td>
-              </tr>
-              <tr>
-                <td className="px-3 py-2.5 border-b border-border"><code className="font-mono text-xs bg-surface px-1.5 py-0.5 rounded text-primary">-q, --quiet</code></td>
-                <td className="px-3 py-2.5 border-b border-border">&mdash;</td>
-                <td className="px-3 py-2.5 border-b border-border">Suppress progress display</td>
-              </tr>
-              <tr>
-                <td className="px-3 py-2.5 border-b border-border"><code className="font-mono text-xs bg-surface px-1.5 py-0.5 rounded text-primary">--version</code></td>
-                <td className="px-3 py-2.5 border-b border-border">&mdash;</td>
-                <td className="px-3 py-2.5 border-b border-border">Show version</td>
-              </tr>
-              <tr>
-                <td className="px-3 py-2.5 border-b border-border"><code className="font-mono text-xs bg-surface px-1.5 py-0.5 rounded text-primary">--status</code></td>
-                <td className="px-3 py-2.5 border-b border-border">&mdash;</td>
-                <td className="px-3 py-2.5 border-b border-border">Show license status</td>
-              </tr>
-              <tr>
-                <td className="px-3 py-2.5 border-b border-border"><code className="font-mono text-xs bg-surface px-1.5 py-0.5 rounded text-primary">--buy</code></td>
-                <td className="px-3 py-2.5 border-b border-border">&mdash;</td>
-                <td className="px-3 py-2.5 border-b border-border">Open purchase page</td>
-              </tr>
-              <tr>
-                <td className="px-3 py-2.5 border-b border-border"><code className="font-mono text-xs bg-surface px-1.5 py-0.5 rounded text-primary">--activate &lt;token&gt;</code></td>
-                <td className="px-3 py-2.5 border-b border-border">&mdash;</td>
-                <td className="px-3 py-2.5 border-b border-border">Activate license token</td>
-              </tr>
-            </tbody>
-          </table>
+          <div className="rounded-xl overflow-hidden border border-border">
+            <table className="w-full border-collapse">
+              <thead>
+                <tr className="bg-surface">
+                  <th className="text-left px-4 py-2.5 label-xs !text-muted">Flag</th>
+                  <th className="text-left px-4 py-2.5 label-xs !text-muted">Default</th>
+                  <th className="text-left px-4 py-2.5 label-xs !text-muted">Description</th>
+                </tr>
+              </thead>
+              <tbody className="text-sm">
+                {[
+                  ["-o, --output", "*_supports.stl", "Output file path"],
+                  ["-m, --margin", "0.2", "Gap between supports and model (mm)"],
+                  ["--min-volume", "1.0", "Discard support pieces smaller than this (mm³)"],
+                  ["-a, --angle", "45", "Overhang angle threshold in degrees (STEP only)"],
+                  ["--3mf", "—", "Export 3MF with model + supports"],
+                  ["-q, --quiet", "—", "Suppress progress display"],
+                  ["--version", "—", "Show version"],
+                  ["--status", "—", "Show license status"],
+                  ["--buy", "—", "Open purchase page"],
+                  ["--activate <token>", "—", "Activate license token"],
+                ].map(([flag, def, desc]) => (
+                  <tr key={flag} className="border-t border-border hover:bg-surface-bright transition-colors">
+                    <td className="px-4 py-2.5"><code className="font-mono text-[11px] text-primary/70">{flag}</code></td>
+                    <td className="px-4 py-2.5"><code className="font-mono text-[11px] text-dim">{def}</code></td>
+                    <td className="px-4 py-2.5 text-dim text-sm">{desc}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
         </section>
 
         {/* 3MF export */}
-        <section className="mb-12">
-          <h2 className="text-xl mb-4 pt-4 border-t border-border">3MF export</h2>
-          <p className="text-dim mb-3">
-            The <code className="font-mono text-xs bg-surface px-1.5 py-0.5 rounded text-primary">--3mf</code> flag produces a 3MF file containing both
-            your model and supports as separate objects. This is the recommended
-            way to import into your slicer.
+        <section className="mb-14">
+          <div className="flex items-center gap-3 mb-5 pt-5 border-t border-border">
+            <h2 className="text-lg font-medium">3MF export</h2>
+          </div>
+          <p className="text-dim text-sm mb-4 leading-relaxed">
+            The <code className="font-mono text-[11px] bg-surface px-1.5 py-0.5 rounded text-primary/70">--3mf</code> flag produces a 3MF file containing both
+            your model and supports as separate objects. This is the recommended way to import into your slicer.
           </p>
-          <div className="bg-surface border border-border rounded-lg p-4 my-3 overflow-x-auto">
-            <code className="font-mono text-sm text-green-500 whitespace-pre">
+          <div className="bg-base/60 border border-border rounded-lg px-4 py-3.5 mb-4 overflow-x-auto">
+            <code className="font-mono text-xs text-accent whitespace-pre leading-relaxed">
               {`negative-support model.stl --3mf
 # → model_supports.stl
 # → model.3mf`}
             </code>
           </div>
-          <p className="text-dim mb-3">
+          <p className="text-dim text-sm leading-relaxed">
             The 3MF file includes slicer presets for the support object
             (1 wall, 15% cubic infill) compatible with BambuStudio, OrcaSlicer,
             and PrusaSlicer.
@@ -161,11 +137,13 @@ negative-support model.stl -o my_supports.stl`}
         </section>
 
         {/* npm API reference */}
-        <section className="mb-12">
-          <h2 className="text-xl mb-4 pt-4 border-t border-border">npm API reference</h2>
-          <p className="text-dim mb-3">You can also use negative-support as a library:</p>
-          <div className="bg-surface border border-border rounded-lg p-4 my-3 overflow-x-auto">
-            <code className="font-mono text-sm text-green-500 whitespace-pre">
+        <section className="mb-14">
+          <div className="flex items-center gap-3 mb-5 pt-5 border-t border-border">
+            <h2 className="text-lg font-medium">npm API reference</h2>
+          </div>
+          <p className="text-dim text-sm mb-4 leading-relaxed">You can also use negative-support as a library:</p>
+          <div className="bg-base/60 border border-border rounded-lg px-4 py-3.5 mb-4 overflow-x-auto">
+            <code className="font-mono text-xs text-accent whitespace-pre leading-relaxed">
               {`import { generateSupports } from 'negative-support'
 import { readFileSync, writeFileSync } from 'fs'
 
@@ -180,90 +158,72 @@ console.log(result.stats) // { pieces, faces, volume }`}
             </code>
           </div>
 
-          <h3 className="text-lg mt-4 mb-2">GenerateOptions</h3>
-          <table className="w-full border-collapse my-3">
-            <thead>
-              <tr>
-                <th className="text-left px-3 py-2.5 border-b border-border text-primary font-semibold text-xs uppercase tracking-wider">Property</th>
-                <th className="text-left px-3 py-2.5 border-b border-border text-primary font-semibold text-xs uppercase tracking-wider">Type</th>
-                <th className="text-left px-3 py-2.5 border-b border-border text-primary font-semibold text-xs uppercase tracking-wider">Default</th>
-                <th className="text-left px-3 py-2.5 border-b border-border text-primary font-semibold text-xs uppercase tracking-wider">Description</th>
-              </tr>
-            </thead>
-            <tbody className="text-sm text-dim">
-              <tr>
-                <td className="px-3 py-2.5 border-b border-border"><code className="font-mono text-xs bg-surface px-1.5 py-0.5 rounded text-primary">format</code></td>
-                <td className="px-3 py-2.5 border-b border-border"><code className="font-mono text-xs bg-surface px-1.5 py-0.5 rounded text-primary">string</code></td>
-                <td className="px-3 py-2.5 border-b border-border">auto-detect</td>
-                <td className="px-3 py-2.5 border-b border-border">File format: 'stl', 'obj', 'step', or 'stp'</td>
-              </tr>
-              <tr>
-                <td className="px-3 py-2.5 border-b border-border"><code className="font-mono text-xs bg-surface px-1.5 py-0.5 rounded text-primary">margin</code></td>
-                <td className="px-3 py-2.5 border-b border-border"><code className="font-mono text-xs bg-surface px-1.5 py-0.5 rounded text-primary">number</code></td>
-                <td className="px-3 py-2.5 border-b border-border"><code className="font-mono text-xs bg-surface px-1.5 py-0.5 rounded text-primary">0.2</code></td>
-                <td className="px-3 py-2.5 border-b border-border">Gap between supports and model (mm)</td>
-              </tr>
-              <tr>
-                <td className="px-3 py-2.5 border-b border-border"><code className="font-mono text-xs bg-surface px-1.5 py-0.5 rounded text-primary">angle</code></td>
-                <td className="px-3 py-2.5 border-b border-border"><code className="font-mono text-xs bg-surface px-1.5 py-0.5 rounded text-primary">number</code></td>
-                <td className="px-3 py-2.5 border-b border-border"><code className="font-mono text-xs bg-surface px-1.5 py-0.5 rounded text-primary">45</code></td>
-                <td className="px-3 py-2.5 border-b border-border">Overhang angle threshold in degrees (STEP only)</td>
-              </tr>
-              <tr>
-                <td className="px-3 py-2.5 border-b border-border"><code className="font-mono text-xs bg-surface px-1.5 py-0.5 rounded text-primary">minVolume</code></td>
-                <td className="px-3 py-2.5 border-b border-border"><code className="font-mono text-xs bg-surface px-1.5 py-0.5 rounded text-primary">number</code></td>
-                <td className="px-3 py-2.5 border-b border-border"><code className="font-mono text-xs bg-surface px-1.5 py-0.5 rounded text-primary">1.0</code></td>
-                <td className="px-3 py-2.5 border-b border-border">Discard support pieces smaller than this (mm<sup>3</sup>)</td>
-              </tr>
-              <tr>
-                <td className="px-3 py-2.5 border-b border-border"><code className="font-mono text-xs bg-surface px-1.5 py-0.5 rounded text-primary">onProgress</code></td>
-                <td className="px-3 py-2.5 border-b border-border"><code className="font-mono text-xs bg-surface px-1.5 py-0.5 rounded text-primary">(step, detail?) =&gt; void</code></td>
-                <td className="px-3 py-2.5 border-b border-border">&mdash;</td>
-                <td className="px-3 py-2.5 border-b border-border">Progress callback for each pipeline stage</td>
-              </tr>
-            </tbody>
-          </table>
+          <h3 className="text-base font-medium mt-6 mb-3">GenerateOptions</h3>
+          <div className="rounded-xl overflow-hidden border border-border">
+            <table className="w-full border-collapse">
+              <thead>
+                <tr className="bg-surface">
+                  <th className="text-left px-4 py-2.5 label-xs !text-muted">Property</th>
+                  <th className="text-left px-4 py-2.5 label-xs !text-muted">Type</th>
+                  <th className="text-left px-4 py-2.5 label-xs !text-muted">Default</th>
+                  <th className="text-left px-4 py-2.5 label-xs !text-muted">Description</th>
+                </tr>
+              </thead>
+              <tbody className="text-sm">
+                {[
+                  ["format", "string", "auto-detect", "File format: 'stl', 'obj', 'step', or 'stp'"],
+                  ["margin", "number", "0.2", "Gap between supports and model (mm)"],
+                  ["angle", "number", "45", "Overhang angle threshold (STEP only)"],
+                  ["minVolume", "number", "1.0", "Discard pieces smaller than this (mm³)"],
+                  ["onProgress", "(step, detail?) => void", "—", "Progress callback for each stage"],
+                ].map(([prop, type, def, desc]) => (
+                  <tr key={prop} className="border-t border-border hover:bg-surface-bright transition-colors">
+                    <td className="px-4 py-2.5"><code className="font-mono text-[11px] text-primary/70">{prop}</code></td>
+                    <td className="px-4 py-2.5"><code className="font-mono text-[11px] text-dim">{type}</code></td>
+                    <td className="px-4 py-2.5"><code className="font-mono text-[11px] text-dim">{def}</code></td>
+                    <td className="px-4 py-2.5 text-dim text-sm">{desc}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
 
-          <h3 className="text-lg mt-4 mb-2">SupportResult</h3>
-          <table className="w-full border-collapse my-3">
-            <thead>
-              <tr>
-                <th className="text-left px-3 py-2.5 border-b border-border text-primary font-semibold text-xs uppercase tracking-wider">Property</th>
-                <th className="text-left px-3 py-2.5 border-b border-border text-primary font-semibold text-xs uppercase tracking-wider">Type</th>
-                <th className="text-left px-3 py-2.5 border-b border-border text-primary font-semibold text-xs uppercase tracking-wider">Description</th>
-              </tr>
-            </thead>
-            <tbody className="text-sm text-dim">
-              <tr>
-                <td className="px-3 py-2.5 border-b border-border"><code className="font-mono text-xs bg-surface px-1.5 py-0.5 rounded text-primary">stl</code></td>
-                <td className="px-3 py-2.5 border-b border-border"><code className="font-mono text-xs bg-surface px-1.5 py-0.5 rounded text-primary">ArrayBuffer</code></td>
-                <td className="px-3 py-2.5 border-b border-border">Binary STL of the generated supports</td>
-              </tr>
-              <tr>
-                <td className="px-3 py-2.5 border-b border-border"><code className="font-mono text-xs bg-surface px-1.5 py-0.5 rounded text-primary">stats.pieces</code></td>
-                <td className="px-3 py-2.5 border-b border-border"><code className="font-mono text-xs bg-surface px-1.5 py-0.5 rounded text-primary">number</code></td>
-                <td className="px-3 py-2.5 border-b border-border">Number of separate support pieces</td>
-              </tr>
-              <tr>
-                <td className="px-3 py-2.5 border-b border-border"><code className="font-mono text-xs bg-surface px-1.5 py-0.5 rounded text-primary">stats.faces</code></td>
-                <td className="px-3 py-2.5 border-b border-border"><code className="font-mono text-xs bg-surface px-1.5 py-0.5 rounded text-primary">number</code></td>
-                <td className="px-3 py-2.5 border-b border-border">Total triangle count</td>
-              </tr>
-              <tr>
-                <td className="px-3 py-2.5 border-b border-border"><code className="font-mono text-xs bg-surface px-1.5 py-0.5 rounded text-primary">stats.volume</code></td>
-                <td className="px-3 py-2.5 border-b border-border"><code className="font-mono text-xs bg-surface px-1.5 py-0.5 rounded text-primary">number</code></td>
-                <td className="px-3 py-2.5 border-b border-border">Total support volume (mm³)</td>
-              </tr>
-            </tbody>
-          </table>
+          <h3 className="text-base font-medium mt-6 mb-3">SupportResult</h3>
+          <div className="rounded-xl overflow-hidden border border-border">
+            <table className="w-full border-collapse">
+              <thead>
+                <tr className="bg-surface">
+                  <th className="text-left px-4 py-2.5 label-xs !text-muted">Property</th>
+                  <th className="text-left px-4 py-2.5 label-xs !text-muted">Type</th>
+                  <th className="text-left px-4 py-2.5 label-xs !text-muted">Description</th>
+                </tr>
+              </thead>
+              <tbody className="text-sm">
+                {[
+                  ["stl", "ArrayBuffer", "Binary STL of the generated supports"],
+                  ["stats.pieces", "number", "Number of separate support pieces"],
+                  ["stats.faces", "number", "Total triangle count"],
+                  ["stats.volume", "number", "Total support volume (mm³)"],
+                ].map(([prop, type, desc]) => (
+                  <tr key={prop} className="border-t border-border hover:bg-surface-bright transition-colors">
+                    <td className="px-4 py-2.5"><code className="font-mono text-[11px] text-primary/70">{prop}</code></td>
+                    <td className="px-4 py-2.5"><code className="font-mono text-[11px] text-dim">{type}</code></td>
+                    <td className="px-4 py-2.5 text-dim text-sm">{desc}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
         </section>
 
         {/* Python API */}
-        <section className="mb-12">
-          <h2 className="text-xl mb-4 pt-4 border-t border-border">Python API</h2>
-          <p className="text-dim mb-3">You can also use negative-support as a Python library:</p>
-          <div className="bg-surface border border-border rounded-lg p-4 my-3 overflow-x-auto">
-            <code className="font-mono text-sm text-green-500 whitespace-pre">
+        <section className="mb-14">
+          <div className="flex items-center gap-3 mb-5 pt-5 border-t border-border">
+            <h2 className="text-lg font-medium">Python API</h2>
+          </div>
+          <p className="text-dim text-sm mb-4 leading-relaxed">You can also use negative-support as a Python library:</p>
+          <div className="bg-base/60 border border-border rounded-lg px-4 py-3.5 mb-4 overflow-x-auto">
+            <code className="font-mono text-xs text-accent whitespace-pre leading-relaxed">
               {`from negative_support import load_step, compute_supports
 
 # STEP file
@@ -282,14 +242,16 @@ supports.export("supports.stl")`}
         </section>
 
         {/* License */}
-        <section className="mb-12">
-          <h2 className="text-xl mb-4 pt-4 border-t border-border">License management</h2>
-          <p className="text-dim mb-3">
+        <section className="mb-14">
+          <div className="flex items-center gap-3 mb-5 pt-5 border-t border-border">
+            <h2 className="text-lg font-medium">License management</h2>
+          </div>
+          <p className="text-dim text-sm mb-4 leading-relaxed">
             negative-support includes 3 free runs per machine. After that, a
             lifetime license is required.
           </p>
-          <div className="bg-surface border border-border rounded-lg p-4 my-3 overflow-x-auto">
-            <code className="font-mono text-sm text-green-500 whitespace-pre">
+          <div className="bg-base/60 border border-border rounded-lg px-4 py-3.5 mb-4 overflow-x-auto">
+            <code className="font-mono text-xs text-accent whitespace-pre leading-relaxed">
               {`# Check license status
 negative-support --status
 
@@ -300,7 +262,7 @@ negative-support --buy
 negative-support --activate ns_live_your_token_here`}
             </code>
           </div>
-          <p className="text-dim mb-3">
+          <p className="text-dim text-sm leading-relaxed">
             License state is shared between npm and pip on the same machine.
           </p>
         </section>

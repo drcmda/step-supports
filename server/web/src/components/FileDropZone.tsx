@@ -59,8 +59,8 @@ export default function FileDropZone({ onFile, disabled }: Props) {
   return (
     <div>
       <div
-        className={`border-2 border-dashed rounded-xl py-12 px-6 text-center cursor-pointer transition-all mb-6 ${
-          isDragging ? 'border-blue-500 bg-blue-500/5' : 'border-border hover:border-blue-500 hover:bg-blue-500/5'
+        className={`border border-dashed rounded-xl py-12 px-6 text-center cursor-pointer transition-all mb-6 ${
+          isDragging ? 'border-accent/40 bg-accent-glow' : 'border-border hover:border-accent/30 hover:bg-accent-glow'
         } ${disabled ? 'opacity-50 cursor-not-allowed' : ''}`}
         onDrop={onDrop}
         onDragOver={onDragOver}
@@ -74,22 +74,22 @@ export default function FileDropZone({ onFile, disabled }: Props) {
           onChange={onChange}
           className="hidden"
         />
-        <div className="text-dim mb-4">
-          <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
+        <div className="text-muted mb-4 flex justify-center">
+          <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
             <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
             <polyline points="17 8 12 3 7 8" />
             <line x1="12" y1="3" x2="12" y2="15" />
           </svg>
         </div>
         {fileName ? (
-          <p className="font-mono text-green-500 text-[0.95rem]">{fileName}</p>
+          <p className="font-mono text-accent text-sm">{fileName}</p>
         ) : (
-          <p className="text-dim text-[0.95rem]">
-            Drop an STL, OBJ, or STEP file here, or <span className="text-blue-500 underline">browse</span>
+          <p className="text-dim text-sm">
+            Drop an STL, OBJ, or STEP file here, or <span className="text-accent/70 underline underline-offset-2">browse</span>
           </p>
         )}
       </div>
-      {error && <p className="text-[#fca5a5] text-sm mt-2">{error}</p>}
+      {error && <p className="text-red-400 text-xs mt-2">{error}</p>}
     </div>
   );
 }

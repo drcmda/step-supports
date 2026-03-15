@@ -14,10 +14,10 @@ export default function CopyToken({ token }: Props) {
   };
 
   return (
-    <div className="flex items-center gap-3 bg-surface border border-border rounded-lg p-4 max-w-[500px] mx-auto my-4">
-      <code className="font-mono text-sm text-green-500 flex-1 break-all">{token}</code>
+    <div className="flex items-center gap-3 rounded-xl p-4 max-w-[500px] mx-auto my-4 border border-accent/20 bg-accent-glow">
+      <code className="font-mono text-xs text-accent flex-1 break-all">{token}</code>
       <button
-        className="bg-blue-500 text-white border-none px-4 py-2 rounded-md cursor-pointer text-sm font-medium whitespace-nowrap hover:bg-blue-600"
+        className="bg-accent text-base border-none px-4 py-2 rounded-lg cursor-pointer text-sm font-medium whitespace-nowrap hover:brightness-110 transition-all"
         onClick={handleCopy}
       >
         {copied ? "Copied!" : "Copy"}

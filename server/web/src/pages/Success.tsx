@@ -39,35 +39,44 @@ export default function Success() {
   }, [sessionId]);
 
   return (
-    <div className="py-20">
-      <div className="max-w-[960px] mx-auto px-6">
-        <h1 className="text-3xl mb-6 text-center">Payment successful!</h1>
+    <div className="py-24">
+      <div className="max-w-[1100px] mx-auto px-6 text-center">
+        <div className="inline-flex items-center justify-center w-12 h-12 rounded-full border border-accent/20 bg-accent-glow mb-6">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className="text-accent">
+            <polyline points="20 6 9 17 4 12" />
+          </svg>
+        </div>
+        <h1 className="text-2xl font-semibold mb-2 tracking-[-0.01em]">Payment successful</h1>
+        <p className="text-dim text-sm mb-8">Your lifetime license is ready.</p>
 
-        {loading && <p className="text-center text-dim">Retrieving your license token...</p>}
+        {loading && (
+          <div className="flex items-center justify-center gap-2 text-dim text-sm">
+            <div className="w-4 h-4 border-2 border-border border-t-accent rounded-full animate-spin" />
+            Retrieving your license token...
+          </div>
+        )}
 
         {error && (
-          <div className="bg-[#1a0000] border border-[#5c1a1a] rounded-lg p-5 max-w-[500px] mx-auto">
-            <p className="text-[#fca5a5] text-sm">{error}</p>
-            <p className="text-[#fca5a5] text-sm">
+          <div className="rounded-xl px-5 py-4 max-w-[500px] mx-auto border border-red-500/20 bg-red-500/5">
+            <p className="text-red-400 text-sm">{error}</p>
+            <p className="text-red-400/60 text-xs mt-1">
               If your payment went through, please refresh in a few seconds.
-              Contact support if this persists.
             </p>
           </div>
         )}
 
         {token && (
           <>
-            <p>Here is your license token:</p>
+            <p className="text-dim text-sm mb-2">Your license token:</p>
             <CopyToken token={token} />
-            <div className="max-w-[500px] mx-auto mt-8">
-              <h2 className="text-xl mb-3">Activate your license</h2>
-              <p className="text-dim mb-3">Run this command in your terminal:</p>
-              <div className="bg-surface border border-border rounded-lg p-4 my-3 overflow-x-auto">
-                <code className="font-mono text-sm text-green-500 whitespace-pre">negative-support --activate {token}</code>
+            <div className="max-w-[500px] mx-auto mt-10 text-left">
+              <p className="label-xs mb-4 tracking-[0.14em]">Activate</p>
+              <p className="text-dim text-sm mb-3 leading-relaxed">Run this command in your terminal:</p>
+              <div className="bg-base/60 border border-border rounded-lg px-4 py-3 overflow-x-auto">
+                <code className="font-mono text-xs text-accent whitespace-pre">negative-support --activate {token}</code>
               </div>
-              <p className="text-dim text-sm mt-3">
-                Your token works on up to 3 machines. Keep it safe — you can
-                always find it in <code className="font-mono text-xs bg-surface px-1.5 py-0.5 rounded">~/.negative-support/license.json</code>.
+              <p className="text-muted text-xs font-mono mt-4 leading-relaxed">
+                Works on up to 3 machines. Token stored in ~/.negative-support/license.json
               </p>
             </div>
           </>

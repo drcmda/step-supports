@@ -24,162 +24,164 @@ export default function Landing() {
   return (
     <div>
       {/* Hero */}
-      <section className="py-25 pb-20 text-center">
-        <div className="max-w-[960px] mx-auto px-6">
-          <h1 className="text-[2.8rem] font-bold leading-[1.15] mb-4">
-            Negative-space 3D print supports
+      <section className="pt-28 pb-24 text-center relative overflow-hidden">
+        {/* Subtle radial glow behind hero */}
+        <div className="absolute inset-0 pointer-events-none" style={{ background: "radial-gradient(ellipse 600px 400px at 50% 0%, rgba(34,197,94,0.04) 0%, transparent 70%)" }} />
+        <div className="max-w-[1100px] mx-auto px-6 relative">
+          <p className="label-xs mb-6 tracking-[0.14em]">3D print support generator</p>
+          <h1 className="text-[3.2rem] font-semibold leading-[1.08] mb-5 tracking-[-0.02em] max-w-[720px] mx-auto">
+            Negative-space supports that{" "}
+            <span className="text-accent">fit perfectly</span>
           </h1>
-          <p className="text-lg text-dim max-w-[560px] mx-auto mb-8">
-            Generate precision support structures that fit perfectly around your
-            model. Use it in your browser, or install via npm or pip.
+          <p className="text-[1.05rem] text-dim max-w-[520px] mx-auto mb-10 leading-relaxed">
+            Generate precision support structures around your model.
+            Browser, npm, or pip — same algorithm everywhere.
           </p>
           <div className="flex gap-3 justify-center">
             <a
-              href="/try"
-              className="inline-block px-6 py-2.5 rounded-lg text-[0.95rem] font-medium no-underline bg-blue-500 text-white hover:bg-blue-600 transition-all"
+              href="/generate"
+              className="inline-flex items-center gap-2 px-5 py-2.5 rounded-lg text-sm font-medium no-underline bg-accent text-base transition-all hover:brightness-110 glow-accent"
             >
               Generate now
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className="opacity-60"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
             </a>
             <a
               href="/docs"
-              className="inline-block px-6 py-2.5 rounded-lg text-[0.95rem] font-medium no-underline bg-surface text-primary border border-border hover:border-dim transition-all"
+              className="inline-flex items-center px-5 py-2.5 rounded-lg text-sm font-medium no-underline glass glass-hover text-primary/70"
             >
               Documentation
-            </a>
-            <a
-              href="#pricing"
-              className="inline-block px-6 py-2.5 rounded-lg text-[0.95rem] font-medium no-underline bg-surface text-primary border border-border hover:border-dim transition-all"
-            >
-              Pricing
             </a>
           </div>
         </div>
       </section>
 
-      {/* How it works */}
-      <section className="py-20 bg-base-alt">
-        <div className="max-w-[1080px] mx-auto px-6">
-          <h2 className="text-center mb-12 text-3xl">Get started</h2>
-          <div className="grid grid-cols-[1fr_1.4fr_1fr] gap-6 max-sm:grid-cols-1">
-            <div className="bg-surface border border-border rounded-xl p-6 min-w-0">
-              <h3 className="text-lg mb-2">Browser</h3>
-              <p className="text-dim text-sm mb-3">
-                Upload a file and generate supports instantly. No install
-                needed.
-              </p>
-              <div className="bg-base border border-border rounded-lg px-3 py-2.5 mb-3 overflow-x-auto min-w-0">
-                <code className="font-mono text-xs text-green-500 whitespace-pre">STL, OBJ, STEP</code>
-              </div>
-              <a href="/try" className="text-blue-500 text-sm no-underline hover:underline">
-                Open generator &rarr;
-              </a>
+      {/* Install strip */}
+      <section className="border-y border-border bg-base-alt">
+        <div className="max-w-[1100px] mx-auto px-6 grid grid-cols-3 max-md:grid-cols-1 divide-x max-md:divide-x-0 max-md:divide-y divide-border">
+          {/* Browser */}
+          <div className="py-8 px-6 first:pl-0 last:pr-0 max-md:px-0 max-md:first:pt-8">
+            <p className="label-xs mb-3">Browser</p>
+            <p className="text-dim text-sm mb-3 leading-relaxed">Upload and generate instantly. No install needed.</p>
+            <div className="bg-base/60 border border-border rounded-md px-3 py-2 mb-3 overflow-x-auto">
+              <code className="font-mono text-xs text-accent whitespace-pre">STL, OBJ, STEP</code>
             </div>
-            <div className="bg-surface border border-border rounded-xl p-6 min-w-0">
-              <h3 className="text-lg mb-2">npm</h3>
-              <div className="bg-base border border-border rounded-lg px-3 py-2.5 mb-3 overflow-x-auto min-w-0">
-                <code className="font-mono text-xs text-green-500 whitespace-pre">npx negative-support model.stl</code>
-              </div>
-              <div className="bg-base border border-border rounded-lg px-3 py-2.5 mb-3 overflow-x-auto min-w-0">
-                <code className="font-mono text-xs text-green-500 whitespace-pre">npx negative-support model.step --3mf</code>
-              </div>
-              <a
-                href="https://www.npmjs.com/package/negative-support"
-                className="text-blue-500 text-sm no-underline hover:underline"
-                target="_blank"
-                rel="noopener noreferrer"
-              >
-                View on npm &rarr;
-              </a>
+            <a href="/generate" className="font-mono text-[11px] tracking-[0.06em] text-accent/60 no-underline hover:text-accent transition-colors">
+              Open generator &rarr;
+            </a>
+          </div>
+          {/* npm */}
+          <div className="py-8 px-6 max-md:px-0">
+            <p className="label-xs mb-3">npm</p>
+            <div className="bg-base/60 border border-border rounded-md px-3 py-2 mb-2 overflow-x-auto">
+              <code className="font-mono text-xs text-accent whitespace-pre">npx negative-support model.stl</code>
             </div>
-            <div className="bg-surface border border-border rounded-xl p-6 min-w-0">
-              <h3 className="text-lg mb-2">pip</h3>
-              <div className="bg-base border border-border rounded-lg px-3 py-2.5 mb-3 overflow-x-auto min-w-0">
-                <code className="font-mono text-xs text-green-500 whitespace-pre">pip install negative-support</code>
-              </div>
-              <div className="bg-base border border-border rounded-lg px-3 py-2.5 mb-3 overflow-x-auto min-w-0">
-                <code className="font-mono text-xs text-green-500 whitespace-pre">negative-support model.stl</code>
-              </div>
-              <a href="/docs" className="text-blue-500 text-sm no-underline hover:underline">
-                Read the docs &rarr;
-              </a>
+            <div className="bg-base/60 border border-border rounded-md px-3 py-2 mb-3 overflow-x-auto">
+              <code className="font-mono text-xs text-accent whitespace-pre">npx negative-support model.step --3mf</code>
             </div>
+            <a
+              href="https://www.npmjs.com/package/negative-support"
+              className="font-mono text-[11px] tracking-[0.06em] text-accent/60 no-underline hover:text-accent transition-colors"
+              target="_blank"
+              rel="noopener noreferrer"
+            >
+              View on npm &rarr;
+            </a>
+          </div>
+          {/* pip */}
+          <div className="py-8 px-6 last:pr-0 max-md:px-0 max-md:last:pb-8">
+            <p className="label-xs mb-3">pip</p>
+            <div className="bg-base/60 border border-border rounded-md px-3 py-2 mb-2 overflow-x-auto">
+              <code className="font-mono text-xs text-accent whitespace-pre">pip install negative-support</code>
+            </div>
+            <div className="bg-base/60 border border-border rounded-md px-3 py-2 mb-3 overflow-x-auto">
+              <code className="font-mono text-xs text-accent whitespace-pre">negative-support model.stl</code>
+            </div>
+            <a href="/docs" className="font-mono text-[11px] tracking-[0.06em] text-accent/60 no-underline hover:text-accent transition-colors">
+              Read the docs &rarr;
+            </a>
           </div>
         </div>
       </section>
 
       {/* Features */}
-      <section className="py-20">
-        <div className="max-w-[960px] mx-auto px-6">
-          <h2 className="text-center mb-12 text-3xl">Features</h2>
-          <div className="grid grid-cols-2 gap-6 max-sm:grid-cols-1">
-            <div className="bg-surface border border-border rounded-xl p-6">
-              <h3 className="mb-2 text-base">STEP overhang detection</h3>
-              <p className="text-dim text-sm">
-                Uses B-Rep face topology to detect exactly which surfaces need
-                support. Only generates supports where needed.
-              </p>
-            </div>
-            <div className="bg-surface border border-border rounded-xl p-6">
-              <h3 className="mb-2 text-base">Mesh full-shell mode</h3>
-              <p className="text-dim text-sm">
-                Works with STL and OBJ files. Creates complete negative-space
-                supports around the entire model.
-              </p>
-            </div>
-            <div className="bg-surface border border-border rounded-xl p-6">
-              <h3 className="mb-2 text-base">Precision gap control</h3>
-              <p className="text-dim text-sm">
-                Configurable margin between supports and model (default 0.2mm).
-                Supports snap off cleanly after printing.
-              </p>
-            </div>
-            <div className="bg-surface border border-border rounded-xl p-6">
-              <h3 className="mb-2 text-base">Cross-platform</h3>
-              <p className="text-dim text-sm">
-                Same algorithm on all platforms. Browser, Node.js, and Python
-                produce identical results.
-              </p>
-            </div>
+      <section className="py-24">
+        <div className="max-w-[1100px] mx-auto px-6">
+          <p className="label-xs mb-4 text-center tracking-[0.14em]">Capabilities</p>
+          <h2 className="text-center mb-14 text-2xl font-semibold tracking-[-0.01em]">Built for precision printing</h2>
+          <div className="grid grid-cols-2 gap-4 max-sm:grid-cols-1">
+            {[
+              { title: "STEP overhang detection", desc: "Uses B-Rep face topology to detect exactly which surfaces need support. Only generates supports where needed." },
+              { title: "Mesh full-shell mode", desc: "Works with STL and OBJ files. Creates complete negative-space supports around the entire model." },
+              { title: "Precision gap control", desc: "Configurable margin between supports and model (default 0.2mm). Supports snap off cleanly after printing." },
+              { title: "Cross-platform", desc: "Same algorithm on all platforms. Browser, Node.js, and Python produce identical results." },
+            ].map((f) => (
+              <div key={f.title} className="rounded-xl p-6 glass glass-hover group">
+                <h3 className="text-[0.95rem] font-medium mb-2 text-primary/80 group-hover:text-primary transition-colors">{f.title}</h3>
+                <p className="text-dim text-sm leading-relaxed">{f.desc}</p>
+              </div>
+            ))}
           </div>
         </div>
       </section>
 
       {/* Pricing */}
-      <section className="py-20 bg-base-alt" id="pricing">
-        <div className="max-w-[960px] mx-auto px-6">
-          <h2 className="text-center mb-12 text-3xl">Pricing</h2>
-          <div className="grid grid-cols-2 gap-6 max-w-[640px] mx-auto max-sm:grid-cols-1">
-            <div className="bg-surface border border-border rounded-xl p-8 text-center">
-              <h3 className="mb-3 text-xl">Free</h3>
-              <div className="text-4xl font-bold mb-6">$0</div>
-              <ul className="list-none mb-6">
-                <li className="py-1.5 text-dim text-sm before:content-['\2713\00a0\00a0'] before:text-green-500">3 runs per machine</li>
-                <li className="py-1.5 text-dim text-sm before:content-['\2713\00a0\00a0'] before:text-green-500">All features included</li>
-                <li className="py-1.5 text-dim text-sm before:content-['\2713\00a0\00a0'] before:text-green-500">No account needed</li>
+      <section className="py-24 border-t border-border" id="pricing">
+        <div className="max-w-[1100px] mx-auto px-6">
+          <p className="label-xs mb-4 text-center tracking-[0.14em]">Pricing</p>
+          <h2 className="text-center mb-14 text-2xl font-semibold tracking-[-0.01em]">Simple, one-time pricing</h2>
+          <div className="grid grid-cols-2 gap-4 max-w-[580px] mx-auto max-sm:grid-cols-1">
+            {/* Free */}
+            <div className="rounded-xl p-7 glass text-center">
+              <p className="label-xs mb-5">Free tier</p>
+              <div className="font-pixel text-[3rem] leading-none mb-1 text-primary/60">$0</div>
+              <p className="text-dim text-xs mb-6">forever</p>
+              <ul className="list-none mb-7 space-y-2.5">
+                <li className="text-dim text-sm flex items-center gap-2 justify-center">
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className="text-accent shrink-0"><polyline points="20 6 9 17 4 12"/></svg>
+                  3 runs per machine
+                </li>
+                <li className="text-dim text-sm flex items-center gap-2 justify-center">
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className="text-accent shrink-0"><polyline points="20 6 9 17 4 12"/></svg>
+                  All features included
+                </li>
+                <li className="text-dim text-sm flex items-center gap-2 justify-center">
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className="text-accent shrink-0"><polyline points="20 6 9 17 4 12"/></svg>
+                  No account needed
+                </li>
               </ul>
               <a
                 href="/docs"
-                className="inline-block px-6 py-2.5 rounded-lg text-[0.95rem] font-medium no-underline bg-surface text-primary border border-border hover:border-dim transition-all"
+                className="inline-flex items-center px-5 py-2 rounded-lg text-sm font-medium no-underline glass glass-hover text-primary/70"
               >
                 Get started
               </a>
             </div>
-            <div className="bg-surface border border-blue-500 rounded-xl p-8 text-center">
-              <h3 className="mb-3 text-xl">Lifetime</h3>
-              <div className="text-4xl font-bold mb-6">
-                $29 <span className="text-sm font-normal text-dim">one-time</span>
-              </div>
-              <ul className="list-none mb-6">
-                <li className="py-1.5 text-dim text-sm before:content-['\2713\00a0\00a0'] before:text-green-500">Unlimited runs</li>
-                <li className="py-1.5 text-dim text-sm before:content-['\2713\00a0\00a0'] before:text-green-500">Up to 3 machines</li>
-                <li className="py-1.5 text-dim text-sm before:content-['\2713\00a0\00a0'] before:text-green-500">All future updates</li>
+            {/* Lifetime */}
+            <div className="rounded-xl p-7 text-center border border-accent/20 bg-accent-glow relative overflow-hidden animate-glow-pulse">
+              <p className="label-xs mb-5 text-accent/50">Lifetime</p>
+              <div className="font-pixel text-[3rem] leading-none mb-1 text-accent">$29</div>
+              <p className="text-dim text-xs mb-6">one-time payment</p>
+              <ul className="list-none mb-7 space-y-2.5">
+                <li className="text-dim text-sm flex items-center gap-2 justify-center">
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className="text-accent shrink-0"><polyline points="20 6 9 17 4 12"/></svg>
+                  Unlimited runs
+                </li>
+                <li className="text-dim text-sm flex items-center gap-2 justify-center">
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className="text-accent shrink-0"><polyline points="20 6 9 17 4 12"/></svg>
+                  Up to 3 machines
+                </li>
+                <li className="text-dim text-sm flex items-center gap-2 justify-center">
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className="text-accent shrink-0"><polyline points="20 6 9 17 4 12"/></svg>
+                  All future updates
+                </li>
               </ul>
               <button
-                className="inline-block px-6 py-2.5 rounded-lg text-[0.95rem] font-medium bg-blue-500 text-white border-none cursor-pointer hover:bg-blue-600 transition-all disabled:opacity-60 disabled:cursor-not-allowed"
+                className="inline-flex items-center gap-2 px-5 py-2 rounded-lg text-sm font-medium bg-accent text-base border-none cursor-pointer hover:brightness-110 transition-all disabled:opacity-60 disabled:cursor-not-allowed"
                 onClick={handleBuy}
                 disabled={loading}
               >
                 {loading ? "Redirecting..." : "Buy now"}
+                {!loading && <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className="opacity-60"><path d="M5 12h14M12 5l7 7-7 7"/></svg>}
               </button>
             </div>
           </div>

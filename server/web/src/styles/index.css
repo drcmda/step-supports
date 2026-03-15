@@ -1,15 +1,72 @@
 @import "tailwindcss";
 
-@theme {
-  --color-base: #0a0a0a;
-  --color-base-alt: #111111;
-  --color-surface: #1a1a1a;
-  --color-border: #2a2a2a;
-  --color-primary: #e5e5e5;
-  --color-dim: #888888;
-  --font-sans: "Inter", system-ui, sans-serif;
-  --font-mono: "JetBrains Mono", "Fira Code", monospace;
+/* ── Fonts ──────────────────────────────────────────────────── */
+
+@font-face {
+  font-family: "Geist";
+  src: url("/fonts/Geist-Variable.woff2") format("woff2");
+  font-weight: 100 900;
+  font-display: swap;
 }
+
+@font-face {
+  font-family: "Geist Mono";
+  src: url("/fonts/GeistMono-Regular.woff2") format("woff2");
+  font-weight: 400;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "Geist Mono";
+  src: url("/fonts/GeistMono-Medium.woff2") format("woff2");
+  font-weight: 500;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "Geist Pixel Square";
+  src: url("/fonts/GeistPixel-Square.woff2") format("woff2");
+  font-weight: 500;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "Geist Pixel Triangle";
+  src: url("/fonts/GeistPixel-Triangle.woff2") format("woff2");
+  font-weight: 500;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "Geist Pixel Grid";
+  src: url("/fonts/GeistPixel-Grid.woff2") format("woff2");
+  font-weight: 500;
+  font-display: swap;
+}
+
+/* ── Theme ──────────────────────────────────────────────────── */
+
+@theme {
+  --color-base: #050505;
+  --color-base-alt: #0a0a0a;
+  --color-surface: rgba(255, 255, 255, 0.02);
+  --color-surface-bright: rgba(255, 255, 255, 0.04);
+  --color-border: rgba(255, 255, 255, 0.06);
+  --color-border-bright: rgba(255, 255, 255, 0.12);
+  --color-primary: rgba(255, 255, 255, 0.85);
+  --color-dim: rgba(255, 255, 255, 0.4);
+  --color-muted: rgba(255, 255, 255, 0.25);
+  --color-accent: #22c55e;
+  --color-accent-dim: rgba(34, 197, 94, 0.15);
+  --color-accent-glow: rgba(34, 197, 94, 0.08);
+  --font-sans: "Geist", system-ui, sans-serif;
+  --font-mono: "Geist Mono", ui-monospace, monospace;
+  --font-pixel: "Geist Pixel Triangle", "Geist Mono", monospace;
+  --font-pixel-square: "Geist Pixel Square", "Geist Mono", monospace;
+  --font-pixel-grid: "Geist Pixel Grid", "Geist Mono", monospace;
+}
+
+/* ── Base ───────────────────────────────────────────────────── */
 
 @layer base {
   *,
@@ -33,8 +90,58 @@
   }
 }
 
+/* ── Keyframes ──────────────────────────────────────────────── */
+
 @keyframes spin {
-  to {
-    transform: rotate(360deg);
+  to { transform: rotate(360deg); }
+}
+
+@keyframes fade-in-up {
+  from { opacity: 0; transform: translateY(16px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes glow-pulse {
+  0%, 100% { box-shadow: 0 0 20px var(--color-accent-glow); }
+  50% { box-shadow: 0 0 40px rgba(34, 197, 94, 0.14); }
+}
+
+@keyframes pulse-dot {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.4; }
+}
+
+/* ── Utilities ──────────────────────────────────────────────── */
+
+@utility animate-fade-in-up {
+  animation: fade-in-up 0.6s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+@utility animate-glow-pulse {
+  animation: glow-pulse 3s ease-in-out infinite;
+}
+
+@utility glass {
+  background: rgba(255, 255, 255, 0.02);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  transition: all 0.3s ease;
+}
+
+@utility glass-hover {
+  &:hover {
+    background: rgba(255, 255, 255, 0.04);
+    border-color: rgba(255, 255, 255, 0.1);
   }
+}
+
+@utility glow-accent {
+  box-shadow: 0 0 20px var(--color-accent-glow), 0 0 0 1px var(--color-accent-dim);
+}
+
+@utility label-xs {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: rgba(255, 255, 255, 0.3);
 }
