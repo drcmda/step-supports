@@ -120,7 +120,7 @@ Mesh mode:
 
 ## Licensing
 
-Free tier: **3 runs per machine**, no account needed. After that, a lifetime license is required ($29, one-time).
+Free tier: **3 runs per machine**, no account needed. After that, a lifetime license is required ($19, one-time).
 
 - Tracked server-side via machine fingerprint (SHA-256 of hostname + MAC + OS + arch + username)
 - Offline fallback: local counter in `~/.negative-support/usage.json`
@@ -179,6 +179,25 @@ pip install -e ".[step]"      # mesh + STEP support
 # Verify
 negative-support --version
 negative-support --status
+```
+
+### Dev mode (skip license checks)
+
+```bash
+source .venv/bin/activate
+NS_DEV=1 negative-support models/body.step
+NS_DEV=1 negative-support models/follower.stl
+
+# Or export for the whole session
+export NS_DEV=1
+negative-support models/handle.step
+negative-support models/stock.step
+
+# Run all STEP models
+for f in models/*.step; do echo "=== $f ===" && negative-support "$f"; done
+
+# Run all STL models (skip _supports files)
+for f in models/*.stl; do [[ "$f" != *_supports.stl ]] && echo "=== $f ===" && negative-support "$f"; done
 ```
 
 ### Run tests
