@@ -10,6 +10,7 @@ import Module from 'manifold-3d';
 import wasmUrl from 'manifold-3d/manifold.wasm?url';
 import { parseSTL, exportSTL, type ParsedMesh } from '../lib/stl';
 import { parseOBJ } from '../lib/obj';
+import { parseSTEP } from '../lib/step';
 import { computeBBox, translateZ, inflateMesh, repairMesh } from '../lib/mesh-utils';
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -223,10 +224,13 @@ self.onmessage = async (e: MessageEvent<InMessage>) => {
       parsed = parseSTL(msg.fileBuffer);
     } else if (ext === 'obj') {
       parsed = parseOBJ(msg.fileBuffer);
+    } else if (ext === 'step' || ext === 'stp') {
+      progress('Parse', 'Loading OpenCascade WASM (first time may take a moment)...');
+      parsed = await parseSTEP(msg.fileBuffer);
     } else {
       self.postMessage({
         type: 'error',
-        message: `Unsupported format: .${ext}. Use STL or OBJ. For STEP files, install the CLI: pip install negative-support`,
+        message: `Unsupported format: .${ext}. Use STL, OBJ, or STEP.`,
       } satisfies ErrorMessage);
       return;
     }

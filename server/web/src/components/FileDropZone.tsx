@@ -5,8 +5,7 @@ interface Props {
   disabled?: boolean;
 }
 
-const ACCEPTED = ['.stl', '.obj'];
-const STEP_EXTS = ['.step', '.stp'];
+const ACCEPTED = ['.stl', '.obj', '.step', '.stp'];
 
 export default function FileDropZone({ onFile, disabled }: Props) {
   const [isDragging, setIsDragging] = useState(false);
@@ -17,14 +16,8 @@ export default function FileDropZone({ onFile, disabled }: Props) {
   const handleFile = useCallback(
     (file: File) => {
       const ext = '.' + file.name.toLowerCase().split('.').pop();
-      if (STEP_EXTS.includes(ext)) {
-        setError(
-          'STEP files require overhang detection which only runs natively. Install the CLI: pip install negative-support'
-        );
-        return;
-      }
       if (!ACCEPTED.includes(ext)) {
-        setError(`Unsupported format: ${ext}. Use STL or OBJ files.`);
+        setError(`Unsupported format: ${ext}. Use STL, OBJ, or STEP files.`);
         return;
       }
       setError(null);
@@ -75,7 +68,7 @@ export default function FileDropZone({ onFile, disabled }: Props) {
         <input
           ref={inputRef}
           type="file"
-          accept=".stl,.obj"
+          accept=".stl,.obj,.step,.stp"
           onChange={onChange}
           style={{ display: 'none' }}
         />
@@ -90,7 +83,7 @@ export default function FileDropZone({ onFile, disabled }: Props) {
           <p className="drop-zone__file">{fileName}</p>
         ) : (
           <p className="drop-zone__text">
-            Drop an STL or OBJ file here, or <span className="drop-zone__browse">browse</span>
+            Drop an STL, OBJ, or STEP file here, or <span className="drop-zone__browse">browse</span>
           </p>
         )}
       </div>
