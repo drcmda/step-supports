@@ -171,7 +171,7 @@ negative-support model.stl -o my_supports.stl`}
           </div>
           <p className="text-dim text-sm leading-relaxed">
             The 3MF file includes slicer presets for the support object
-            (1 wall, 15% cubic infill) compatible with BambuStudio, OrcaSlicer,
+            (1 wall, 10% cubic infill) compatible with BambuStudio, OrcaSlicer,
             and PrusaSlicer.
           </p>
         </section>

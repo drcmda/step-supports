@@ -10,7 +10,7 @@
  *
  * Slicer settings (same as Python):
  *   - wall_loops: 1
- *   - sparse_infill_density: 15%
+ *   - sparse_infill_density: 10%
  *   - sparse_infill_pattern: cubic
  */
 
@@ -108,7 +108,7 @@ function buildSlicerConfig(modelId: number, supportsId: number): string {
     `  <object id="${supportsId}">`,
     '    <metadata key="name" value="Supports"/>',
     '    <metadata key="wall_loops" value="1"/>',
-    '    <metadata key="sparse_infill_density" value="15%"/>',
+    '    <metadata key="sparse_infill_density" value="10%"/>',
     '    <metadata key="sparse_infill_pattern" value="cubic"/>',
     '  </object>',
     '</config>',
