@@ -59,6 +59,8 @@ function meshToManifold(parsed: ParsedMesh): any {
     vertProperties: parsed.vertices,
     triVerts: parsed.faces,
   });
+  // Try merge() to repair simple non-manifold issues (open edges)
+  try { mesh.merge(); } catch (_) { /* best-effort */ }
   const m = wasm.Manifold.ofMesh(mesh);
   mesh.delete?.();
   return m;
