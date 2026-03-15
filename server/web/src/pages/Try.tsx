@@ -275,6 +275,8 @@ export default function Try() {
                     >
                       {showTokenInput ? 'Cancel' : 'Activate a token'}
                     </button>
+                    <span className="text-muted text-xs">·</span>
+                    <a href="/recover" className="text-muted text-sm no-underline hover:text-dim transition-colors">Lost your token?</a>
                   </div>
                   {showTokenInput && (
                     <div className="mt-3 flex items-center gap-2">
