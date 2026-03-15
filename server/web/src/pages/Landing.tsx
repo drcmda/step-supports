@@ -113,8 +113,8 @@ export default function Landing() {
           <p className='label-xs mb-4 text-center tracking-[0.14em]'>Why negative-space?</p>
           <h2 className='text-center mb-5 text-2xl font-semibold tracking-[-0.01em]'>Tree supports vs. negative-space</h2>
           <p className='text-dim text-center text-sm max-w-[520px] mx-auto mb-10 leading-relaxed'>
-            Traditional tree supports touch your model at many points, leaving marks and risking damage. Negative-space supports wrap around
-            the geometry's exact shape with a precision air gap.
+            Custom supports that follow model curvature have been a secret weapon for those who could design them in CAD. Now, anyone can
+            generate them with a single click — no CAD skills required.
           </p>
           <div className='flex justify-center mb-14'>
             <img src='/hero-outline.png' alt='Model with negative-space supports' className='h-[360px] w-auto opacity-70' />
@@ -190,11 +190,11 @@ export default function Landing() {
               <ul className='list-none space-y-3'>
                 {[
                   [
-                    'Zero contact damage',
+                    'Reduced contact damage',
                     'A precision air gap (default 0.2mm) keeps supports from ever touching the model. Contact surfaces stay pristine.',
                   ],
                   [
-                    'Perfect surface finish',
+                    'Improved surface finish',
                     'Supports curve around your geometry without fusing. Smooth faces, threads, and fine details print exactly as designed.',
                   ],
                   [
@@ -233,25 +233,71 @@ export default function Landing() {
       <section className='py-24'>
         <div className='max-w-[1100px] mx-auto px-6'>
           <p className='label-xs mb-4 text-center tracking-[0.14em]'>Capabilities</p>
-          <h2 className='text-center mb-14 text-2xl font-semibold tracking-[-0.01em]'>Built for precision printing</h2>
-          <div className='grid grid-cols-2 gap-4 max-sm:grid-cols-1'>
+          <h2 className='text-center mb-6 text-2xl font-semibold tracking-[-0.01em]'>Built for precision printing</h2>
+          <p className='text-dim text-center text-sm max-w-[480px] mx-auto mb-14 leading-relaxed'>
+            From overhang detection to slicer-ready export — everything you need in one tool.
+          </p>
+          <div className='grid grid-cols-2 gap-px max-sm:grid-cols-1 rounded-2xl overflow-hidden border border-border'>
             {[
               {
-                title: 'STEP overhang detection',
-                desc: 'Uses B-Rep face topology to detect exactly which surfaces need support. Only generates supports where needed.',
+                icon: (
+                  <svg width='20' height='20' viewBox='0 0 24 24' fill='none' stroke='currentColor' strokeWidth='1.5' className='text-accent'>
+                    <path d='M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z' />
+                    <polyline points='3.27 6.96 12 12.01 20.73 6.96' />
+                    <line x1='12' y1='22.08' x2='12' y2='12' />
+                  </svg>
+                ),
+                label: 'STEP + Mesh',
+                title: 'Smart overhang detection',
+                desc: 'STEP files use B-Rep face topology to identify exactly which surfaces need support — only overhangs get them. STL and OBJ files receive full negative-shell supports around the entire model.',
               },
               {
-                title: 'Mesh full-shell mode',
-                desc: 'Works with STL and OBJ files. Creates complete negative-space supports around the entire model.',
+                icon: (
+                  <svg width='20' height='20' viewBox='0 0 24 24' fill='none' stroke='currentColor' strokeWidth='1.5' className='text-accent'>
+                    <path d='M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z' />
+                    <polyline points='14 2 14 8 20 8' />
+                    <line x1='16' y1='13' x2='8' y2='13' />
+                    <line x1='16' y1='17' x2='8' y2='17' />
+                  </svg>
+                ),
+                label: '3MF export',
+                title: 'Slicer-ready 3MF output',
+                desc: 'The --3mf flag bundles model and supports into a single file with per-object slicer settings: 1 wall, 10% cubic infill. Open in OrcaSlicer or BambuStudio and hit print.',
               },
               {
-                title: 'Precision gap control',
-                desc: 'Configurable margin between supports and model (default 0.2mm). Supports snap off cleanly after printing.',
+                icon: (
+                  <svg width='20' height='20' viewBox='0 0 24 24' fill='none' stroke='currentColor' strokeWidth='1.5' className='text-accent'>
+                    <circle cx='12' cy='12' r='10' />
+                    <path d='M12 8v4l3 3' />
+                  </svg>
+                ),
+                label: 'Gap control',
+                title: 'Precision air gap',
+                desc: 'Supports follow every curve and contour of your model but leave a configurable gap (default 0.2mm). Tune it for your nozzle size and filament — tight enough to support, loose enough to snap off.',
               },
-              { title: 'Cross-platform', desc: 'Same algorithm on all platforms. Browser, Node.js, and Python produce identical results.' },
+              {
+                icon: (
+                  <svg width='20' height='20' viewBox='0 0 24 24' fill='none' stroke='currentColor' strokeWidth='1.5' className='text-accent'>
+                    <rect x='2' y='3' width='20' height='14' rx='2' ry='2' />
+                    <line x1='8' y1='21' x2='16' y2='21' />
+                    <line x1='12' y1='17' x2='12' y2='21' />
+                  </svg>
+                ),
+                label: 'Cross-platform',
+                title: 'Web, npm, and pip',
+                desc: 'Same algorithm everywhere. Generate in the browser, automate with the Node.js or Python CLI, or integrate via the JavaScript and Python APIs. Identical results on every platform.',
+              },
             ].map((f) => (
-              <div key={f.title} className='rounded-xl p-6 glass glass-hover group'>
-                <h3 className='text-[0.95rem] font-medium mb-2 text-primary/80 group-hover:text-primary transition-colors'>{f.title}</h3>
+              <div key={f.title} className='p-7 bg-surface-bright/50 group hover:bg-surface-bright transition-colors'>
+                <div className='flex items-center gap-3 mb-3'>
+                  <div className='w-9 h-9 rounded-lg bg-accent-dim/50 flex items-center justify-center shrink-0'>
+                    {f.icon}
+                  </div>
+                  <div>
+                    <p className='font-mono text-[9px] tracking-[0.14em] text-muted uppercase'>{f.label}</p>
+                    <h3 className='text-[0.95rem] font-medium text-primary/80 group-hover:text-primary transition-colors leading-tight'>{f.title}</h3>
+                  </div>
+                </div>
                 <p className='text-dim text-sm leading-relaxed'>{f.desc}</p>
               </div>
             ))}

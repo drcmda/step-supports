@@ -547,7 +547,7 @@ def _export_3mf(
     """Export a 3MF file containing model + supports with per-object slicer settings.
 
     Writes slicer config files for both BambuStudio/OrcaSlicer and PrusaSlicer
-    so the supports object gets: 1 wall, 15% sparse infill, cubic pattern.
+    so the supports object gets: 1 wall, 10% sparse infill, cubic pattern.
     """
     import zipfile
     import lib3mf
@@ -619,7 +619,7 @@ def _slicer_config_xml(model_id: int, supports_id: int) -> str:
         f'  <object id="{supports_id}">\n'
         '    <metadata key="name" value="Supports"/>\n'
         '    <metadata key="wall_loops" value="1"/>\n'
-        '    <metadata key="sparse_infill_density" value="15%"/>\n'
+        '    <metadata key="sparse_infill_density" value="10%"/>\n'
         '    <metadata key="sparse_infill_pattern" value="cubic"/>\n'
         "  </object>\n"
         "</config>\n"
@@ -681,7 +681,7 @@ def main():
         dest="three_mf",
         action="store_true",
         help="Export 3MF with model + supports and per-object slicer settings "
-             "(1 wall, 15%% cubic infill on supports)",
+             "(1 wall, 10%% cubic infill on supports)",
     )
     parser.add_argument(
         "-q", "--quiet",
