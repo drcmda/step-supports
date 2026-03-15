@@ -8,3 +8,5 @@ venv/
 *.stl
 *.step
 *.stp
+node_modules/
+models/
