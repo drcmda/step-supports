@@ -117,7 +117,7 @@ export default function Landing() {
             the geometry's exact shape with a precision air gap.
           </p>
           <div className='flex justify-center mb-14'>
-            <img src='/hero-outline.png' alt='Model with negative-space supports' className='h-[280px] w-auto opacity-70' />
+            <img src='/hero-outline.png' alt='Model with negative-space supports' className='h-[360px] w-auto opacity-70' />
           </div>
           <div className='grid grid-cols-2 gap-4 max-sm:grid-cols-1'>
             {/* Tree supports */}
