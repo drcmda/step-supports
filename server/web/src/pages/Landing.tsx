@@ -112,7 +112,7 @@ export default function Landing() {
         <div className='max-w-[1100px] mx-auto px-6'>
           <p className='label-xs mb-4 text-center tracking-[0.14em]'>Why negative-space?</p>
           <h2 className='text-center mb-5 text-2xl font-semibold tracking-[-0.01em]'>Tree supports vs. negative-space</h2>
-          <p className='text-dim text-center text-sm max-w-[520px] mx-auto mb-10 leading-relaxed'>
+          <p className='text-dim text-center text-[1.05rem] max-w-[520px] mx-auto mb-10 leading-relaxed'>
             Custom supports that follow model curvature have been a secret weapon for those who could design them in CAD. Now, anyone can
             generate them with a single click — no CAD skills required.
           </p>
@@ -164,7 +164,7 @@ export default function Landing() {
                     </svg>
                     <div>
                       <p className='text-primary/70 text-sm font-medium'>{title}</p>
-                      <p className='text-dim text-xs mt-0.5 leading-relaxed'>{desc}</p>
+                      <p className='text-dim text-sm mt-0.5 leading-relaxed'>{desc}</p>
                     </div>
                   </li>
                 ))}
@@ -219,7 +219,7 @@ export default function Landing() {
                     </svg>
                     <div>
                       <p className='text-primary/70 text-sm font-medium'>{title}</p>
-                      <p className='text-dim text-xs mt-0.5 leading-relaxed'>{desc}</p>
+                      <p className='text-dim text-sm mt-0.5 leading-relaxed'>{desc}</p>
                     </div>
                   </li>
                 ))}
@@ -234,14 +234,21 @@ export default function Landing() {
         <div className='max-w-[1100px] mx-auto px-6'>
           <p className='label-xs mb-4 text-center tracking-[0.14em]'>Capabilities</p>
           <h2 className='text-center mb-6 text-2xl font-semibold tracking-[-0.01em]'>Built for precision printing</h2>
-          <p className='text-dim text-center text-sm max-w-[480px] mx-auto mb-14 leading-relaxed'>
+          <p className='text-dim text-center text-[1.05rem] max-w-[480px] mx-auto mb-14 leading-relaxed'>
             From overhang detection to slicer-ready export — everything you need in one tool.
           </p>
           <div className='grid grid-cols-2 gap-px max-sm:grid-cols-1 rounded-2xl overflow-hidden border border-border'>
             {[
               {
                 icon: (
-                  <svg width='20' height='20' viewBox='0 0 24 24' fill='none' stroke='currentColor' strokeWidth='1.5' className='text-accent'>
+                  <svg
+                    width='20'
+                    height='20'
+                    viewBox='0 0 24 24'
+                    fill='none'
+                    stroke='currentColor'
+                    strokeWidth='1.5'
+                    className='text-accent'>
                     <path d='M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z' />
                     <polyline points='3.27 6.96 12 12.01 20.73 6.96' />
                     <line x1='12' y1='22.08' x2='12' y2='12' />
@@ -253,7 +260,14 @@ export default function Landing() {
               },
               {
                 icon: (
-                  <svg width='20' height='20' viewBox='0 0 24 24' fill='none' stroke='currentColor' strokeWidth='1.5' className='text-accent'>
+                  <svg
+                    width='20'
+                    height='20'
+                    viewBox='0 0 24 24'
+                    fill='none'
+                    stroke='currentColor'
+                    strokeWidth='1.5'
+                    className='text-accent'>
                     <path d='M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z' />
                     <polyline points='14 2 14 8 20 8' />
                     <line x1='16' y1='13' x2='8' y2='13' />
@@ -262,11 +276,18 @@ export default function Landing() {
                 ),
                 label: '3MF export',
                 title: 'Slicer-ready 3MF output',
-                desc: 'The --3mf flag bundles model and supports into a single file with per-object slicer settings: 1 wall, 10% cubic infill. Open in OrcaSlicer or BambuStudio and hit print.',
+                desc: 'The 3mf export bundles everything into a single file with per-object slicer settings for supports: 1 wall, 10% cubic infill. Open in your slicer and hit print.',
               },
               {
                 icon: (
-                  <svg width='20' height='20' viewBox='0 0 24 24' fill='none' stroke='currentColor' strokeWidth='1.5' className='text-accent'>
+                  <svg
+                    width='20'
+                    height='20'
+                    viewBox='0 0 24 24'
+                    fill='none'
+                    stroke='currentColor'
+                    strokeWidth='1.5'
+                    className='text-accent'>
                     <circle cx='12' cy='12' r='10' />
                     <path d='M12 8v4l3 3' />
                   </svg>
@@ -277,7 +298,14 @@ export default function Landing() {
               },
               {
                 icon: (
-                  <svg width='20' height='20' viewBox='0 0 24 24' fill='none' stroke='currentColor' strokeWidth='1.5' className='text-accent'>
+                  <svg
+                    width='20'
+                    height='20'
+                    viewBox='0 0 24 24'
+                    fill='none'
+                    stroke='currentColor'
+                    strokeWidth='1.5'
+                    className='text-accent'>
                     <rect x='2' y='3' width='20' height='14' rx='2' ry='2' />
                     <line x1='8' y1='21' x2='16' y2='21' />
                     <line x1='12' y1='17' x2='12' y2='21' />
@@ -290,12 +318,12 @@ export default function Landing() {
             ].map((f) => (
               <div key={f.title} className='p-7 bg-surface-bright/50 group hover:bg-surface-bright transition-colors'>
                 <div className='flex items-center gap-3 mb-3'>
-                  <div className='w-9 h-9 rounded-lg bg-accent-dim/50 flex items-center justify-center shrink-0'>
-                    {f.icon}
-                  </div>
+                  <div className='w-9 h-9 rounded-lg bg-accent-dim/50 flex items-center justify-center shrink-0'>{f.icon}</div>
                   <div>
                     <p className='font-mono text-[9px] tracking-[0.14em] text-muted uppercase'>{f.label}</p>
-                    <h3 className='text-[0.95rem] font-medium text-primary/80 group-hover:text-primary transition-colors leading-tight'>{f.title}</h3>
+                    <h3 className='text-[0.95rem] font-medium text-primary/80 group-hover:text-primary transition-colors leading-tight'>
+                      {f.title}
+                    </h3>
                   </div>
                 </div>
                 <p className='text-dim text-sm leading-relaxed'>{f.desc}</p>
