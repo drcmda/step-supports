@@ -27,7 +27,7 @@ USAGE_FILE = CONFIG_DIR / "usage.json"
 LICENSE_FILE = CONFIG_DIR / "license.json"
 TOKEN_PREFIX = "ns_live_"
 API_BASE = os.environ.get("NS_API_BASE", "https://negative.support")
-BUY_URL = "https://negative.support/buy"
+BUY_URL = "https://negative.support"
 GRACE_DAYS = 7  # allow offline usage for this many days after last validation
 
 
@@ -301,7 +301,8 @@ def print_buy_message() -> None:
     print("  Free tier exhausted (3/3 runs used).")
     print()
     print("  To continue using negative-support, purchase a license:")
-    print("    negative-support --buy")
+    print(f"    {BUY_URL}")
+    print("  or run: negative-support --buy")
     print()
     print("  After purchasing, activate your token:")
     print("    negative-support --activate <your-token>")
