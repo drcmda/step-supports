@@ -1,0 +1,11 @@
+{
+  "total_pieces": 1,
+  "total_volume": 345803.2,
+  "total_faces": 6232,
+  "pieces": [
+    {
+      "volume": 345803.2,
+      "faces": 6232
+    }
+  ]
+}
