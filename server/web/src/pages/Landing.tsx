@@ -37,8 +37,8 @@ export default function Landing() {
             Negative-space supports that <span className='text-accent'>fit perfectly</span>
           </h1>
           <p className='text-[1.05rem] text-dim max-w-[520px] mx-auto mb-10 leading-relaxed'>
-            Generate supports that wrap and curve around your model. Clean prints, spotless contact surfaces, stability during printing,
-            and easy removal after. Works with STL, OBJ, and STEP files.
+            Generate supports that wrap and curve around your model. Clean prints, spotless contact surfaces, stability during printing, and
+            easy removal after. Works with STL, OBJ, and STEP files.
           </p>
           <div className='flex gap-3 justify-center'>
             <a
@@ -54,78 +54,6 @@ export default function Landing() {
               className='inline-flex items-center px-5 py-2.5 rounded-lg text-sm font-medium no-underline glass glass-hover text-primary/70'>
               Documentation
             </a>
-          </div>
-        </div>
-      </section>
-
-      {/* Comparison */}
-      <section className='py-24'>
-        <div className='max-w-[1100px] mx-auto px-6'>
-          <p className='label-xs mb-4 text-center tracking-[0.14em]'>Why negative-space?</p>
-          <h2 className='text-center mb-5 text-2xl font-semibold tracking-[-0.01em]'>Tree supports vs. negative-space</h2>
-          <p className='text-dim text-center text-sm max-w-[520px] mx-auto mb-14 leading-relaxed'>
-            Traditional tree supports touch your model at many points, leaving marks and risking damage.
-            Negative-space supports wrap around the geometry with a precision air gap.
-          </p>
-          <div className='grid grid-cols-2 gap-4 max-sm:grid-cols-1'>
-            {/* Tree supports */}
-            <div className='rounded-xl p-7 glass'>
-              <div className='flex items-center gap-2.5 mb-5'>
-                <div className='w-8 h-8 rounded-lg bg-pink-dim flex items-center justify-center'>
-                  <svg width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='currentColor' strokeWidth='2' className='text-pink'>
-                    <line x1='18' y1='6' x2='6' y2='18' /><line x1='6' y1='6' x2='18' y2='18' />
-                  </svg>
-                </div>
-                <h3 className='text-[0.95rem] font-medium text-pink'>Tree supports</h3>
-              </div>
-              <ul className='list-none space-y-3'>
-                {[
-                  ['Fuse to the model', 'Branch tips bond directly to surfaces, leaving scars, pitting, and layer damage that require sanding or reprinting.'],
-                  ['Ruin contact surfaces', 'Smooth faces, threads, and mating surfaces are marred wherever support tips touch — destroying the finish you designed for.'],
-                  ['Struggle with complex geometry', 'Non-planar overhangs, curved undercuts, and internal cavities receive inconsistent coverage, leading to failed prints or drooping layers.'],
-                  ['Difficult removal', 'Supports snap unevenly, leave stubs behind, and often take chunks of the model with them — especially with PETG and nylon.'],
-                ].map(([title, desc]) => (
-                  <li key={title} className='flex gap-3'>
-                    <svg width='14' height='14' viewBox='0 0 24 24' fill='none' stroke='currentColor' strokeWidth='2.5' className='text-pink/50 shrink-0 mt-0.5'>
-                      <line x1='18' y1='6' x2='6' y2='18' /><line x1='6' y1='6' x2='18' y2='18' />
-                    </svg>
-                    <div>
-                      <p className='text-primary/70 text-sm font-medium'>{title}</p>
-                      <p className='text-dim text-xs mt-0.5 leading-relaxed'>{desc}</p>
-                    </div>
-                  </li>
-                ))}
-              </ul>
-            </div>
-            {/* Negative-space supports */}
-            <div className='rounded-xl p-7 border border-accent/15 bg-accent-glow'>
-              <div className='flex items-center gap-2.5 mb-5'>
-                <div className='w-8 h-8 rounded-lg bg-accent-dim flex items-center justify-center'>
-                  <svg width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='currentColor' strokeWidth='2.5' className='text-accent'>
-                    <polyline points='20 6 9 17 4 12' />
-                  </svg>
-                </div>
-                <h3 className='text-[0.95rem] font-medium text-accent'>Negative-space supports</h3>
-              </div>
-              <ul className='list-none space-y-3'>
-                {[
-                  ['Zero contact damage', 'A precision air gap (default 0.2mm) keeps supports from ever touching the model. Contact surfaces stay pristine.'],
-                  ['Perfect surface finish', 'Supports curve around your geometry without fusing. Smooth faces, threads, and fine details print exactly as designed.'],
-                  ['Full coverage on any shape', 'The negative shell wraps non-planar overhangs, curved undercuts, and complex cavities uniformly — no gaps, no drooping.'],
-                  ['Clean snap-off removal', 'Supports lift away in one piece. No stubs, no prying, no damage. Works reliably across PLA, PETG, ABS, and nylon.'],
-                ].map(([title, desc]) => (
-                  <li key={title} className='flex gap-3'>
-                    <svg width='14' height='14' viewBox='0 0 24 24' fill='none' stroke='currentColor' strokeWidth='2.5' className='text-accent shrink-0 mt-0.5'>
-                      <polyline points='20 6 9 17 4 12' />
-                    </svg>
-                    <div>
-                      <p className='text-primary/70 text-sm font-medium'>{title}</p>
-                      <p className='text-dim text-xs mt-0.5 leading-relaxed'>{desc}</p>
-                    </div>
-                  </li>
-                ))}
-              </ul>
-            </div>
           </div>
         </div>
       </section>
@@ -175,6 +103,125 @@ export default function Landing() {
             <a href='/docs' className='font-mono text-[11px] tracking-[0.06em] text-pink/60 no-underline hover:text-pink transition-colors'>
               Read the docs &rarr;
             </a>
+          </div>
+        </div>
+      </section>
+
+      {/* Comparison */}
+      <section className='py-24'>
+        <div className='max-w-[1100px] mx-auto px-6'>
+          <p className='label-xs mb-4 text-center tracking-[0.14em]'>Why negative-space?</p>
+          <h2 className='text-center mb-5 text-2xl font-semibold tracking-[-0.01em]'>Tree supports vs. negative-space</h2>
+          <p className='text-dim text-center text-sm max-w-[520px] mx-auto mb-14 leading-relaxed'>
+            Traditional tree supports touch your model at many points, leaving marks and risking damage. Negative-space supports wrap around
+            the geometry's exact shape with a precision air gap.
+          </p>
+          <div className='grid grid-cols-2 gap-4 max-sm:grid-cols-1'>
+            {/* Tree supports */}
+            <div className='rounded-xl p-7 glass'>
+              <div className='flex items-center gap-2.5 mb-5'>
+                <div className='w-8 h-8 rounded-lg bg-pink-dim flex items-center justify-center'>
+                  <svg width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='currentColor' strokeWidth='2' className='text-pink'>
+                    <line x1='18' y1='6' x2='6' y2='18' />
+                    <line x1='6' y1='6' x2='18' y2='18' />
+                  </svg>
+                </div>
+                <h3 className='text-[0.95rem] font-medium text-pink'>Tree supports</h3>
+              </div>
+              <ul className='list-none space-y-3'>
+                {[
+                  [
+                    'Fuse to the model',
+                    'Branch tips bond directly to surfaces, leaving scars, pitting, and layer damage that require sanding or reprinting.',
+                  ],
+                  [
+                    'Ruin contact surfaces',
+                    'Smooth faces, threads, and mating surfaces are marred wherever support tips touch — destroying the finish you designed for.',
+                  ],
+                  [
+                    'Struggle with complex geometry',
+                    'Non-planar overhangs, curved undercuts, and internal cavities receive inconsistent coverage, leading to failed prints or drooping layers.',
+                  ],
+                  [
+                    'Difficult removal',
+                    'Supports snap unevenly, leave stubs behind, and often take chunks of the model with them — especially with PETG and nylon.',
+                  ],
+                ].map(([title, desc]) => (
+                  <li key={title} className='flex gap-3'>
+                    <svg
+                      width='14'
+                      height='14'
+                      viewBox='0 0 24 24'
+                      fill='none'
+                      stroke='currentColor'
+                      strokeWidth='2.5'
+                      className='text-pink/50 shrink-0 mt-0.5'>
+                      <line x1='18' y1='6' x2='6' y2='18' />
+                      <line x1='6' y1='6' x2='18' y2='18' />
+                    </svg>
+                    <div>
+                      <p className='text-primary/70 text-sm font-medium'>{title}</p>
+                      <p className='text-dim text-xs mt-0.5 leading-relaxed'>{desc}</p>
+                    </div>
+                  </li>
+                ))}
+              </ul>
+            </div>
+            {/* Negative-space supports */}
+            <div className='rounded-xl p-7 border border-accent/15 bg-accent-glow'>
+              <div className='flex items-center gap-2.5 mb-5'>
+                <div className='w-8 h-8 rounded-lg bg-accent-dim flex items-center justify-center'>
+                  <svg
+                    width='16'
+                    height='16'
+                    viewBox='0 0 24 24'
+                    fill='none'
+                    stroke='currentColor'
+                    strokeWidth='2.5'
+                    className='text-accent'>
+                    <polyline points='20 6 9 17 4 12' />
+                  </svg>
+                </div>
+                <h3 className='text-[0.95rem] font-medium text-accent'>Negative-space supports</h3>
+              </div>
+              <ul className='list-none space-y-3'>
+                {[
+                  [
+                    'Zero contact damage',
+                    'A precision air gap (default 0.2mm) keeps supports from ever touching the model. Contact surfaces stay pristine.',
+                  ],
+                  [
+                    'Perfect surface finish',
+                    'Supports curve around your geometry without fusing. Smooth faces, threads, and fine details print exactly as designed.',
+                  ],
+                  [
+                    'Full coverage on any shape',
+                    'The negative shell wraps non-planar overhangs, curved undercuts, and complex cavities uniformly — no gaps, no drooping.',
+                  ],
+                  [
+                    'Clean snap-off removal',
+                    'Supports lift away in one piece. No stubs, no prying, no damage. Works reliably across PLA, PETG, ABS, and nylon.',
+                  ],
+                ].map(([title, desc]) => (
+                  <li key={title} className='flex gap-3'>
+                    <svg
+                      width='14'
+                      height='14'
+                      viewBox='0 0 24 24'
+                      fill='none'
+                      stroke='currentColor'
+                      strokeWidth='2.5'
+                      className='text-accent shrink-0 mt-0.5'>
+                      <polyline points='20 6 9 17 4 12' />
+                    </svg>
+                    <div>
+                      <p className='text-primary/70 text-sm font-medium'>{title}</p>
+                      <p className='text-dim text-xs mt-0.5 leading-relaxed'>{desc}</p>
+                    </div>
+                  </li>
+                ))}
+              </ul>
+            </div>
           </div>
         </div>
       </section>
