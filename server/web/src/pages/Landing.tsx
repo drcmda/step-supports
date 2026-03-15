@@ -65,7 +65,7 @@ export default function Landing() {
             <div className="bg-base/60 border border-border rounded-md px-3 py-2 mb-3 overflow-x-auto">
               <code className="font-mono text-xs text-code whitespace-pre">STL, OBJ, STEP</code>
             </div>
-            <a href="/generate" className="font-mono text-[11px] tracking-[0.06em] text-accent/60 no-underline hover:text-accent transition-colors">
+            <a href="/generate" className="font-mono text-[11px] tracking-[0.06em] text-pink/60 no-underline hover:text-pink transition-colors">
               Open generator &rarr;
             </a>
           </div>
@@ -80,7 +80,7 @@ export default function Landing() {
             </div>
             <a
               href="https://www.npmjs.com/package/negative-support"
-              className="font-mono text-[11px] tracking-[0.06em] text-accent/60 no-underline hover:text-accent transition-colors"
+              className="font-mono text-[11px] tracking-[0.06em] text-pink/60 no-underline hover:text-pink transition-colors"
               target="_blank"
               rel="noopener noreferrer"
             >
@@ -96,7 +96,7 @@ export default function Landing() {
             <div className="bg-base/60 border border-border rounded-md px-3 py-2 mb-3 overflow-x-auto">
               <code className="font-mono text-xs text-code whitespace-pre">negative-support model.stl</code>
             </div>
-            <a href="/docs" className="font-mono text-[11px] tracking-[0.06em] text-accent/60 no-underline hover:text-accent transition-colors">
+            <a href="/docs" className="font-mono text-[11px] tracking-[0.06em] text-pink/60 no-underline hover:text-pink transition-colors">
               Read the docs &rarr;
             </a>
           </div>
@@ -157,9 +157,9 @@ export default function Landing() {
               </a>
             </div>
             {/* Lifetime */}
-            <div className="rounded-xl p-7 text-center border border-accent/20 bg-accent-glow relative overflow-hidden animate-glow-pulse">
-              <p className="label-xs mb-5 text-accent/50">Lifetime</p>
-              <div className="font-pixel text-[3rem] leading-none mb-1 text-accent">$29</div>
+            <div className="rounded-xl p-7 text-center border border-accent/20 bg-[rgba(255,255,255,0.02)] relative overflow-hidden animate-glow-pulse">
+              <p className="label-xs mb-5 text-pink/50">Lifetime</p>
+              <div className="font-pixel text-[3rem] leading-none mb-1 text-pink">$29</div>
               <p className="text-dim text-xs mb-6">one-time payment</p>
               <ul className="list-none mb-7 space-y-2.5">
                 <li className="text-dim text-sm flex items-center gap-2 justify-center">
