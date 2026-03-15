@@ -1,0 +1,22 @@
+import { Routes, Route } from "react-router-dom";
+import Header from "./components/Header";
+import Footer from "./components/Footer";
+import Landing from "./pages/Landing";
+import Success from "./pages/Success";
+import Docs from "./pages/Docs";
+
+export default function App() {
+  return (
+    <div className="app">
+      <Header />
+      <main>
+        <Routes>
+          <Route path="/" element={<Landing />} />
+          <Route path="/success" element={<Success />} />
+          <Route path="/docs" element={<Docs />} />
+        </Routes>
+      </main>
+      <Footer />
+    </div>
+  );
+}

@@ -1,0 +1,14 @@
+name = "negative-support-api"
+main = "src/index.ts"
+compatibility_date = "2024-09-23"
+routes = [
+  { pattern = "negative.support/*", zone_name = "negative.support" },
+]
+
+[site]
+bucket = "./web/dist"
+
+[[d1_databases]]
+binding = "DB"
+database_name = "negative-support-db"
+database_id = "88dbb518-516f-4fa0-92af-416dda2f2abd"

@@ -1,54 +1,97 @@
-# Project: STEP/Mesh Support Generator
+# Project: negative-support
 
-## Testing Requirements
+Negative-space 3D print support generator, published as `negative-support` on PyPI.
 
-**IMPORTANT**: After ANY change to `step_supports.py`, always run the baseline test:
+## Quick Reference
 
 ```bash
-python3 tests/baseline.py
+# Python CLI
+source .venv/bin/activate
+negative-support --version
+python tests/baseline.py
+
+# Build package
+pip install build && python -m build
+
+# Server (local)
+cd server && npm run dev          # API on :8787
+cd server/web && npm run dev      # React on :5173
 ```
 
-This compares the current output against a known-good snapshot (test_model.step).
-The test checks piece count, total volume, and per-piece volumes.
+## Testing
 
+**IMPORTANT**: After ANY change to `src/negative_support/cli.py`, run the baseline test:
+
+```bash
+python tests/baseline.py
+```
+
+Compares output against known-good snapshot (test_model.step):
 - Volume tolerance: 5% for totals, 10% per piece
 - Piece count must match exactly
 
-If the test fails, investigate before committing. If the change is intentional
-(e.g. algorithm improvement), update the baseline:
-
+Update baseline after intentional changes:
 ```bash
-python3 tests/baseline.py --update
+python tests/baseline.py --update
 ```
 
 ## Project Structure
 
-- `step_supports.py` — Main support generator (Minkowski sum inflation)
-- `models/` — STEP/STL model files
-- `tests/baseline.py` — Baseline regression test
-- `tests/baseline.json` — Saved baseline snapshot
-- `tests/baseline_generator.py` — Reference inflation algorithm (B-Rep offset)
-- `stl_supports.py` — Legacy STL-based approach (deprecated)
+```
+src/negative_support/
+  __init__.py       # __version__, public API exports
+  cli.py            # Main CLI + compute_supports + compute_supports_mesh
+  license.py        # License checking, free tier, token validation
+  progress.py       # ProgressDisplay (spinner, progress bar, ANSI)
 
-## Key Architecture Decisions
+server/
+  src/index.ts      # Cloudflare Worker entry, routes /api/* and static
+  src/api.ts        # API handlers (free-tier, validate, activate, stripe, checkout)
+  schema.sql        # D1 tables: machines, licenses, machine_licenses
+  web/              # React SPA (Vite): Landing, Success, Docs pages
 
-- **Two input modes**: STEP files use B-Rep face topology for smart overhang
-  detection. Mesh files (STL/OBJ/PLY/3MF) generate full-shell supports
-  (entire negative space). Auto-detected by file extension.
-- **build123d optional**: Only imported when processing STEP files. Mesh-only
-  usage works without build123d installed.
-- **Minkowski sum inflation** for margins: model mesh is inflated outward by
-  `margin` using `manifold3d.Manifold.minkowski_sum(sphere)`, then
-  `box - inflated_model` gives negative space with built-in margin gap.
-  This replaces the fragile B-Rep offset approach.
-- **B-Rep face detection** (STEP only): STEP topology gives exact overhang
-  faces with proper normals on curved surfaces. Normals are sampled across
-  curved faces.
-- **Per-face column extraction** (STEP only): Each overhang face defines a
-  vertical column (XY bounding box). The column intersects the negative space
-  to extract that face's support region.
-- **Mid-air detection** (STEP only): Faces that pass the angle threshold but
-  start with nothing below them get supports regardless of angle. Capped at
-  angle+25° to exclude near-vertical faces.
-- **Progress display**: Always shown by default (suppress with `-q`).
-  Uses ANSI in-place rendering with braille spinner and progress bar.
+step_supports.py    # Backwards-compat wrapper → imports from negative_support
+tests/baseline.py   # Regression test (imports from negative_support.cli)
+pyproject.toml      # Hatchling build, entry point: negative-support
+```
+
+## Architecture
+
+- **Two input modes**: STEP (B-Rep overhang detection) and mesh (full-shell). Auto-detected by extension.
+- **build123d optional**: Only imported for STEP files. Mesh-only works without it.
+- **Minkowski sum inflation**: `manifold3d.Manifold.minkowski_sum(sphere)` for margin gap.
+- **B-Rep face detection** (STEP only): Normals sampled across curved faces, mid-air detection via raycasting.
+- **Per-face column extraction** (STEP only): Each overhang face's XY bbox defines a vertical column intersected with negative space.
+
+## Licensing System
+
+- **Client** (`license.py`): Checks paid token → free tier (server then local) → blocked
+- **Server** (`server/src/api.ts`): Cloudflare Workers + D1
+  - POST `/api/free-tier` — machine_id tracking (3 free runs)
+  - POST `/api/validate` — token lookup
+  - POST `/api/activate` — bind token to machine (max 3)
+  - POST `/api/webhook/stripe` — payment → generate `ns_live_<32hex>` token
+  - POST `/api/checkout` — create Stripe Checkout Session
+- **Config**: `~/.negative-support/usage.json` (free tier), `~/.negative-support/license.json` (token)
+- **Constants**: `FREE_RUNS=3`, `GRACE_DAYS=7`, `API_BASE=https://negative.support`
+
+## Deploy Checklist
+
+### PyPI
+```bash
+pip install build twine
+python -m build
+twine upload dist/*
+```
+
+### Server (Cloudflare)
+```bash
+cd server
+npx wrangler d1 create negative-support-db   # get database_id → wrangler.toml
+npm run migrate                               # create tables
+npx wrangler secret put STRIPE_SECRET_KEY
+npx wrangler secret put STRIPE_WEBHOOK_SECRET
+# Update PRICE_ID, SUCCESS_URL, CANCEL_URL in src/api.ts
+npm run deploy
+# Set Stripe webhook: https://<worker>.workers.dev/api/webhook/stripe
+```

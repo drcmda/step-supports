@@ -1,4 +1,4 @@
-# step_supports — Negative-Space 3D Print Support Generator
+# negative-support — Negative-Space 3D Print Support Generator
 
 Generates model-conforming support structures for 3D printing. Unlike slicer-generated tree or grid supports, these are **negative-space** supports — exact shapes created by subtracting the model from a surrounding block, filling internal cavities (overhangs, bridges, holes) with solid mesh that conforms to the model's actual surface contours.
 
@@ -8,66 +8,94 @@ Supports two input modes:
 
 The output is a separate STL file that can be imported alongside the model in your slicer.
 
-## Requirements
+---
 
-- Python 3.10+
-- [trimesh](https://trimesh.org/) with [manifold3d](https://github.com/elalish/manifold) backend
-- numpy
-- [build123d](https://github.com/gumyr/build123d) *(optional — only needed for STEP input)*
+## Install
 
+Requires Python 3.10+.
+
+```bash
+pip install negative-support
 ```
-pip install -r requirements.txt
+
+For STEP file support (B-Rep overhang detection), install the optional dependency:
+
+```bash
+pip install negative-support[step]
 ```
 
 ## Usage
 
-```
-python3 step_supports.py model.step [options]    # STEP: overhang detection
-python3 step_supports.py model.stl [options]     # Mesh: full-shell supports
+```bash
+negative-support model.step                # STEP: overhang detection
+negative-support model.stl                 # Mesh: full-shell supports
+negative-support model.step -m 0.15 -a 40  # tighter margin + stricter angle
+negative-support model.step -e             # also export model as STL
+negative-support model.step -q             # quiet mode for scripting
 ```
 
-The input format is auto-detected by file extension. `.step`/`.stp` files use the STEP pipeline with B-Rep overhang detection. All other extensions use the mesh pipeline with full-shell supports.
+The input format is auto-detected by file extension.
 
-### Parameters
+### CLI Flags
 
 | Flag | Short | Default | Description |
 |------|-------|---------|-------------|
 | `input` | | *(required)* | Path to input file (STEP/STP or STL/OBJ/PLY/3MF) |
-| `--output` | `-o` | `<input>_supports.stl` | Output STL path for the generated supports |
-| `--margin` | `-m` | `0.2` | Gap between support and model in mm. This clearance allows supports to be removed after printing. Larger values are easier to remove but less precise. |
-| `--angle` | `-a` | `45.0` | Overhang angle threshold in degrees from horizontal *(STEP only)*. Faces steeper than this receive supports. Most FDM printers handle up to 45° without support. |
-| `--min-volume` | | `1.0` | Discard support pieces smaller than this volume in mm³. Filters out tiny slivers and artifacts. |
-| `--tolerance` | | `0.01` | STL tessellation tolerance in mm *(STEP only)*. Lower values produce smoother curved surfaces but larger files. |
-| `--export-model` | `-e` | off | Also export the STEP model as STL *(STEP only)*. Convenient when you only have the STEP file and need an STL for your slicer. |
-| `--quiet` | `-q` | off | Suppress the progress display. Only the final output summary is printed. |
-| `--debug` | | off | Print detailed per-face diagnostics *(STEP only)*: face normals, angles, bounding boxes, stray discards. |
+| `--output` | `-o` | `<input>_supports.stl` | Output STL path |
+| `--margin` | `-m` | `0.2` | Gap between support and model (mm) |
+| `--angle` | `-a` | `45.0` | Overhang angle threshold (STEP only) |
+| `--min-volume` | | `1.0` | Discard support pieces smaller than this (mm³) |
+| `--tolerance` | | `0.01` | STL tessellation tolerance (STEP only) |
+| `--export-model` | `-e` | off | Also export the STEP model as STL |
+| `--quiet` | `-q` | off | Suppress progress display |
+| `--debug` | | off | Print per-face diagnostics (STEP only) |
 
-### Examples
+### License Commands
 
-STEP input with overhang detection:
-```
-python3 step_supports.py bracket.step
-```
-
-STL input with full-shell supports:
-```
-python3 step_supports.py bracket.stl
+```bash
+negative-support --status                          # show license status
+negative-support --buy                             # open purchase page in browser
+negative-support --activate ns_live_<your_token>   # activate a license token
+negative-support --version                         # show version
 ```
 
-Quiet mode for scripting:
-```
-python3 step_supports.py bracket.step -q
+### Python API
+
+```python
+from negative_support import load_step, compute_supports
+
+part, z_offset = load_step("model.step")
+supports = compute_supports(part, margin=0.2, angle=45.0)
+supports.export("supports.stl")
+
+from negative_support import load_mesh, compute_supports_mesh
+
+mesh, z_offset = load_mesh("model.stl")
+supports = compute_supports_mesh(mesh, margin=0.2)
+supports.export("supports.stl")
 ```
 
-Tighter margin and stricter overhang angle:
+## Progress Display
+
+STEP mode:
 ```
-python3 step_supports.py bracket.step -m 0.15 -a 40
+  ✓ Tessellate          28,912 faces          0.1s
+  ✓ Inflate             150,788 faces        22.3s
+  ✓ Negative space      702,596 mm³           0.1s
+  ✓ Detect overhangs    92 faces              2.4s
+  ✓ Extract supports    134 pieces            1.9s
+  ✓ Merge               113,754 faces         0.0s
 ```
 
-Export model STL alongside supports:
+Mesh mode:
 ```
-python3 step_supports.py bracket.step -e
+  ✓ Inflate             87,980 faces         10.2s
+  ✓ Negative space      702,609 mm³           0.1s
+  ✓ Split & filter      1 pieces              0.1s
+  ✓ Merge               84,924 faces          0.0s
 ```
+
+---
 
 ## How It Works
 
@@ -88,56 +116,173 @@ python3 step_supports.py bracket.step -e
 4. **Split & filter** — separates into pieces and removes tiny fragments
 5. **Merge & export** — combines all support pieces into a single STL file
 
-## Progress Display
+---
 
-By default, the tool shows a live progress display with a spinner and timing.
+## Licensing
 
-STEP mode:
+Free tier: **3 runs per machine**, no account needed. After that, a lifetime license is required ($29, one-time).
+
+- Tracked server-side via machine fingerprint (SHA-256 of hostname + MAC + OS + arch + username)
+- Offline fallback: local counter in `~/.negative-support/usage.json`
+- Token format: `ns_live_<32 hex chars>`, stored in `~/.negative-support/license.json`
+- Grace period: 7 days offline after last server validation
+
+---
+
+## Project Structure
+
 ```
-  ✓ Tessellate          28,912 faces          0.1s
-  ✓ Inflate             150,788 faces        22.3s
-  ✓ Negative space      702,596 mm³           0.1s
-  ✓ Detect overhangs    92 faces              2.4s
-  ✓ Extract supports    134 pieces            1.9s
-  ✓ Merge               113,754 faces         0.0s
+├── pyproject.toml                    # Package metadata (hatchling)
+├── src/negative_support/
+│   ├── __init__.py                   # Version + public API
+│   ├── cli.py                        # Main CLI + compute functions
+│   ├── license.py                    # License checking + free tier
+│   └── progress.py                   # ProgressDisplay (spinner/bar)
+├── server/
+│   ├── wrangler.toml                 # Cloudflare Worker config
+│   ├── package.json                  # Server dependencies
+│   ├── schema.sql                    # D1 database migration
+│   ├── src/
+│   │   ├── index.ts                  # Worker entry + router
+│   │   └── api.ts                    # API route handlers
+│   └── web/                          # React SPA (Vite)
+│       ├── package.json
+│       ├── vite.config.ts
+│       └── src/
+│           ├── App.tsx               # Router
+│           ├── pages/Landing.tsx     # Landing page + pricing
+│           ├── pages/Success.tsx     # Post-payment token display
+│           └── pages/Docs.tsx        # Usage documentation
+├── step_supports.py                  # Backwards-compat wrapper
+├── tests/
+│   ├── baseline.py                   # Regression test
+│   ├── baseline.json                 # Saved snapshot
+│   └── baseline_generator.py         # Reference algorithm
+└── models/                           # Dev-only test models
 ```
 
-Mesh mode:
-```
-  ✓ Inflate             87,980 faces         10.2s
-  ✓ Negative space      702,609 mm³           0.1s
-  ✓ Split & filter      1 pieces              0.1s
-  ✓ Merge               84,924 faces          0.0s
-```
+---
 
-Use `-q` to suppress this output.
+## Development
 
-## Testing
-
-A baseline regression test ensures STEP support generation stays consistent:
+### Local setup (Python CLI)
 
 ```bash
-python3 tests/baseline.py            # compare against known-good snapshot
-python3 tests/baseline.py --update   # update baseline after intentional changes
+# Create venv with Python 3.10+
+python3.13 -m venv .venv
+source .venv/bin/activate
+
+# Install in editable mode
+pip install -e .              # mesh-only
+pip install -e ".[step]"      # mesh + STEP support
+
+# Verify
+negative-support --version
+negative-support --status
 ```
 
-The test compares piece count (must match exactly), total volume (5% tolerance), and per-piece volumes (10% tolerance) against a saved snapshot generated from the reference algorithm.
+### Run tests
+
+```bash
+source .venv/bin/activate
+python tests/baseline.py                # compare against snapshot
+python tests/baseline.py --update       # update after intentional changes
+```
+
+### Build package
+
+```bash
+pip install build
+python -m build
+ls dist/   # negative_support-0.1.0.tar.gz + .whl
+```
+
+### Publish to PyPI
+
+```bash
+pip install twine
+
+# Test PyPI first
+twine upload --repository testpypi dist/*
+
+# Production
+twine upload dist/*
+```
+
+### Local setup (Server)
+
+```bash
+cd server
+npm install
+cd web && npm install && cd ..
+
+# Copy env template
+cp .dev.vars.example .dev.vars
+# Edit .dev.vars with real Stripe keys
+```
+
+### Run server locally
+
+```bash
+# Terminal 1: API server
+cd server
+npm run migrate:local    # create D1 tables locally
+npm run dev              # wrangler dev on :8787
+
+# Terminal 2: React dev server
+cd server/web
+npm run dev              # vite on :5173, proxies /api to :8787
+```
+
+### Deploy server
+
+```bash
+cd server
+
+# 1. Create D1 database (first time only)
+npx wrangler d1 create negative-support-db
+# Copy the database_id into wrangler.toml
+
+# 2. Run migration
+npm run migrate
+
+# 3. Set secrets
+npx wrangler secret put STRIPE_SECRET_KEY
+npx wrangler secret put STRIPE_WEBHOOK_SECRET
+
+# 4. Update placeholders in src/api.ts:
+#    - PRICE_ID → your Stripe Price ID
+#    - SUCCESS_URL / CANCEL_URL → your domain
+
+# 5. Build frontend + deploy worker
+npm run deploy
+
+# 6. Set up Stripe webhook in Dashboard:
+#    URL: https://<worker>.workers.dev/api/webhook/stripe
+#    Events: checkout.session.completed
+```
+
+### Server API endpoints
+
+| Method | Path | Purpose |
+|--------|------|---------|
+| POST | `/api/free-tier` | Track machine runs, return remaining |
+| POST | `/api/validate` | Check token validity |
+| POST | `/api/activate` | Bind token to machine (max 3) |
+| POST | `/api/webhook/stripe` | Stripe payment → generate token |
+| GET | `/api/token?session_id=x` | Fetch token after payment |
+| POST | `/api/checkout` | Create Stripe Checkout Session |
+
+### Server database (D1/SQLite)
+
+- **machines**: `machine_id`, `runs_used`, `first_seen`, `last_seen`
+- **licenses**: `token`, `email`, `plan`, `stripe_session_id`, `created_at`
+- **machine_licenses**: `token`, `machine_id`, `activated_at` (max 3 per token)
+
+---
 
 ## Limitations
 
 - **No tree supports** — generates solid block supports, which use more material but conform exactly to the model surface
 - **Mesh input = full shell** — without B-Rep topology, every surface gets support. Use STEP input for smart overhang-only supports.
 - **Processing time** — the Minkowski sum inflation step can take 20-30s on complex models (400+ faces)
-
-## Project Structure
-
-```
-step_supports.py          Main support generator
-models/                   STEP/STL model files
-tests/
-  baseline.py             Baseline regression test
-  baseline.json           Saved baseline snapshot
-  baseline_generator.py   Reference inflation algorithm
-  test_model_supports.stl Reference support mesh
-stl_supports.py           Legacy STL-based approach (deprecated)
-```
