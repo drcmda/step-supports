@@ -1,6 +1,6 @@
 {
   "name": "negative-support",
-  "version": "0.2.1",
+  "version": "0.3.0",
   "description": "Generate 3D-print negative-space support structures from STL, OBJ, or STEP files",
   "type": "module",
   "main": "dist/index.cjs",

@@ -1,6 +1,6 @@
 """Negative-space 3D print support generator."""
 
-__version__ = "0.1.1"
+__version__ = "0.2.0"
 
 from negative_support.cli import (
     compute_supports,

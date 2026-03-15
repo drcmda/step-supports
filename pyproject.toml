@@ -4,7 +4,7 @@ build-backend = "hatchling.build"
 
 [project]
 name = "negative-support"
-version = "0.1.1"
+version = "0.2.0"
 description = "Negative-space 3D print support generator for STEP and mesh files"
 readme = "README.md"
 requires-python = ">=3.10"
@@ -20,6 +20,20 @@ step = ["build123d>=0.8"]
 
 [project.scripts]
 negative-support = "negative_support.cli:main"
+
+[tool.hatch.build.targets.sdist]
+exclude = [
+    "packages/",
+    "node_modules/",
+    "models/",
+    ".claude/",
+    "server/",
+    ".venv/",
+    "dist/",
+    "*.egg-info/",
+    ".git/",
+    "__pycache__/",
+]
 
 [tool.hatch.build.targets.wheel]
 packages = ["src/negative_support"]

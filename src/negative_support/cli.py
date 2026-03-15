@@ -634,8 +634,8 @@ def main():
         activate_token,
         check_license,
         get_status,
-        open_buy_page,
-        print_buy_message,
+        print_no_token_message,
+        print_exhausted_message,
     )
 
     parser = argparse.ArgumentParser(
@@ -701,11 +701,6 @@ def main():
         version=f"negative-support {__version__}",
     )
     parser.add_argument(
-        "--buy",
-        action="store_true",
-        help="Open the purchase page in your browser",
-    )
-    parser.add_argument(
         "--activate",
         metavar="TOKEN",
         help="Activate a license token",
@@ -719,10 +714,6 @@ def main():
     args = parser.parse_args()
 
     # Handle license management commands (no input file needed)
-    if args.buy:
-        open_buy_page()
-        return
-
     if args.activate:
         ok, msg = activate_token(args.activate)
         print(msg)
@@ -743,7 +734,10 @@ def main():
     else:
         allowed, lic_msg = check_license()
         if not allowed:
-            print_buy_message()
+            if lic_msg == "exhausted":
+                print_exhausted_message()
+            else:
+                print_no_token_message()
             sys.exit(1)
 
     if args.output is None:

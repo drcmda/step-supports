@@ -1,8 +1,8 @@
 """License management for negative-support.
 
-Free tier: 3 runs per machine. After that, requires a paid license token.
-Tracks usage locally in ~/.negative-support/ and validates against a remote
-server when available (to prevent reinstall abuse).
+Requires a valid license token (ns_live_*) to run. Tokens are issued
+when you sign in at https://negative.support. Free tokens get 10 runs,
+paid tokens get unlimited.
 """
 
 from __future__ import annotations
@@ -15,19 +15,16 @@ import os
 import platform
 import sys
 import uuid
-import webbrowser
 from pathlib import Path
 from urllib import request, error as urlerror
 
 # ── Configuration ─────────────────────────────────────────────────────
 
-FREE_RUNS = 3
+FREE_RUNS = 10
 CONFIG_DIR = Path.home() / ".negative-support"
-USAGE_FILE = CONFIG_DIR / "usage.json"
 LICENSE_FILE = CONFIG_DIR / "license.json"
 TOKEN_PREFIX = "ns_live_"
 API_BASE = os.environ.get("NS_API_BASE", "https://negative.support")
-BUY_URL = "https://negative.support"
 GRACE_DAYS = 7  # allow offline usage for this many days after last validation
 
 
@@ -87,41 +84,6 @@ def _api_post(endpoint: str, body: dict, timeout: float = 5.0) -> dict | None:
         return None
 
 
-# ── Free tier ─────────────────────────────────────────────────────────
-
-def _check_free_tier_server(machine_id: str) -> int | None:
-    """Ask server how many free runs remain. Returns count or None if unreachable."""
-    resp = _api_post("/api/free-tier", {"machine_id": machine_id})
-    if resp and "free_remaining" in resp:
-        return resp["free_remaining"]
-    return None
-
-
-def _check_free_tier_local(machine_id: str) -> int:
-    """Check local usage file for remaining free runs."""
-    usage = _read_json(USAGE_FILE)
-    if usage is None or usage.get("machine_id") != machine_id:
-        # First run or different machine — initialize
-        usage = {
-            "machine_id": machine_id,
-            "runs_used": 0,
-            "first_run": datetime.datetime.now(datetime.timezone.utc).isoformat(),
-        }
-        _write_json(USAGE_FILE, usage)
-
-    runs_used = usage.get("runs_used", 0)
-    return max(0, FREE_RUNS - runs_used)
-
-
-def _consume_free_run_local(machine_id: str) -> None:
-    """Decrement local free run counter."""
-    usage = _read_json(USAGE_FILE) or {}
-    usage["machine_id"] = machine_id
-    usage["runs_used"] = usage.get("runs_used", 0) + 1
-    usage["last_run"] = datetime.datetime.now(datetime.timezone.utc).isoformat()
-    _write_json(USAGE_FILE, usage)
-
-
 # ── Token validation ─────────────────────────────────────────────────
 
 def _is_valid_token_format(token: str) -> bool:
@@ -138,7 +100,7 @@ def _validate_token_server(token: str) -> dict | None:
 
 
 def _validate_license() -> tuple[bool, str]:
-    """Check if a valid paid license exists.
+    """Check if a valid license exists.
 
     Returns (is_valid, message).
     """
@@ -157,10 +119,19 @@ def _validate_license() -> tuple[bool, str]:
             # Update last validated timestamp
             lic["last_validated"] = datetime.datetime.now(datetime.timezone.utc).isoformat()
             lic["plan"] = resp.get("plan", "lifetime")
+            lic["runs_used"] = resp.get("runs_used", 0)
             _write_json(LICENSE_FILE, lic)
-            return True, f"Licensed ({lic['plan']})"
+            plan = lic["plan"]
+            if plan == "lifetime":
+                return True, "Licensed (lifetime)"
+            else:
+                remaining = resp.get("free_remaining", FREE_RUNS - resp.get("runs_used", 0))
+                return True, f"Free tier ({remaining} run{'s' if remaining != 1 else ''} remaining)"
         else:
-            return False, resp.get("error", "Token is no longer valid.")
+            error = resp.get("error", "Token is no longer valid.")
+            if "exhausted" in str(error).lower() or resp.get("runs_used", 0) >= FREE_RUNS:
+                return False, "exhausted"
+            return False, error
 
     # Server unreachable — check grace period
     last_validated = lic.get("last_validated")
@@ -188,37 +159,17 @@ def check_license() -> tuple[bool, str]:
     """Check if the user is allowed to run.
 
     Returns (allowed, message).
-    Priority:
-      1. Valid paid token → allowed
-      2. Free runs remaining → allowed (decrements counter)
-      3. No runs left → blocked with buy message
+    Requires a valid ns_live_* token. No anonymous free tier.
     """
-    # Check paid license first
     has_license, msg = _validate_license()
     if has_license:
         return True, msg
 
-    # Check free tier
-    machine_id = _get_machine_id()
+    if msg == "exhausted":
+        return False, "exhausted"
 
-    # Try server first (prevents reinstall abuse)
-    server_remaining = _check_free_tier_server(machine_id)
-    if server_remaining is not None:
-        if server_remaining > 0:
-            _consume_free_run_local(machine_id)
-            remaining = server_remaining - 1
-            return True, f"Free tier ({remaining} run{'s' if remaining != 1 else ''} remaining)"
-        else:
-            return False, ""
-    else:
-        # Server unreachable — use local count
-        local_remaining = _check_free_tier_local(machine_id)
-        if local_remaining > 0:
-            _consume_free_run_local(machine_id)
-            remaining = local_remaining - 1
-            return True, f"Free tier ({remaining} run{'s' if remaining != 1 else ''} remaining)"
-        else:
-            return False, ""
+    # No token found
+    return False, "no_token"
 
 
 def activate_token(token: str) -> tuple[bool, str]:
@@ -265,7 +216,6 @@ def get_status() -> str:
     """Get a human-readable license status string."""
     lines = []
 
-    # Check paid license
     lic = _read_json(LICENSE_FILE)
     if lic and "token" in lic:
         token = lic["token"]
@@ -279,31 +229,34 @@ def get_status() -> str:
         lines.append(f"Status:     {'valid' if valid else 'invalid'} — {msg}")
     else:
         lines.append("Token:      none")
-        machine_id = _get_machine_id()
-        local_remaining = _check_free_tier_local(machine_id)
-        lines.append(f"Free runs:  {local_remaining} remaining")
-        lines.append(f"Machine ID: {machine_id[:16]}...")
+        lines.append("")
+        lines.append("Sign in at https://negative.support to get your token,")
+        lines.append("then activate it:")
+        lines.append("  negative-support --activate <your-token>")
 
     return "\n".join(lines)
 
 
-def open_buy_page() -> None:
-    """Open the purchase page in the user's browser."""
-    machine_id = _get_machine_id()
-    url = f"{BUY_URL}?machine={machine_id}"
-    print(f"Opening {url}")
-    webbrowser.open(url)
+def print_no_token_message() -> None:
+    """Print the message shown when no token is configured."""
+    print()
+    print("  No license token found.")
+    print()
+    print("  1. Sign in at https://negative.support")
+    print("  2. Copy your token from the user menu")
+    print("  3. Run: negative-support --activate <your-token>")
+    print()
+    print("  Free accounts get 10 runs. Buy a lifetime license for unlimited use.")
+    print()
 
 
-def print_buy_message() -> None:
-    """Print the message shown when free tier is exhausted."""
+def print_exhausted_message() -> None:
+    """Print the message shown when free runs are exhausted."""
     print()
-    print("  Free tier exhausted (3/3 runs used).")
+    print(f"  Free tier exhausted ({FREE_RUNS}/{FREE_RUNS} runs used).")
     print()
-    print("  To continue using negative-support, purchase a license:")
-    print(f"    {BUY_URL}")
-    print("  or run: negative-support --buy")
+    print("  To continue, buy a lifetime license at:")
+    print("    https://negative.support/#pricing")
     print()
-    print("  After purchasing, activate your token:")
-    print("    negative-support --activate <your-token>")
+    print("  Your existing token will be upgraded — no re-activation needed.")
     print()

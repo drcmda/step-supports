@@ -8,7 +8,7 @@ export default function Docs() {
         {/* Install */}
         <section className="mb-14">
           <div className="flex items-center gap-3 mb-5 pt-5 border-t border-border">
-            <h2 className="text-lg font-medium">Installation</h2>
+            <h2 className="text-lg font-medium">1. Install</h2>
           </div>
           <div className="grid grid-cols-2 gap-4 mb-4 max-sm:grid-cols-1">
             <div className="rounded-xl p-5 glass">
@@ -39,10 +39,51 @@ export default function Docs() {
           <p className="text-muted text-xs font-mono">Requires Node.js 18+ (npm) or Python 3.10+ (pip).</p>
         </section>
 
+        {/* Activate */}
+        <section className="mb-14">
+          <div className="flex items-center gap-3 mb-5 pt-5 border-t border-border">
+            <h2 className="text-lg font-medium">2. Activate</h2>
+          </div>
+          <p className="text-dim text-sm mb-4 leading-relaxed">
+            The CLI requires a license token. Sign in at{" "}
+            <a href="/" className="text-accent no-underline hover:underline">negative.support</a> to
+            get yours, then activate it:
+          </p>
+          <div className="bg-base/60 border border-border rounded-lg px-4 py-3.5 mb-4 overflow-x-auto">
+            <code className="font-mono text-xs text-code whitespace-pre leading-relaxed">
+              {`negative-support --activate <your-token>`}
+            </code>
+          </div>
+          <p className="text-dim text-sm mb-4 leading-relaxed">
+            You can find your token in the user menu after signing in. It works on up to 3 machines
+            and is shared between npm and pip on the same machine.
+          </p>
+          <div className="rounded-xl p-5 glass">
+            <div className="flex items-start gap-4 max-sm:flex-col">
+              <div className="flex-1">
+                <p className="label-xs mb-2">Free tier</p>
+                <p className="text-dim text-sm leading-relaxed">
+                  Every account starts with 10 free runs. No credit card needed.
+                  Once exhausted, buy a lifetime license to continue — your
+                  existing token is automatically upgraded, no re-activation needed.
+                </p>
+              </div>
+              <div className="flex-1">
+                <p className="label-xs mb-2">Lifetime license</p>
+                <p className="text-dim text-sm leading-relaxed">
+                  One-time purchase, unlimited runs forever.
+                  Works on up to 3 machines with the same token.{" "}
+                  <a href="/#pricing" className="text-accent no-underline hover:underline">See pricing</a>.
+                </p>
+              </div>
+            </div>
+          </div>
+        </section>
+
         {/* Quick start */}
         <section className="mb-14">
           <div className="flex items-center gap-3 mb-5 pt-5 border-t border-border">
-            <h2 className="text-lg font-medium">Quick start</h2>
+            <h2 className="text-lg font-medium">3. Use</h2>
           </div>
           <p className="text-dim text-sm mb-4 leading-relaxed">
             Both CLIs work the same way with the same arguments and output formats.
@@ -93,14 +134,13 @@ negative-support model.stl -o my_supports.stl`}
                 {[
                   ["-o, --output", "*_supports.stl", "Output file path"],
                   ["-m, --margin", "0.2", "Gap between supports and model (mm)"],
-                  ["--min-volume", "1.0", "Discard support pieces smaller than this (mm³)"],
+                  ["--min-volume", "1.0", "Discard support pieces smaller than this (mm\u00b3)"],
                   ["-a, --angle", "45", "Overhang angle threshold in degrees (STEP only)"],
-                  ["--3mf", "—", "Export 3MF with model + supports"],
-                  ["-q, --quiet", "—", "Suppress progress display"],
-                  ["--version", "—", "Show version"],
-                  ["--status", "—", "Show license status"],
-                  ["--buy", "—", "Open purchase page"],
-                  ["--activate <token>", "—", "Activate license token"],
+                  ["--3mf", "\u2014", "Export 3MF with model + supports"],
+                  ["-q, --quiet", "\u2014", "Suppress progress display"],
+                  ["--version", "\u2014", "Show version"],
+                  ["--status", "\u2014", "Show license status"],
+                  ["--activate <token>", "\u2014", "Activate license token"],
                 ].map(([flag, def, desc]) => (
                   <tr key={flag} className="border-t border-border hover:bg-surface-bright transition-colors">
                     <td className="px-4 py-2.5"><code className="font-mono text-[11px] text-primary/70">{flag}</code></td>
@@ -125,8 +165,8 @@ negative-support model.stl -o my_supports.stl`}
           <div className="bg-base/60 border border-border rounded-lg px-4 py-3.5 mb-4 overflow-x-auto">
             <code className="font-mono text-xs text-code whitespace-pre leading-relaxed">
               {`negative-support model.stl --3mf
-# → model_supports.stl
-# → model.3mf`}
+# \u2192 model_supports.stl
+# \u2192 model.3mf`}
             </code>
           </div>
           <p className="text-dim text-sm leading-relaxed">
@@ -174,8 +214,8 @@ console.log(result.stats) // { pieces, faces, volume }`}
                   ["format", "string", "auto-detect", "File format: 'stl', 'obj', 'step', or 'stp'"],
                   ["margin", "number", "0.2", "Gap between supports and model (mm)"],
                   ["angle", "number", "45", "Overhang angle threshold (STEP only)"],
-                  ["minVolume", "number", "1.0", "Discard pieces smaller than this (mm³)"],
-                  ["onProgress", "(step, detail?) => void", "—", "Progress callback for each stage"],
+                  ["minVolume", "number", "1.0", "Discard pieces smaller than this (mm\u00b3)"],
+                  ["onProgress", "(step, detail?) => void", "\u2014", "Progress callback for each stage"],
                 ].map(([prop, type, def, desc]) => (
                   <tr key={prop} className="border-t border-border hover:bg-surface-bright transition-colors">
                     <td className="px-4 py-2.5"><code className="font-mono text-[11px] text-primary/70">{prop}</code></td>
@@ -203,7 +243,7 @@ console.log(result.stats) // { pieces, faces, volume }`}
                   ["stl", "ArrayBuffer", "Binary STL of the generated supports"],
                   ["stats.pieces", "number", "Number of separate support pieces"],
                   ["stats.faces", "number", "Total triangle count"],
-                  ["stats.volume", "number", "Total support volume (mm³)"],
+                  ["stats.volume", "number", "Total support volume (mm\u00b3)"],
                 ].map(([prop, type, desc]) => (
                   <tr key={prop} className="border-t border-border hover:bg-surface-bright transition-colors">
                     <td className="px-4 py-2.5"><code className="font-mono text-[11px] text-primary/70">{prop}</code></td>
@@ -239,32 +279,6 @@ supports = compute_supports_mesh(mesh, margin=0.2)
 supports.export("supports.stl")`}
             </code>
           </div>
-        </section>
-
-        {/* License */}
-        <section className="mb-14">
-          <div className="flex items-center gap-3 mb-5 pt-5 border-t border-border">
-            <h2 className="text-lg font-medium">License management</h2>
-          </div>
-          <p className="text-dim text-sm mb-4 leading-relaxed">
-            negative-support includes 3 free runs per machine. After that, a
-            lifetime license is required.
-          </p>
-          <div className="bg-base/60 border border-border rounded-lg px-4 py-3.5 mb-4 overflow-x-auto">
-            <code className="font-mono text-xs text-code whitespace-pre leading-relaxed">
-              {`# Check license status
-negative-support --status
-
-# Purchase a license (opens browser)
-negative-support --buy
-
-# Activate your token after purchase
-negative-support --activate ns_live_your_token_here`}
-            </code>
-          </div>
-          <p className="text-dim text-sm leading-relaxed">
-            License state is shared between npm and pip on the same machine.
-          </p>
         </section>
       </div>
     </div>

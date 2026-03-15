@@ -2,7 +2,9 @@
  * License management for negative-support (Node.js CLI).
  *
  * Shares config files with the Python CLI at ~/.negative-support/.
- * Free tier: 3 runs per machine. After that, requires a paid license token.
+ * Requires a valid ns_live_* token to run. Tokens are issued when you
+ * sign in at https://negative.support. Free tokens get 10 runs, paid
+ * tokens get unlimited.
  */
 
 import { createHash } from 'crypto';
@@ -13,13 +15,11 @@ import { homedir } from 'os';
 
 // ── Configuration ─────────────────────────────────────────────────────
 
-const FREE_RUNS = 3;
+const FREE_RUNS = 10;
 const TOKEN_PREFIX = 'ns_live_';
 const API_BASE = process.env.NS_API_BASE || 'https://negative.support';
-const BUY_URL = 'https://negative.support';
 const GRACE_DAYS = 7;
 const CONFIG_DIR = join(homedir(), '.negative-support');
-const USAGE_FILE = join(CONFIG_DIR, 'usage.json');
 const LICENSE_FILE = join(CONFIG_DIR, 'license.json');
 
 // ── Machine fingerprint ───────────────────────────────────────────────
@@ -88,37 +88,6 @@ async function apiPost(endpoint: string, body: Record<string, unknown>): Promise
   }
 }
 
-// ── Free tier ─────────────────────────────────────────────────────────
-
-async function checkFreeTierServer(machineId: string): Promise<number | null> {
-  const resp = await apiPost('/api/free-tier', { machine_id: machineId });
-  if (resp && typeof resp.free_remaining === 'number') return resp.free_remaining;
-  return null;
-}
-
-function checkFreeTierLocal(machineId: string): number {
-  const usage = readJson(USAGE_FILE);
-  if (!usage || usage.machine_id !== machineId) {
-    const newUsage = {
-      machine_id: machineId,
-      runs_used: 0,
-      first_run: new Date().toISOString(),
-    };
-    writeJson(USAGE_FILE, newUsage);
-    return FREE_RUNS;
-  }
-  const runsUsed = (usage.runs_used as number) || 0;
-  return Math.max(0, FREE_RUNS - runsUsed);
-}
-
-function consumeFreeRunLocal(machineId: string): void {
-  const usage = readJson(USAGE_FILE) || {};
-  usage.machine_id = machineId;
-  usage.runs_used = ((usage.runs_used as number) || 0) + 1;
-  usage.last_run = new Date().toISOString();
-  writeJson(USAGE_FILE, usage);
-}
-
 // ── Token validation ─────────────────────────────────────────────────
 
 function isValidTokenFormat(token: string): boolean {
@@ -140,10 +109,21 @@ async function validateLicense(): Promise<[boolean, string]> {
     if (resp.valid) {
       lic.last_validated = new Date().toISOString();
       lic.plan = (resp.plan as string) || 'lifetime';
+      lic.runs_used = resp.runs_used ?? 0;
       writeJson(LICENSE_FILE, lic);
-      return [true, `Licensed (${lic.plan})`];
+      const plan = lic.plan as string;
+      if (plan === 'lifetime') {
+        return [true, 'Licensed (lifetime)'];
+      } else {
+        const remaining = (resp.free_remaining as number) ?? (FREE_RUNS - ((resp.runs_used as number) ?? 0));
+        return [true, `Free tier (${remaining} run${remaining !== 1 ? 's' : ''} remaining)`];
+      }
     } else {
-      return [false, (resp.error as string) || 'Token is no longer valid.'];
+      const error = (resp.error as string) || 'Token is no longer valid.';
+      if (error.toLowerCase().includes('exhausted') || ((resp.runs_used as number) ?? 0) >= FREE_RUNS) {
+        return [false, 'exhausted'];
+      }
+      return [false, error];
     }
   }
 
@@ -167,33 +147,13 @@ async function validateLicense(): Promise<[boolean, string]> {
 // ── Public API ────────────────────────────────────────────────────────
 
 export async function checkLicense(): Promise<[boolean, string]> {
-  // Check paid license first
   const [hasLicense, msg] = await validateLicense();
   if (hasLicense) return [true, msg];
 
-  // Check free tier
-  const machineId = getMachineId();
+  if (msg === 'exhausted') return [false, 'exhausted'];
 
-  // Try server first (prevents reinstall abuse)
-  const serverRemaining = await checkFreeTierServer(machineId);
-  if (serverRemaining !== null) {
-    if (serverRemaining > 0) {
-      consumeFreeRunLocal(machineId);
-      const remaining = serverRemaining - 1;
-      return [true, `Free tier (${remaining} run${remaining !== 1 ? 's' : ''} remaining)`];
-    } else {
-      return [false, ''];
-    }
-  }
-
-  // Server unreachable — use local count
-  const localRemaining = checkFreeTierLocal(machineId);
-  if (localRemaining > 0) {
-    consumeFreeRunLocal(machineId);
-    const remaining = localRemaining - 1;
-    return [true, `Free tier (${remaining} run${remaining !== 1 ? 's' : ''} remaining)`];
-  }
-  return [false, ''];
+  // No token found
+  return [false, 'no_token'];
 }
 
 export async function activateToken(token: string): Promise<[boolean, string]> {
@@ -243,31 +203,34 @@ export async function getStatus(): Promise<string> {
     lines.push(`Status:     ${valid ? 'valid' : 'invalid'} — ${msg}`);
   } else {
     lines.push('Token:      none');
-    const machineId = getMachineId();
-    const localRemaining = checkFreeTierLocal(machineId);
-    lines.push(`Free runs:  ${localRemaining} remaining`);
-    lines.push(`Machine ID: ${machineId.slice(0, 16)}...`);
+    lines.push('');
+    lines.push('Sign in at https://negative.support to get your token,');
+    lines.push('then activate it:');
+    lines.push('  negative-support --activate <your-token>');
   }
 
   return lines.join('\n');
 }
 
-export function openBuyPage(): void {
-  const machineId = getMachineId();
-  const url = `${BUY_URL}?machine=${machineId}`;
-  console.log(`Opening ${url}`);
-  import('child_process').then(cp => cp.exec(`open "${url}" || xdg-open "${url}" || start "${url}"`));
+export function printNoTokenMessage(): void {
+  console.log();
+  console.log('  No license token found.');
+  console.log();
+  console.log('  1. Sign in at https://negative.support');
+  console.log('  2. Copy your token from the user menu');
+  console.log('  3. Run: negative-support --activate <your-token>');
+  console.log();
+  console.log('  Free accounts get 10 runs. Buy a lifetime license for unlimited use.');
+  console.log();
 }
 
-export function printBuyMessage(): void {
+export function printExhaustedMessage(): void {
   console.log();
-  console.log('  Free tier exhausted (3/3 runs used).');
+  console.log(`  Free tier exhausted (${FREE_RUNS}/${FREE_RUNS} runs used).`);
   console.log();
-  console.log('  To continue using negative-support, purchase a license:');
-  console.log(`    ${BUY_URL}`);
-  console.log('  or run: negative-support --buy');
+  console.log('  To continue, buy a lifetime license at:');
+  console.log('    https://negative.support/#pricing');
   console.log();
-  console.log('  After purchasing, activate your token:');
-  console.log('    negative-support --activate <your-token>');
+  console.log('  Your existing token will be upgraded — no re-activation needed.');
   console.log();
 }

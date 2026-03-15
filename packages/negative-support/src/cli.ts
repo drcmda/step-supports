@@ -5,7 +5,6 @@
  *   negative-support <input> [options]
  *   negative-support --version
  *   negative-support --status
- *   negative-support --buy
  *   negative-support --activate <token>
  */
 
@@ -13,7 +12,7 @@ import { readFileSync, writeFileSync } from 'fs';
 import { basename, extname, resolve } from 'path';
 import { generateSupports } from './index';
 import { ProgressDisplay } from './progress';
-import { checkLicense, activateToken, getStatus, openBuyPage, printBuyMessage } from './license';
+import { checkLicense, activateToken, getStatus, printNoTokenMessage, printExhaustedMessage } from './license';
 import { export3MF } from './threemf';
 import { parseSTL } from './stl';
 import { parseOBJ } from './obj';
@@ -29,7 +28,6 @@ interface Args {
   threeMf: boolean;
   quiet: boolean;
   version: boolean;
-  buy: boolean;
   activate?: string;
   status: boolean;
   help: boolean;
@@ -43,7 +41,6 @@ function parseArgs(argv: string[]): Args {
     threeMf: false,
     quiet: false,
     version: false,
-    buy: false,
     status: false,
     help: false,
   };
@@ -66,8 +63,6 @@ function parseArgs(argv: string[]): Args {
         args.quiet = true; break;
       case '--version':
         args.version = true; break;
-      case '--buy':
-        args.buy = true; break;
       case '--activate':
         args.activate = argv[++i]; break;
       case '--status':
@@ -98,7 +93,6 @@ Options:
   -q, --quiet             Suppress progress display
   --version               Show version
   --status                Show license status
-  --buy                   Open purchase page
   --activate <token>      Activate license token
   -h, --help              Show this help
 `);
@@ -129,11 +123,6 @@ async function main(): Promise<void> {
     return;
   }
 
-  if (args.buy) {
-    openBuyPage();
-    return;
-  }
-
   if (args.activate !== undefined) {
     const [ok, msg] = await activateToken(args.activate);
     console.log(ok ? `✓ ${msg}` : `✗ ${msg}`);
@@ -149,7 +138,11 @@ async function main(): Promise<void> {
   // Check license
   const [allowed, licMsg] = await checkLicense();
   if (!allowed) {
-    printBuyMessage();
+    if (licMsg === 'exhausted') {
+      printExhaustedMessage();
+    } else {
+      printNoTokenMessage();
+    }
     process.exit(1);
   }
   if (licMsg && !args.quiet) {

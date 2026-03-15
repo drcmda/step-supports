@@ -52,7 +52,7 @@ export default function Header() {
   }, [open]);
 
   return (
-    <header className="border-b border-border py-3.5">
+    <header className="relative z-50 border-b border-border py-3.5">
       <div className="max-w-[1100px] mx-auto px-6 flex items-center justify-between">
         <Link to="/" className="font-mono text-[13px] font-medium text-primary/70 no-underline tracking-wide hover:text-primary transition-colors">
           negative-support
@@ -79,7 +79,7 @@ export default function Header() {
                 </button>
 
                 {open && (
-                  <div className="absolute right-0 top-[calc(100%+8px)] w-[280px] rounded-xl glass border border-border p-4 z-50">
+                  <div className="absolute right-0 top-[calc(100%+8px)] w-[280px] rounded-xl bg-surface border border-border p-4 z-50 shadow-lg shadow-black/40">
                     {/* User info */}
                     <div className="mb-3 pb-3 border-b border-border">
                       <p className="text-primary text-sm font-medium">{user.login}</p>
