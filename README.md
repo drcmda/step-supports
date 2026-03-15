@@ -30,7 +30,9 @@ pip install negative-support[step]
 negative-support model.step                # STEP: overhang detection
 negative-support model.stl                 # Mesh: full-shell supports
 negative-support model.step -m 0.15 -a 40  # tighter margin + stricter angle
-negative-support model.step -e             # also export model as STL
+negative-support model.step --3mf          # 3MF with model + supports + slicer settings
+negative-support model.step --stl          # also export model as STL
+negative-support model.step --stl --3mf    # both STL and 3MF
 negative-support model.step -q             # quiet mode for scripting
 ```
 
@@ -46,7 +48,8 @@ The input format is auto-detected by file extension.
 | `--angle` | `-a` | `45.0` | Overhang angle threshold (STEP only) |
 | `--min-volume` | | `1.0` | Discard support pieces smaller than this (mm³) |
 | `--tolerance` | | `0.01` | STL tessellation tolerance (STEP only) |
-| `--export-model` | `-e` | off | Also export the STEP model as STL |
+| `--stl` | | off | Also export the STEP model as STL |
+| `--3mf` | | off | Export 3MF with model + supports (1 wall, 15% cubic infill on supports) |
 | `--quiet` | `-q` | off | Suppress progress display |
 | `--debug` | | off | Print per-face diagnostics (STEP only) |
 
@@ -153,7 +156,6 @@ Free tier: **3 runs per machine**, no account needed. After that, a lifetime lic
 │           ├── pages/Landing.tsx     # Landing page + pricing
 │           ├── pages/Success.tsx     # Post-payment token display
 │           └── pages/Docs.tsx        # Usage documentation
-├── step_supports.py                  # Backwards-compat wrapper
 ├── tests/
 │   ├── baseline.py                   # Regression test
 │   ├── baseline.json                 # Saved snapshot

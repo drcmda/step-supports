@@ -12,6 +12,7 @@ dependencies = [
     "trimesh[easy]>=4.0",
     "numpy",
     "manifold3d",
+    "lib3mf",
 ]
 
 [project.optional-dependencies]

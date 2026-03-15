@@ -525,6 +525,95 @@ def compute_supports_mesh(
     return supports
 
 
+# -- 3MF export --
+
+def _export_3mf(
+    model_mesh: trimesh.Trimesh,
+    supports_mesh: trimesh.Trimesh,
+    output_path: str,
+) -> None:
+    """Export a 3MF file containing model + supports with per-object slicer settings.
+
+    Writes slicer config files for both BambuStudio/OrcaSlicer and PrusaSlicer
+    so the supports object gets: 1 wall, 15% sparse infill, cubic pattern.
+    """
+    import zipfile
+    import lib3mf
+
+    wrapper = lib3mf.Wrapper()
+    model = wrapper.CreateModel()
+    model.SetUnit(lib3mf.ModelUnit.MilliMeter)
+
+    # Add model mesh as object 1
+    model_obj = model.AddMeshObject()
+    model_obj.SetName("Model")
+    _add_trimesh_to_lib3mf(model_obj, model_mesh)
+    model.AddBuildItem(model_obj, wrapper.GetIdentityTransform())
+
+    # Add supports mesh as object 2
+    supports_obj = model.AddMeshObject()
+    supports_obj.SetName("Supports")
+    _add_trimesh_to_lib3mf(supports_obj, supports_mesh)
+    model.AddBuildItem(supports_obj, wrapper.GetIdentityTransform())
+
+    # Get resource IDs for the config XML
+    model_id = model_obj.GetResourceID()
+    supports_id = supports_obj.GetResourceID()
+
+    # Write the base 3MF
+    writer = model.QueryWriter("3mf")
+    writer.WriteToFile(output_path)
+
+    # Inject slicer config files into the ZIP
+    config_xml = _slicer_config_xml(model_id, supports_id)
+    with zipfile.ZipFile(output_path, "a") as zf:
+        # BambuStudio / OrcaSlicer
+        zf.writestr("Metadata/model_settings.config", config_xml)
+        # PrusaSlicer
+        zf.writestr("Metadata/Slic3r_PE_model.config", config_xml)
+
+
+def _add_trimesh_to_lib3mf(mesh_obj, tmesh: trimesh.Trimesh) -> None:
+    """Add trimesh vertices and faces to a lib3mf MeshObject."""
+    import lib3mf
+
+    vertices = []
+    for v in tmesh.vertices:
+        pos = lib3mf.Position()
+        pos.Coordinates[0] = float(v[0])
+        pos.Coordinates[1] = float(v[1])
+        pos.Coordinates[2] = float(v[2])
+        vertices.append(pos)
+
+    triangles = []
+    for face in tmesh.faces:
+        tri = lib3mf.Triangle()
+        tri.Indices[0] = int(face[0])
+        tri.Indices[1] = int(face[1])
+        tri.Indices[2] = int(face[2])
+        triangles.append(tri)
+
+    mesh_obj.SetGeometry(vertices, triangles)
+
+
+def _slicer_config_xml(model_id: int, supports_id: int) -> str:
+    """Generate slicer config XML with per-object settings for supports."""
+    return (
+        '<?xml version="1.0" encoding="UTF-8"?>\n'
+        "<config>\n"
+        f'  <object id="{model_id}">\n'
+        '    <metadata key="name" value="Model"/>\n'
+        "  </object>\n"
+        f'  <object id="{supports_id}">\n'
+        '    <metadata key="name" value="Supports"/>\n'
+        '    <metadata key="wall_loops" value="1"/>\n'
+        '    <metadata key="sparse_infill_density" value="15%"/>\n'
+        '    <metadata key="sparse_infill_pattern" value="cubic"/>\n'
+        "  </object>\n"
+        "</config>\n"
+    )
+
+
 # -- CLI entry point --
 
 def main():
@@ -571,9 +660,16 @@ def main():
              "Faces steeper than this get supports. Mid-air faces are always supported.",
     )
     parser.add_argument(
-        "-e", "--export-model",
+        "--stl",
         action="store_true",
         help="Also export the input STEP model as STL",
+    )
+    parser.add_argument(
+        "--3mf",
+        dest="three_mf",
+        action="store_true",
+        help="Export 3MF with model + supports and per-object slicer settings "
+             "(1 wall, 15%% cubic infill on supports)",
     )
     parser.add_argument(
         "-q", "--quiet",
@@ -696,11 +792,27 @@ def main():
     print(f"Supports written to {args.output}")
     print(f"  {len(supports.faces)} faces, volume = {abs(supports.volume):.1f} mm\u00b3")
 
-    if args.export_model and is_step:
+    # --stl: export model as STL (STEP input only)
+    if args.stl and is_step:
         model_stl = args.input.rsplit(".", 1)[0] + ".stl"
         export_stl(part.moved(Location((0, 0, original_z_min))),
                    model_stl, tolerance=args.tolerance)
         print(f"Model written to {model_stl}")
+
+    # --3mf: export combined 3MF with slicer settings
+    if args.three_mf:
+        # Get model as trimesh for 3MF
+        if is_step:
+            mdl = _model_to_mesh(part, args.tolerance)
+        else:
+            mdl = model_mesh.copy()
+        # Translate model back to original coordinate space
+        if abs(original_z_min) > 1e-6:
+            mdl.apply_translation([0, 0, original_z_min])
+
+        threemf_path = args.input.rsplit(".", 1)[0] + ".3mf"
+        _export_3mf(mdl, supports, threemf_path)
+        print(f"3MF written to {threemf_path}")
 
 
 if __name__ == "__main__":
