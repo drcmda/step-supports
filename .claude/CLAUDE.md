@@ -7,20 +7,27 @@ Negative-space 3D print support generator. Available on PyPI (`negative-support`
 This is the **public** repo (website + API + issue tracking). The core algorithm lives in a **private submodule** at `core/`.
 
 ```
-core/                     # git submodule → negative-support-core (private)
-  src/negative_support/   # Python algorithm
-  packages/negative-support/  # npm TypeScript package
-  tests/                  # Cross-platform test suite + baselines
-  models/                 # Test models
+core/                       # git submodule → negative-support-core (private)
+  src/negative_support/     # Python algorithm
+  packages/negative-support/ # npm TypeScript package
+  tests/                    # Cross-platform test suite + baselines
+  models/                   # Test models
   pyproject.toml
   requirements.txt
 
-server/
-  src/index.ts            # Cloudflare Worker entry, routes /api/* and static
-  src/api.ts              # API handlers (free-tier, validate, activate, stripe, checkout)
-  src/auth.ts             # GitHub OAuth + session management
-  schema.sql              # D1 tables: machines, licenses, users, sessions
-  web/                    # React SPA (Vite): Landing, /try page, Success, Docs
+packages/
+  server/                   # Cloudflare Worker API
+    src/index.ts            # Worker entry, routes /api/* and static
+    src/api.ts              # API handlers (free-tier, validate, activate, stripe, checkout)
+    src/auth.ts             # GitHub OAuth + session management
+    schema.sql              # D1 tables: machines, licenses, users, sessions
+    wrangler.toml
+  frontend/                 # React SPA (Vite + Tailwind)
+    src/                    # Landing, /try page, Success, Docs
+    public/                 # Static assets (hero video, outline images)
+    vite.config.ts
+
+package.json                # Root scripts (dev, build, deploy, test)
 ```
 
 ## Quick Reference
@@ -29,21 +36,22 @@ server/
 # Init submodule (after clone)
 git submodule update --init
 
-# Python CLI
-source .venv/bin/activate
-negative-support --version
-python core/tests/baseline.py
+# Development
+npm run dev               # Frontend dev server on :5173
+npm run dev:server        # API dev server on :8787
 
-# npm package
-cd core/packages/negative-support && npm run build
-node -e "import {generateSupports} from './dist/index.js'"
+# Build & deploy
+npm run build             # Build frontend
+npm run deploy            # Build frontend + deploy to Cloudflare
 
-# Server (local)
-cd server && npm run dev          # API on :8787
-cd server/web && npm run dev      # React on :5173
+# Tests (runs inside core submodule)
+npm test                  # Full cross-platform test suite
+npm run test:python       # Python pipeline only
+npm run test:baseline     # Legacy STEP regression
 
-# Run all platform tests
-python core/tests/run_all.py
+# Core packages
+npm run build:npm         # Build npm package
+npm run build:pip         # Build Python package
 ```
 
 ## Testing
@@ -51,7 +59,7 @@ python core/tests/run_all.py
 **IMPORTANT**: After ANY change to the algorithm, run the unified test suite:
 
 ```bash
-python core/tests/run_all.py
+npm test
 ```
 
 This runs:
@@ -62,7 +70,7 @@ This runs:
 
 Update baselines after intentional algorithm changes:
 ```bash
-python core/tests/generate_baselines.py
+cd core && python3 tests/generate_baselines.py
 ```
 
 ## Architecture
@@ -78,7 +86,7 @@ python core/tests/generate_baselines.py
 ## Licensing System
 
 - **Client** (`core/src/negative_support/license.py`): Checks paid token → free tier (server then local) → blocked
-- **Server** (`server/src/api.ts`): Cloudflare Workers + D1
+- **Server** (`packages/server/src/api.ts`): Cloudflare Workers + D1
   - POST `/api/free-tier` — machine_id tracking (10 free runs)
   - POST `/api/validate` — token lookup
   - POST `/api/activate` — bind token to machine (max 3)
@@ -91,25 +99,23 @@ python core/tests/generate_baselines.py
 
 ### PyPI
 ```bash
-cd core
-pip install build twine
-python -m build
-twine upload dist/*
+npm run build:pip
+cd core && twine upload dist/*
 ```
 
 ### npm
 ```bash
-cd core/packages/negative-support
-npm run build
-npm publish
+npm run build:npm
+cd core/packages/negative-support && npm publish
 ```
 
 ### Server (Cloudflare)
 ```bash
-cd server
-npx wrangler d1 create negative-support-db   # get database_id → wrangler.toml
-npm run migrate                               # create tables
+npm run deploy
+# First time only:
+cd packages/server
+npx wrangler d1 create negative-support-db
+npm run migrate
 npx wrangler secret put STRIPE_SECRET_KEY
 npx wrangler secret put STRIPE_WEBHOOK_SECRET
-npm run deploy
 ```
