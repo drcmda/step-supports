@@ -1,7 +1,17 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 
 export default function Landing() {
   const [loading, setLoading] = useState(false)
+  const [price, setPrice] = useState(19)
+
+  useEffect(() => {
+    fetch('/api/price')
+      .then((r) => r.json())
+      .then((d) => {
+        if (d.amount) setPrice(d.amount)
+      })
+      .catch(() => {})
+  }, [])
 
   const handleBuy = async () => {
     setLoading(true)
@@ -25,22 +35,37 @@ export default function Landing() {
   return (
     <div>
       {/* Hero */}
-      <section className='pt-28 pb-24 text-center relative overflow-hidden'>
-        {/* Subtle radial glow behind hero */}
+      <section className='relative min-h-screen overflow-hidden flex items-end'>
+        {/* Background video */}
+        <video className='absolute inset-0 w-full h-full object-cover' autoPlay muted loop playsInline src='/hero-video.mp4' />
+        {/* Dark overlay */}
+        <div className='absolute inset-0 bg-black/50' />
+        {/* Subtle accent glow */}
         <div
           className='absolute inset-0 pointer-events-none'
-          style={{ background: 'radial-gradient(ellipse 600px 400px at 50% 0%, rgba(34,197,94,0.04) 0%, transparent 70%)' }}
+          style={{ background: 'radial-gradient(ellipse 800px 400px at 0% 100%, rgba(93,228,199,0.06) 0%, transparent 70%)' }}
         />
-        <div className='max-w-[1100px] mx-auto px-6 relative'>
-          <p className='label-xs mb-6 tracking-[0.14em]'>3D print support generator</p>
-          <h1 className='text-[3.2rem] font-semibold leading-[1.08] mb-5 tracking-[-0.02em] max-w-[720px] mx-auto'>
-            Negative-space supports that <span className='text-accent'>fit perfectly</span>
+        {/* Text backdrop */}
+        <div
+          className='absolute inset-0 pointer-events-none'
+          style={{
+            background:
+              'linear-gradient(to top, color-mix(in srgb, var(--color-base) 85%, transparent) 0%, color-mix(in srgb, var(--color-base) 85%, transparent) 30%, transparent 65%)',
+          }}
+        />
+        {/* Content */}
+        <div className='relative max-w-[1200px] mx-auto px-6 pb-36 pt-32 w-full'>
+          <p className='label-xs mb-5 tracking-[0.14em]'>3D print support generator</p>
+          <h1 className='text-[3.8rem] font-semibold leading-[1.06] mb-6 tracking-[-0.02em]'>
+            <span className='max-md:whitespace-normal whitespace-nowrap'>Negative-space supports</span>
+            <br />
+            that <span className='text-accent'>fit perfectly</span>
           </h1>
-          <p className='text-[1.05rem] text-dim max-w-[520px] mx-auto mb-10 leading-relaxed'>
+          <p className='text-[1.1rem] text-dim max-w-[460px] mb-10 leading-relaxed'>
             Generate supports that wrap and curve around your model. Clean prints, spotless contact surfaces, stability during printing, and
-            easy removal after. Works with STL, OBJ, and STEP files.
+            easy removal after.
           </p>
-          <div className='flex gap-3 justify-center'>
+          <div className='flex gap-3'>
             <a
               href='/generate'
               className='inline-flex items-center gap-2 px-5 py-2.5 rounded-lg text-sm font-medium no-underline bg-accent text-base transition-all hover:brightness-110 glow-accent'>
@@ -60,7 +85,7 @@ export default function Landing() {
 
       {/* Install strip */}
       <section className='border-y border-border bg-base-alt'>
-        <div className='max-w-[1100px] mx-auto px-6 grid grid-cols-3 max-md:grid-cols-1 divide-x max-md:divide-x-0 max-md:divide-y divide-border'>
+        <div className='max-w-[1200px] mx-auto px-6 grid grid-cols-3 max-md:grid-cols-1 divide-x max-md:divide-x-0 max-md:divide-y divide-border'>
           {/* Browser */}
           <div className='py-8 px-6 first:pl-0 last:pr-0 max-md:px-0 max-md:first:pt-8'>
             <p className='label-xs mb-3'>Browser</p>
@@ -109,17 +134,35 @@ export default function Landing() {
 
       {/* Comparison */}
       <section className='py-24'>
-        <div className='max-w-[1100px] mx-auto px-6'>
+        <div className='max-w-[1200px] mx-auto px-6'>
           <p className='label-xs mb-4 text-center tracking-[0.14em]'>Why negative-space?</p>
           <h2 className='text-center mb-5 text-2xl font-semibold tracking-[-0.01em]'>Tree supports vs. negative-space</h2>
           <p className='text-dim text-center text-[1.05rem] max-w-[520px] mx-auto mb-10 leading-relaxed'>
-            Custom supports that follow model curvature have been a secret weapon for those who could design them in CAD. Now, anyone can
-            generate them with a single click — no CAD skills required.
+            Custom volumetric supports that follow model curvature have been a secret weapon for those who could{' '}
+            <a
+              href='https://www.youtube.com/watch?v=_R2E8VwyNz0'
+              target='_blank'
+              rel='noopener noreferrer'
+              className='text-accent/70 underline underline-offset-2 hover:text-accent transition-colors'>
+              design them in CAD
+            </a>
+            . Now, anyone can generate them with a single click — no CAD skills required.
           </p>
-          <div className='flex justify-center mb-14'>
-            <img src='/hero-outline.png' alt='Model with negative-space supports' className='h-[360px] w-auto opacity-70' />
+          <div className='flex justify-center items-end gap-8 mb-14 max-sm:gap-4'>
+            <div className='text-center'>
+              <img src='/outline-model.png' alt='Model outline' className='h-[320px] w-auto opacity-70 max-sm:h-[140px]' />
+              <p className='label-xs mt-3'>Model</p>
+            </div>
+            <div className='text-center'>
+              <img src='/outline-supports.png' alt='Support outline' className='h-[234px] w-auto opacity-70 max-sm:h-[102px]' />
+              <p className='label-xs mt-3'>Supports</p>
+            </div>
+            <div className='text-center'>
+              <img src='/outline-combined.png' alt='Model with supports' className='h-[320px] w-auto opacity-70 max-sm:h-[140px]' />
+              <p className='label-xs mt-3'>Combined</p>
+            </div>
           </div>
-          <div className='grid grid-cols-2 gap-4 max-sm:grid-cols-1'>
+          <div className='grid grid-cols-2 gap-5 max-sm:grid-cols-1'>
             {/* Tree supports */}
             <div className='rounded-xl p-7 glass'>
               <div className='flex items-center gap-2.5 mb-5'>
@@ -129,7 +172,7 @@ export default function Landing() {
                     <line x1='6' y1='6' x2='18' y2='18' />
                   </svg>
                 </div>
-                <h3 className='text-[0.95rem] font-medium text-pink'>Tree supports</h3>
+                <h3 className='text-[0.95rem] font-medium text-pink'>Tree-, Block-Supports</h3>
               </div>
               <ul className='list-none space-y-3'>
                 {[
@@ -150,18 +193,20 @@ export default function Landing() {
                     'Supports snap unevenly, leave stubs behind, and often take chunks of the model with them — especially with PETG and nylon.',
                   ],
                 ].map(([title, desc]) => (
-                  <li key={title} className='flex gap-3'>
-                    <svg
-                      width='14'
-                      height='14'
-                      viewBox='0 0 24 24'
-                      fill='none'
-                      stroke='currentColor'
-                      strokeWidth='2.5'
-                      className='text-pink/50 shrink-0 mt-0.5'>
-                      <line x1='18' y1='6' x2='6' y2='18' />
-                      <line x1='6' y1='6' x2='18' y2='18' />
-                    </svg>
+                  <li key={title} className='flex gap-2.5'>
+                    <div className='w-8 shrink-0 flex justify-center pt-0.5'>
+                      <svg
+                        width='14'
+                        height='14'
+                        viewBox='0 0 24 24'
+                        fill='none'
+                        stroke='currentColor'
+                        strokeWidth='2.5'
+                        className='text-pink/50'>
+                        <line x1='18' y1='6' x2='6' y2='18' />
+                        <line x1='6' y1='6' x2='18' y2='18' />
+                      </svg>
+                    </div>
                     <div>
                       <p className='text-primary/70 text-sm font-medium'>{title}</p>
                       <p className='text-dim text-sm mt-0.5 leading-relaxed'>{desc}</p>
@@ -206,17 +251,19 @@ export default function Landing() {
                     'Supports lift away in one piece. No stubs, no prying, no damage. Works reliably across PLA, PETG, ABS, and nylon.',
                   ],
                 ].map(([title, desc]) => (
-                  <li key={title} className='flex gap-3'>
-                    <svg
-                      width='14'
-                      height='14'
-                      viewBox='0 0 24 24'
-                      fill='none'
-                      stroke='currentColor'
-                      strokeWidth='2.5'
-                      className='text-accent shrink-0 mt-0.5'>
-                      <polyline points='20 6 9 17 4 12' />
-                    </svg>
+                  <li key={title} className='flex gap-2.5'>
+                    <div className='w-8 shrink-0 flex justify-center pt-0.5'>
+                      <svg
+                        width='14'
+                        height='14'
+                        viewBox='0 0 24 24'
+                        fill='none'
+                        stroke='currentColor'
+                        strokeWidth='2.5'
+                        className='text-accent'>
+                        <polyline points='20 6 9 17 4 12' />
+                      </svg>
+                    </div>
                     <div>
                       <p className='text-primary/70 text-sm font-medium'>{title}</p>
                       <p className='text-dim text-sm mt-0.5 leading-relaxed'>{desc}</p>
@@ -231,13 +278,13 @@ export default function Landing() {
 
       {/* Features */}
       <section className='py-24'>
-        <div className='max-w-[1100px] mx-auto px-6'>
+        <div className='max-w-[1200px] mx-auto px-6'>
           <p className='label-xs mb-4 text-center tracking-[0.14em]'>Capabilities</p>
           <h2 className='text-center mb-6 text-2xl font-semibold tracking-[-0.01em]'>Built for precision printing</h2>
           <p className='text-dim text-center text-[1.05rem] max-w-[480px] mx-auto mb-14 leading-relaxed'>
             From overhang detection to slicer-ready export — everything you need in one tool.
           </p>
-          <div className='grid grid-cols-2 gap-px max-sm:grid-cols-1 rounded-2xl overflow-hidden border border-border'>
+          <div className='grid grid-cols-2 gap-5 max-sm:grid-cols-1'>
             {[
               {
                 icon: (
@@ -316,7 +363,7 @@ export default function Landing() {
                 desc: 'Same algorithm everywhere. Generate in the browser, automate with the Node.js or Python CLI, or integrate via the JavaScript and Python APIs. Identical results on every platform.',
               },
             ].map((f) => (
-              <div key={f.title} className='p-7 bg-surface-bright/50 group hover:bg-surface-bright transition-colors'>
+              <div key={f.title} className='rounded-xl p-7 glass group hover:bg-surface-bright/60 transition-colors'>
                 <div className='flex items-center gap-3 mb-3'>
                   <div className='w-9 h-9 rounded-lg bg-accent-dim/50 flex items-center justify-center shrink-0'>{f.icon}</div>
                   <div>
@@ -334,17 +381,29 @@ export default function Landing() {
       </section>
 
       {/* Pricing */}
-      <section className='py-24 border-t border-border' id='pricing'>
-        <div className='max-w-[1100px] mx-auto px-6'>
+      <section className='relative py-32 border-t border-border overflow-hidden' id='pricing'>
+        {/* Background glow */}
+        <div
+          className='absolute inset-0 pointer-events-none'
+          style={{ background: 'radial-gradient(ellipse 600px 500px at 50% 50%, rgba(93,228,199,0.05) 0%, transparent 70%)' }}
+        />
+        <div
+          className='absolute inset-0 pointer-events-none'
+          style={{ background: 'radial-gradient(ellipse 400px 300px at 60% 55%, rgba(240,135,189,0.04) 0%, transparent 70%)' }}
+        />
+        <div className='relative max-w-[1200px] mx-auto px-6'>
           <p className='label-xs mb-4 text-center tracking-[0.14em]'>Pricing</p>
-          <h2 className='text-center mb-14 text-2xl font-semibold tracking-[-0.01em]'>Simple, one-time pricing</h2>
-          <div className='grid grid-cols-2 gap-4 max-w-[580px] mx-auto max-sm:grid-cols-1'>
+          <h2 className='text-center mb-4 text-3xl font-semibold tracking-[-0.02em]'>Simple, one-time pricing</h2>
+          <p className='text-dim text-center text-[1.05rem] max-w-[420px] mx-auto mb-14 leading-relaxed'>
+            Start free. Upgrade when you're ready — one payment, no subscriptions.
+          </p>
+          <div className='grid grid-cols-2 gap-5 max-w-[760px] mx-auto max-sm:grid-cols-1'>
             {/* Free */}
-            <div className='rounded-xl p-7 glass text-center'>
-              <p className='label-xs mb-5'>Free tier</p>
-              <div className='font-pixel text-[3rem] leading-none mb-1 text-primary/60'>$0</div>
-              <p className='text-dim text-xs mb-6'>forever</p>
-              <ul className='list-none mb-7 space-y-2.5'>
+            <div className='rounded-2xl p-9 glass text-center'>
+              <p className='label-xs mb-6'>Free tier</p>
+              <div className='font-pixel-grid text-[5rem] leading-none mb-2 text-primary/60'>$0</div>
+              <p className='text-dim text-xs mb-8'>&nbsp;</p>
+              <ul className='list-none mb-8 space-y-3'>
                 <li className='text-dim text-sm flex items-center gap-2 justify-center'>
                   <svg
                     width='14'
@@ -392,11 +451,11 @@ export default function Landing() {
               </a>
             </div>
             {/* Lifetime */}
-            <div className='rounded-xl p-7 text-center border border-accent/20 bg-[rgba(255,255,255,0.02)] relative overflow-hidden animate-glow-pulse'>
-              <p className='label-xs mb-5 text-pink/50'>Lifetime</p>
-              <div className='font-pixel text-[3rem] leading-none mb-1 text-pink'>$29</div>
-              <p className='text-dim text-xs mb-6'>one-time payment</p>
-              <ul className='list-none mb-7 space-y-2.5'>
+            <div className='rounded-2xl p-9 text-center border border-accent/20 bg-[rgba(255,255,255,0.02)] relative overflow-hidden animate-glow-pulse'>
+              <p className='label-xs mb-6 text-pink/50'>Lifetime</p>
+              <div className='font-pixel-grid text-[5rem] leading-none mb-2 text-pink'>${price}</div>
+              <p className='text-dim text-xs mb-8'>one-time payment</p>
+              <ul className='list-none mb-8 space-y-3'>
                 <li className='text-dim text-sm flex items-center gap-2 justify-center'>
                   <svg
                     width='14'
@@ -457,6 +516,7 @@ export default function Landing() {
               </button>
             </div>
           </div>
+          <p className='text-center mt-10 text-muted text-xs font-mono'>All prices in USD · Secure checkout via Stripe</p>
         </div>
       </section>
     </div>

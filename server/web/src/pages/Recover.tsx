@@ -38,7 +38,7 @@ export default function Recover() {
 
   return (
     <div className="py-24">
-      <div className="max-w-[1100px] mx-auto px-6 text-center">
+      <div className="max-w-[1200px] mx-auto px-6 text-center">
         <p className="label-xs mb-6 tracking-[0.14em]">Account</p>
         <h1 className="text-2xl font-semibold mb-2 tracking-[-0.01em]">Recover your license</h1>
         <p className="text-dim text-sm mb-10 max-w-[420px] mx-auto leading-relaxed">

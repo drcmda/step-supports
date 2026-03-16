@@ -160,7 +160,7 @@ export default function Try() {
   if (auth.loading) {
     return (
       <div className="py-16">
-        <div className="max-w-[1100px] mx-auto px-6">
+        <div className="max-w-[1200px] mx-auto px-6">
           <div className="flex items-center gap-2 text-dim text-sm">
             <div className="w-4 h-4 border-2 border-border border-t-accent rounded-full animate-spin" />
             Loading...
@@ -174,7 +174,7 @@ export default function Try() {
   if (!auth.user) {
     return (
       <div className="py-24">
-        <div className="max-w-[1100px] mx-auto px-6 text-center">
+        <div className="max-w-[1200px] mx-auto px-6 text-center">
           <p className="label-xs mb-6 tracking-[0.14em]">Browser</p>
           <h1 className="text-2xl font-semibold mb-2 tracking-[-0.01em]">Generate supports</h1>
           <p className="text-dim text-sm mb-10 max-w-[420px] mx-auto leading-relaxed">
@@ -195,7 +195,7 @@ export default function Try() {
 
   return (
     <div className="py-16">
-      <div className="max-w-[1100px] mx-auto px-6">
+      <div className="max-w-[1200px] mx-auto px-6">
         <div className="flex items-center gap-3 mb-4">
           <p className="label-xs tracking-[0.14em]">Browser</p>
           {licensed && (

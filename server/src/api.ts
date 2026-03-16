@@ -389,6 +389,22 @@ export async function handleRecover(request: Request, env: Env): Promise<Respons
   return json({ ok: true, message: "If a license exists for that email, you'll receive it shortly." });
 }
 
+export async function handlePrice(env: Env): Promise<Response> {
+  const resp = await fetch(`${STRIPE_API}/prices/${PRICE_ID}`, {
+    headers: { Authorization: `Bearer ${env.STRIPE_SECRET_KEY}` },
+  });
+
+  if (!resp.ok) {
+    return json({ error: "Failed to fetch price" }, 500);
+  }
+
+  const price = (await resp.json()) as { unit_amount?: number; currency?: string };
+  return json({
+    amount: (price.unit_amount ?? 0) / 100,
+    currency: price.currency ?? "usd",
+  });
+}
+
 export async function handleCheckout(request: Request, env: Env): Promise<Response> {
   // Lazy import to avoid circular dep
   const { getSessionUser } = await import("./auth");

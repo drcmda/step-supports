@@ -1,7 +1,7 @@
 export default function Docs() {
   return (
     <div className="py-16">
-      <div className="max-w-[1100px] mx-auto px-6">
+      <div className="max-w-[1200px] mx-auto px-6">
         <p className="label-xs mb-4 tracking-[0.14em]">Reference</p>
         <h1 className="text-2xl font-semibold mb-12 tracking-[-0.01em]">Documentation</h1>
 

@@ -13,6 +13,7 @@ import {
   handleGetToken,
   handleCheckout,
   handleRecover,
+  handlePrice,
 } from "./api";
 import {
   handleGitHubLogin,
@@ -72,6 +73,8 @@ export default {
           return handleStripeWebhook(request, env);
         case "/api/token":
           return handleGetToken(url, env);
+        case "/api/price":
+          return handlePrice(env);
         case "/api/checkout":
           return handleCheckout(request, env);
         case "/api/recover":

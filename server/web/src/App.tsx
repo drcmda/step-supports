@@ -11,7 +11,7 @@ export default function App() {
   return (
     <div className="min-h-screen flex flex-col">
       <Header />
-      <main className="flex-1">
+      <main className="flex-1 pt-14">
         <Routes>
           <Route path="/" element={<Landing />} />
           <Route path="/generate" element={<Try />} />
