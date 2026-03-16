@@ -9,11 +9,12 @@
 import Module from 'manifold-3d';
 // @ts-ignore — Vite ?url import for WASM file
 import wasmUrl from 'manifold-3d/manifold.wasm?url';
-import { parseSTL, exportSTL, type ParsedMesh } from '../lib/stl';
-import { parseOBJ } from '../lib/obj';
-import { parseSTEP, type STEPFaceInfo } from '../lib/step';
-import { computeBBox, translateZ, inflateMesh, repairMesh } from '../lib/mesh-utils';
-import { export3MF } from '../lib/threemf';
+import type { ParsedMesh, STEPFaceInfo } from '@core/types';
+import { parseSTL, exportSTL } from '@core/stl';
+import { parseOBJ } from '@core/obj';
+import { parseSTEP } from '@core/step';
+import { computeBBox, translateZ, inflateMesh, repairMesh } from '@core/mesh-utils';
+import { export3MF } from '@core/threemf';
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 let wasm: any;
