@@ -10,3 +10,4 @@ venv/
 *.stp
 node_modules/
 models/
+.DS_Store
