@@ -18,7 +18,11 @@ export interface AuthState {
 
 export async function fetchMe(): Promise<AuthState> {
   try {
-    const resp = await fetch("/api/auth/me", { credentials: "include" });
+    const controller = new AbortController();
+    const timeout = setTimeout(() => controller.abort(), 3000);
+    const resp = await fetch("/api/auth/me", { credentials: "include", signal: controller.signal });
+    clearTimeout(timeout);
+    if (!resp.ok) return { user: null, license: null, freeRemaining: 0 };
     const data = await resp.json();
     return {
       user: data.user || null,

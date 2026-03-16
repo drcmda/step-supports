@@ -13,7 +13,7 @@
     "test": "cd core && python3 tests/run_all.py",
     "test:python": "cd core && python3 tests/test_python.py",
     "test:baseline": "cd core && python3 tests/baseline.py",
-    "build:npm": "cd core/packages/negative-support && npm run build",
-    "build:pip": "cd core && python3 -m build"
+    "build:npm": "cd core/packages/npm && npm run build",
+    "build:pip": "cd core/packages/pip && python3 -m build"
   }
 }

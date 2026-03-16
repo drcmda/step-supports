@@ -27,7 +27,8 @@ export default function Try() {
   const [downloadUrl3mf, setDownloadUrl3mf] = useState<string | null>(null);
   const workerRef = useRef<Worker | null>(null);
 
-  const licensed = auth.license?.plan === 'lifetime';
+  const isDev = import.meta.env.DEV;
+  const licensed = auth.license?.plan === 'lifetime' || isDev;
   const canGenerate = licensed || auth.freeRemaining > 0;
   const exhausted = !licensed && auth.freeRemaining <= 0 && auth.user !== null;
 
@@ -170,8 +171,8 @@ export default function Try() {
     );
   }
 
-  // Not logged in
-  if (!auth.user) {
+  // Not logged in (skip in dev mode)
+  if (!auth.user && !isDev) {
     return (
       <div className="py-24">
         <div className="max-w-[1200px] mx-auto px-6 text-center">
