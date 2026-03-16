@@ -62,8 +62,8 @@ export default function Landing() {
             that <span className='text-accent'>fit perfectly</span>
           </h1>
           <p className='text-[1.1rem] text-dim max-w-[460px] mb-10 leading-relaxed'>
-            Generate supports that wrap and curve around your model. Clean prints, spotless contact surfaces, stability during printing, and
-            easy removal after.
+            Generate volumetric supports that follow the curvature of your model. Clean prints, spotless contact surfaces, stability during
+            printing, and easy removal after.
           </p>
           <div className='flex gap-3'>
             <a
@@ -401,7 +401,7 @@ export default function Landing() {
             {/* Free */}
             <div className='rounded-2xl p-9 glass text-center'>
               <p className='label-xs mb-6'>Free tier</p>
-              <div className='font-pixel-grid text-[5rem] leading-none mb-2 text-primary/60'>$0</div>
+              <div className='text-[3rem] leading-none mb-2 text-primary/60'>$0</div>
               <p className='text-dim text-xs mb-8'>&nbsp;</p>
               <ul className='list-none mb-8 space-y-3'>
                 <li className='text-dim text-sm flex items-center gap-2 justify-center'>
@@ -453,7 +453,7 @@ export default function Landing() {
             {/* Lifetime */}
             <div className='rounded-2xl p-9 text-center border border-accent/20 bg-[rgba(255,255,255,0.02)] relative overflow-hidden animate-glow-pulse'>
               <p className='label-xs mb-6 text-pink/50'>Lifetime</p>
-              <div className='font-pixel-grid text-[5rem] leading-none mb-2 text-pink'>${price}</div>
+              <div className='text-[3rem] leading-none mb-2 text-pink'>${price}</div>
               <p className='text-dim text-xs mb-8'>one-time payment</p>
               <ul className='list-none mb-8 space-y-3'>
                 <li className='text-dim text-sm flex items-center gap-2 justify-center'>

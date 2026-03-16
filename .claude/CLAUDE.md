@@ -2,16 +2,40 @@
 
 Negative-space 3D print support generator. Available on PyPI (`negative-support`), npm (`negative-support`), and as a browser app at negative.support/try.
 
+## Repo Structure
+
+This is the **public** repo (website + API + issue tracking). The core algorithm lives in a **private submodule** at `core/`.
+
+```
+core/                     # git submodule → negative-support-core (private)
+  src/negative_support/   # Python algorithm
+  packages/negative-support/  # npm TypeScript package
+  tests/                  # Cross-platform test suite + baselines
+  models/                 # Test models
+  pyproject.toml
+  requirements.txt
+
+server/
+  src/index.ts            # Cloudflare Worker entry, routes /api/* and static
+  src/api.ts              # API handlers (free-tier, validate, activate, stripe, checkout)
+  src/auth.ts             # GitHub OAuth + session management
+  schema.sql              # D1 tables: machines, licenses, users, sessions
+  web/                    # React SPA (Vite): Landing, /try page, Success, Docs
+```
+
 ## Quick Reference
 
 ```bash
+# Init submodule (after clone)
+git submodule update --init
+
 # Python CLI
 source .venv/bin/activate
 negative-support --version
-python tests/baseline.py
+python core/tests/baseline.py
 
 # npm package
-cd packages/negative-support && npm run build
+cd core/packages/negative-support && npm run build
 node -e "import {generateSupports} from './dist/index.js'"
 
 # Server (local)
@@ -19,7 +43,7 @@ cd server && npm run dev          # API on :8787
 cd server/web && npm run dev      # React on :5173
 
 # Run all platform tests
-python tests/run_all.py
+python core/tests/run_all.py
 ```
 
 ## Testing
@@ -27,7 +51,7 @@ python tests/run_all.py
 **IMPORTANT**: After ANY change to the algorithm, run the unified test suite:
 
 ```bash
-python tests/run_all.py
+python core/tests/run_all.py
 ```
 
 This runs:
@@ -38,47 +62,7 @@ This runs:
 
 Update baselines after intentional algorithm changes:
 ```bash
-python tests/generate_baselines.py
-```
-
-Legacy STEP-specific baseline (kept for backwards compat):
-```bash
-python tests/baseline.py          # compare
-python tests/baseline.py --update # update
-```
-
-## Project Structure
-
-```
-src/negative_support/
-  __init__.py       # __version__, public API exports
-  cli.py            # Main CLI + compute_supports + compute_supports_mesh
-  license.py        # License checking, free tier, token validation
-  progress.py       # ProgressDisplay (spinner, progress bar, ANSI)
-
-packages/negative-support/  # npm package
-  src/index.ts      # Public API: generateSupports()
-  src/supports.ts   # Core algorithm (mesh + STEP pipelines)
-  src/stl.ts        # STL parser/exporter
-  src/obj.ts        # OBJ parser
-  src/step.ts       # STEP parser (occt-import-js)
-  src/mesh-utils.ts # Repair, inflate, bbox, volume
-
-server/
-  src/index.ts      # Cloudflare Worker entry, routes /api/* and static
-  src/api.ts        # API handlers (free-tier, validate, activate, stripe, checkout)
-  schema.sql        # D1 tables: machines, licenses, machine_licenses
-  web/              # React SPA (Vite): Landing, /try page, Success, Docs
-
-tests/
-  baselines/        # Golden baseline JSONs (per model × pipeline)
-  run_all.py        # Unified cross-platform test runner
-  test_python.py    # Python pipeline validation
-  test_npm.mjs      # npm package validation
-  generate_baselines.py  # Regenerate golden baselines from Python
-  baseline.py       # Legacy STEP regression test
-
-pyproject.toml      # Hatchling build, entry point: negative-support
+python core/tests/generate_baselines.py
 ```
 
 ## Architecture
@@ -93,20 +77,21 @@ pyproject.toml      # Hatchling build, entry point: negative-support
 
 ## Licensing System
 
-- **Client** (`license.py`): Checks paid token → free tier (server then local) → blocked
+- **Client** (`core/src/negative_support/license.py`): Checks paid token → free tier (server then local) → blocked
 - **Server** (`server/src/api.ts`): Cloudflare Workers + D1
-  - POST `/api/free-tier` — machine_id tracking (3 free runs)
+  - POST `/api/free-tier` — machine_id tracking (10 free runs)
   - POST `/api/validate` — token lookup
   - POST `/api/activate` — bind token to machine (max 3)
   - POST `/api/webhook/stripe` — payment → generate `ns_live_<32hex>` token
   - POST `/api/checkout` — create Stripe Checkout Session
 - **Config**: `~/.negative-support/usage.json` (free tier), `~/.negative-support/license.json` (token)
-- **Constants**: `FREE_RUNS=3`, `GRACE_DAYS=7`, `API_BASE=https://negative.support`
+- **Constants**: `FREE_RUNS=10`, `GRACE_DAYS=7`, `API_BASE=https://negative.support`
 
 ## Deploy Checklist
 
 ### PyPI
 ```bash
+cd core
 pip install build twine
 python -m build
 twine upload dist/*
@@ -114,7 +99,7 @@ twine upload dist/*
 
 ### npm
 ```bash
-cd packages/negative-support
+cd core/packages/negative-support
 npm run build
 npm publish
 ```
@@ -126,7 +111,5 @@ npx wrangler d1 create negative-support-db   # get database_id → wrangler.toml
 npm run migrate                               # create tables
 npx wrangler secret put STRIPE_SECRET_KEY
 npx wrangler secret put STRIPE_WEBHOOK_SECRET
-# Update PRICE_ID, SUCCESS_URL, CANCEL_URL in src/api.ts
 npm run deploy
-# Set Stripe webhook: https://<worker>.workers.dev/api/webhook/stripe
 ```

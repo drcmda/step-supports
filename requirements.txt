@@ -1,5 +1,0 @@
-trimesh[easy]>=4.0
-numpy
-manifold3d
-shapely>=2.0
-build123d>=0.8
