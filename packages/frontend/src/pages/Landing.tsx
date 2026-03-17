@@ -140,9 +140,8 @@ export default function Landing() {
           <p className='label-xs mb-4 text-center tracking-[0.14em]'>What is this?</p>
           <h2 className='text-center mb-6 text-2xl font-semibold tracking-[-0.01em]'>Supports that are shaped like your model</h2>
           <p className='text-dim text-center text-[1.05rem] max-w-[580px] mx-auto mb-14 leading-relaxed'>
-            Feed it a 3D model, get back support structures that conform to every surface. Instead of generic trees or grids, it subtracts
-            your model from a solid block — the leftover is the support. A precision air gap keeps them from touching, so they snap off
-            clean.
+            Drop in a STEP or STL file, get back supports shaped like the negative space around your model. A precision air gap allows them
+            to snap off clean.
           </p>
           <div className='grid grid-cols-3 gap-5 max-sm:grid-cols-1'>
             {/* Who */}
@@ -150,8 +149,8 @@ export default function Landing() {
               <p className='label-xs mb-3 text-accent/70'>Who it's for</p>
               <p className='text-sm text-primary/70 font-medium mb-2'>Designers and creators</p>
               <p className='text-dim text-sm leading-relaxed'>
-                If you design and publish 3D models, ship them with pre-made supports for perfect results out of the box. Your users get a
-                single file that prints without tuning. STEP files give the best results — full B-Rep overhang detection per face.
+                Ship your models with pre-made supports for the cleanest results. STEP gives the best results — the algorithm reads B-Rep
+                faces directly.
               </p>
             </div>
             {/* Who 2 */}
@@ -159,8 +158,8 @@ export default function Landing() {
               <p className='label-xs mb-3 text-accent/70'>Also for</p>
               <p className='text-sm text-primary/70 font-medium mb-2'>People who print</p>
               <p className='text-dim text-sm leading-relaxed'>
-                Downloaded an STL that needs supports? Drop it in and generate. Triangle-normal clustering gives you targeted per-region
-                supports — not as precise as STEP, but in some cases better than what your slicer generates.
+                STL is not as precise as STEP, but can beat your slicer in some cases. More stability while printing, cleaner results and
+                easier removal.
               </p>
             </div>
             {/* How */}
@@ -168,8 +167,8 @@ export default function Landing() {
               <p className='label-xs mb-3 text-accent/70'>How it works</p>
               <p className='text-sm text-primary/70 font-medium mb-2'>Boolean subtraction</p>
               <p className='text-dim text-sm leading-relaxed'>
-                The model is inflated outward by a small margin, then subtracted from a bounding column using boolean operations. The
-                negative space left behind is your support. Overlapping pieces are merged, tiny fragments discarded.
+                Models are subtracted from a bounding column. What's left is the support. Overhangs are detected by triangle normals or
+                B-Rep.
               </p>
             </div>
           </div>
@@ -182,15 +181,15 @@ export default function Landing() {
           <p className='label-xs mb-4 text-center tracking-[0.14em]'>Why negative-space?</p>
           <h2 className='text-center mb-5 text-2xl font-semibold tracking-[-0.01em]'>Tree supports vs. negative-space</h2>
           <p className='text-dim text-center text-[1.05rem] max-w-[520px] mx-auto mb-10 leading-relaxed'>
-            Custom volumetric supports that follow model curvature have been a secret weapon for those who could{' '}
+            Negative-space supports have been around for a while, but you needed to{' '}
             <a
               href='https://www.youtube.com/watch?v=_R2E8VwyNz0'
               target='_blank'
               rel='noopener noreferrer'
               className='text-accent/70 underline underline-offset-2 hover:text-accent transition-colors'>
               design them in CAD
-            </a>
-            . Now, anyone can generate them with a single click — no CAD skills required.
+            </a>{' '}
+            by hand. This tool does it automatically.
           </p>
           <div className='flex justify-center items-end gap-8 mb-14 max-sm:gap-4'>
             <div className='text-center'>
@@ -220,22 +219,9 @@ export default function Landing() {
               </div>
               <ul className='list-none space-y-3'>
                 {[
-                  [
-                    'Fuse to the model',
-                    'Branch tips bond directly to surfaces, leaving scars, pitting, and layer damage that require sanding or reprinting.',
-                  ],
-                  [
-                    'Ruin contact surfaces',
-                    'Smooth faces, threads, and mating surfaces are marred wherever support tips touch — destroying the finish you designed for.',
-                  ],
-                  [
-                    'Struggle with complex geometry',
-                    'Non-planar overhangs, curved undercuts, and internal cavities receive inconsistent coverage, leading to failed prints or drooping layers.',
-                  ],
-                  [
-                    'Difficult removal',
-                    'Supports snap unevenly, leave stubs behind, and often take chunks of the model with them — especially with PETG and nylon.',
-                  ],
+                  ['Fuse to the model', 'Tips bond to surfaces, scarring threads, mating faces, and smooth finishes.'],
+                  ['Struggle with complex geometry', 'Curved overhangs and internal cavities get inconsistent coverage.'],
+                  ['Are difficult to remove', 'Supports snap unevenly and leave stubs — especially with PETG and nylon.'],
                 ].map(([title, desc]) => (
                   <li key={title} className='flex gap-2.5'>
                     <div className='w-8 shrink-0 flex justify-center pt-0.5'>
@@ -278,22 +264,9 @@ export default function Landing() {
               </div>
               <ul className='list-none space-y-3'>
                 {[
-                  [
-                    'Reduced contact damage',
-                    'A precision air gap (default 0.2mm) keeps supports from ever touching the model. Contact surfaces stay pristine.',
-                  ],
-                  [
-                    'Improved surface finish',
-                    'Supports curve around your geometry without fusing. Smooth faces, threads, and fine details print exactly as designed.',
-                  ],
-                  [
-                    'Full coverage on any shape',
-                    'The negative shell wraps non-planar overhangs, curved undercuts, and complex cavities uniformly — no gaps, no drooping.',
-                  ],
-                  [
-                    'Clean snap-off removal',
-                    'Supports lift away in one piece. No stubs, no prying, no damage. Works reliably across PLA, PETG, ABS, and nylon.',
-                  ],
+                  ['Have less contact damage', 'A configurable air gap keeps supports off the surface. Fine details come out clean.'],
+                  ['Cover on any shape', 'Supports follow overhangs, undercuts, and cavities uniformly.'],
+                  ['Are easier to remove', 'Supports lift off in one piece. Works across PLA, PETG, ABS, and nylon.'],
                 ].map(([title, desc]) => (
                   <li key={title} className='flex gap-2.5'>
                     <div className='w-8 shrink-0 flex justify-center pt-0.5'>
@@ -324,9 +297,9 @@ export default function Landing() {
       <section className='py-24'>
         <div className='max-w-[1200px] mx-auto px-6'>
           <p className='label-xs mb-4 text-center tracking-[0.14em]'>Capabilities</p>
-          <h2 className='text-center mb-6 text-2xl font-semibold tracking-[-0.01em]'>Built for precision printing</h2>
+          <h2 className='text-center mb-6 text-2xl font-semibold tracking-[-0.01em]'>What's in the box</h2>
           <p className='text-dim text-center text-[1.05rem] max-w-[480px] mx-auto mb-14 leading-relaxed'>
-            From overhang detection to slicer-ready export — everything you need in one tool.
+            Overhang detection, gap control, slicer-ready export.
           </p>
           <div className='grid grid-cols-2 gap-5 max-sm:grid-cols-1'>
             {[
@@ -347,7 +320,7 @@ export default function Landing() {
                 ),
                 label: 'STEP + Mesh',
                 title: 'Smart overhang detection',
-                desc: 'STEP files use B-Rep face topology to identify exactly which surfaces need support. STL and OBJ files use triangle-normal clustering to detect overhang regions — both produce targeted per-region supports.',
+                desc: 'STEP files get B-Rep face detection. STL and OBJ use triangle-normal clustering. Both produce per-region supports.',
               },
               {
                 icon: (
@@ -367,7 +340,7 @@ export default function Landing() {
                 ),
                 label: '3MF export',
                 title: 'Slicer-ready 3MF output',
-                desc: 'The 3mf export bundles everything into a single file with per-object slicer settings for supports: 1 wall, 10% cubic infill. Open in your slicer and hit print.',
+                desc: 'Bundles model + supports into one file with slicer settings baked in (1 wall, 10% cubic infill). Open and print.',
               },
               {
                 icon: (
@@ -385,7 +358,7 @@ export default function Landing() {
                 ),
                 label: 'Gap control',
                 title: 'Precision air gap',
-                desc: 'Supports follow every curve and contour of your model but leave a configurable gap (default 0.2mm). Tune it for your nozzle size and filament — tight enough to support, loose enough to snap off.',
+                desc: 'Configurable gap between model and support (default 0.2 mm). Tune it for your nozzle and filament.',
               },
               {
                 icon: (
@@ -404,7 +377,7 @@ export default function Landing() {
                 ),
                 label: 'Cross-platform',
                 title: 'Web, CLI, and API',
-                desc: 'Same algorithm everywhere. Generate in the browser, automate with the CLI, or integrate via the JavaScript API. Identical results on every platform.',
+                desc: 'Same algorithm in the browser, CLI, and JS API. Identical output everywhere.',
               },
             ].map((f) => (
               <div key={f.title} className='rounded-xl p-7 glass group hover:bg-surface-bright/60 transition-colors'>
