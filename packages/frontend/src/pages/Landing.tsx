@@ -134,54 +134,14 @@ export default function Landing() {
         </div>
       </section>
 
-      {/* Explainer */}
+      {/* Explainer + Comparison */}
       <section className='py-24'>
         <div className='max-w-[1200px] mx-auto px-6'>
           <p className='label-xs mb-4 text-center tracking-[0.14em]'>What is this?</p>
           <h2 className='text-center mb-6 text-2xl font-semibold tracking-[-0.01em]'>Supports that are shaped like your model</h2>
           <p className='text-dim text-center text-[1.05rem] max-w-[580px] mx-auto mb-14 leading-relaxed'>
-            Drop in a STEP or STL file, get back supports shaped like the negative space around your model. A precision air gap allows them
-            to snap off clean.
-          </p>
-          <div className='grid grid-cols-3 gap-5 max-sm:grid-cols-1'>
-            {/* Who */}
-            <div className='rounded-xl p-7 glass'>
-              <p className='label-xs mb-3 text-accent/70'>Who it's for</p>
-              <p className='text-sm text-primary/70 font-medium mb-2'>Designers and creators</p>
-              <p className='text-dim text-sm leading-relaxed'>
-                Ship your models with pre-made supports for the cleanest results. STEP gives the best results — the algorithm reads B-Rep
-                faces directly.
-              </p>
-            </div>
-            {/* Who 2 */}
-            <div className='rounded-xl p-7 glass'>
-              <p className='label-xs mb-3 text-accent/70'>Also for</p>
-              <p className='text-sm text-primary/70 font-medium mb-2'>People who print</p>
-              <p className='text-dim text-sm leading-relaxed'>
-                STL is not as precise as STEP, but can beat your slicer in some cases. More stability while printing, cleaner results and
-                easier removal.
-              </p>
-            </div>
-            {/* How */}
-            <div className='rounded-xl p-7 glass'>
-              <p className='label-xs mb-3 text-accent/70'>How it works</p>
-              <p className='text-sm text-primary/70 font-medium mb-2'>Boolean subtraction</p>
-              <p className='text-dim text-sm leading-relaxed'>
-                Models are subtracted from a bounding column. What's left is the support. Overhangs are detected by triangle normals or
-                B-Rep.
-              </p>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* Comparison */}
-      <section className='py-24'>
-        <div className='max-w-[1200px] mx-auto px-6'>
-          <p className='label-xs mb-4 text-center tracking-[0.14em]'>Why negative-space?</p>
-          <h2 className='text-center mb-5 text-2xl font-semibold tracking-[-0.01em]'>Tree supports vs. negative-space</h2>
-          <p className='text-dim text-center text-[1.05rem] max-w-[520px] mx-auto mb-10 leading-relaxed'>
-            Negative-space supports have been around for a while, but you needed to{' '}
+            Drop in a STEP, STL or OBJ file, get back supports shaped like the negative space around your model. Negative-space supports
+            have been around for a while, but you needed to{' '}
             <a
               href='https://www.youtube.com/watch?v=_R2E8VwyNz0'
               target='_blank'
@@ -205,9 +165,9 @@ export default function Landing() {
               <p className='label-xs mt-3'>Combined</p>
             </div>
           </div>
-          <div className='grid grid-cols-2 gap-5 max-sm:grid-cols-1'>
-            {/* Tree supports */}
-            <div className='rounded-xl p-7 glass'>
+          <div className='grid grid-cols-[3fr_2.5fr] gap-5 max-sm:grid-cols-1'>
+            {/* Tree supports — top left */}
+            <div className='rounded-xl p-7'>
               <div className='flex items-center gap-2.5 mb-5'>
                 <div className='w-8 h-8 rounded-lg bg-pink-dim flex items-center justify-center'>
                   <svg width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='currentColor' strokeWidth='2' className='text-pink'>
@@ -215,7 +175,7 @@ export default function Landing() {
                     <line x1='6' y1='6' x2='18' y2='18' />
                   </svg>
                 </div>
-                <h3 className='text-[0.95rem] font-medium text-pink'>Tree-, Block-Supports</h3>
+                <h3 className='text-[0.95rem] font-medium text-pink'>Tree and column supports</h3>
               </div>
               <ul className='list-none space-y-3'>
                 {[
@@ -245,8 +205,8 @@ export default function Landing() {
                 ))}
               </ul>
             </div>
-            {/* Negative-space supports */}
-            <div className='rounded-xl p-7 border border-accent/15 bg-accent-glow'>
+            {/* Negative-space supports — top right */}
+            <div className='rounded-xl p-7'>
               <div className='flex items-center gap-2.5 mb-5'>
                 <div className='w-8 h-8 rounded-lg bg-accent-dim flex items-center justify-center'>
                   <svg
@@ -289,111 +249,114 @@ export default function Landing() {
                 ))}
               </ul>
             </div>
+            {/* Bottom left — 2 items side by side */}
+            <div className='grid grid-cols-2 gap-5 max-lg:grid-cols-1'>
+              {[
+                [
+                  "Who it's for",
+                  'Designers and creators',
+                  'Ship your models with pre-made supports for the cleanest results. STEP gives the best results — the algorithm reads B-Rep faces directly.',
+                ],
+                [
+                  'Also for',
+                  'People who print',
+                  'STL are not as precise as STEP, but supports could beat your slicer. More stability while printing, cleaner results and easier removal.',
+                ],
+              ].map(([label, title, desc]) => (
+                <div key={label} className='flex gap-2.5 rounded-xl p-7'>
+                  <div className='w-8 shrink-0' />
+                  <div>
+                    <p className='label-xs mb-3 text-accent/70'>{label}</p>
+                    <p className='text-sm text-primary/70 font-medium mb-2'>{title}</p>
+                    <p className='text-dim text-sm leading-relaxed'>{desc}</p>
+                  </div>
+                </div>
+              ))}
+            </div>
+            {/* Bottom right */}
+            <div className='flex gap-2.5 rounded-xl p-7'>
+              <div className='w-8 shrink-0' />
+              <div>
+                <p className='label-xs mb-3 text-accent/70'>How it works</p>
+                <p className='text-sm text-primary/70 font-medium mb-2'>Boolean subtraction</p>
+                <p className='text-dim text-sm leading-relaxed'>
+                  Your model is subtracted from a bounding column — what's left is the support. A configurable air gap helps to keep
+                  supports from fusing to the surface. STEP files use B-Rep face normals for overhang detection; STL and OBJ files use
+                  triangle-normal clustering. Output is a slicer-ready 3MF.
+                </p>
+              </div>
+            </div>
           </div>
         </div>
       </section>
 
       {/* Features */}
-      <section className='py-24'>
-        <div className='max-w-[1200px] mx-auto px-6'>
+      <section className='py-24 border-t border-border bg-base-alt'>
+        <div className='max-w-[1200px] mx-auto px-6 pb-6'>
           <p className='label-xs mb-4 text-center tracking-[0.14em]'>Capabilities</p>
           <h2 className='text-center mb-6 text-2xl font-semibold tracking-[-0.01em]'>What's in the box</h2>
-          <p className='text-dim text-center text-[1.05rem] max-w-[480px] mx-auto mb-14 leading-relaxed'>
+          <p className='text-dim text-center text-[1.05rem] max-w-[480px] mx-auto leading-relaxed'>
             Overhang detection, gap control, slicer-ready export.
           </p>
-          <div className='grid grid-cols-2 gap-5 max-sm:grid-cols-1'>
-            {[
-              {
-                icon: (
-                  <svg
-                    width='20'
-                    height='20'
-                    viewBox='0 0 24 24'
-                    fill='none'
-                    stroke='currentColor'
-                    strokeWidth='1.5'
-                    className='text-accent'>
-                    <path d='M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z' />
-                    <polyline points='3.27 6.96 12 12.01 20.73 6.96' />
-                    <line x1='12' y1='22.08' x2='12' y2='12' />
-                  </svg>
-                ),
-                label: 'STEP + Mesh',
-                title: 'Smart overhang detection',
-                desc: 'STEP files get B-Rep face detection. STL and OBJ use triangle-normal clustering. Both produce per-region supports.',
-              },
-              {
-                icon: (
-                  <svg
-                    width='20'
-                    height='20'
-                    viewBox='0 0 24 24'
-                    fill='none'
-                    stroke='currentColor'
-                    strokeWidth='1.5'
-                    className='text-accent'>
-                    <path d='M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z' />
-                    <polyline points='14 2 14 8 20 8' />
-                    <line x1='16' y1='13' x2='8' y2='13' />
-                    <line x1='16' y1='17' x2='8' y2='17' />
-                  </svg>
-                ),
-                label: '3MF export',
-                title: 'Slicer-ready 3MF output',
-                desc: 'Bundles model + supports into one file with slicer settings baked in (1 wall, 10% cubic infill). Open and print.',
-              },
-              {
-                icon: (
-                  <svg
-                    width='20'
-                    height='20'
-                    viewBox='0 0 24 24'
-                    fill='none'
-                    stroke='currentColor'
-                    strokeWidth='1.5'
-                    className='text-accent'>
-                    <circle cx='12' cy='12' r='10' />
-                    <path d='M12 8v4l3 3' />
-                  </svg>
-                ),
-                label: 'Gap control',
-                title: 'Precision air gap',
-                desc: 'Configurable gap between model and support (default 0.2 mm). Tune it for your nozzle and filament.',
-              },
-              {
-                icon: (
-                  <svg
-                    width='20'
-                    height='20'
-                    viewBox='0 0 24 24'
-                    fill='none'
-                    stroke='currentColor'
-                    strokeWidth='1.5'
-                    className='text-accent'>
-                    <rect x='2' y='3' width='20' height='14' rx='2' ry='2' />
-                    <line x1='8' y1='21' x2='16' y2='21' />
-                    <line x1='12' y1='17' x2='12' y2='21' />
-                  </svg>
-                ),
-                label: 'Cross-platform',
-                title: 'Web, CLI, and API',
-                desc: 'Same algorithm in the browser, CLI, and JS API. Identical output everywhere.',
-              },
-            ].map((f) => (
-              <div key={f.title} className='rounded-xl p-7 glass group hover:bg-surface-bright/60 transition-colors'>
-                <div className='flex items-center gap-3 mb-3'>
-                  <div className='w-9 h-9 rounded-lg bg-accent-dim/50 flex items-center justify-center shrink-0'>{f.icon}</div>
-                  <div>
-                    <p className='font-mono text-[9px] tracking-[0.14em] text-muted uppercase'>{f.label}</p>
-                    <h3 className='text-[0.95rem] font-medium text-primary/80 group-hover:text-primary transition-colors leading-tight'>
-                      {f.title}
-                    </h3>
-                  </div>
-                </div>
-                <p className='text-dim text-sm leading-relaxed'>{f.desc}</p>
-              </div>
-            ))}
-          </div>
+        </div>
+        <div className='max-w-[1200px] mx-auto px-6 grid grid-cols-4 max-md:grid-cols-2 max-sm:grid-cols-1'>
+          {[
+            {
+              icon: (
+                <svg width='20' height='20' viewBox='0 0 24 24' fill='none' stroke='currentColor' strokeWidth='1.5' className='text-accent'>
+                  <path d='M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z' />
+                  <polyline points='3.27 6.96 12 12.01 20.73 6.96' />
+                  <line x1='12' y1='22.08' x2='12' y2='12' />
+                </svg>
+              ),
+              label: 'STEP + Mesh',
+              title: 'Smart overhang detection',
+              desc: 'STEP files get B-Rep face detection. STL and OBJ use triangle-normal clustering. Both produce per-region supports.',
+            },
+            {
+              icon: (
+                <svg width='20' height='20' viewBox='0 0 24 24' fill='none' stroke='currentColor' strokeWidth='1.5' className='text-accent'>
+                  <path d='M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z' />
+                  <polyline points='14 2 14 8 20 8' />
+                  <line x1='16' y1='13' x2='8' y2='13' />
+                  <line x1='16' y1='17' x2='8' y2='17' />
+                </svg>
+              ),
+              label: '3MF export',
+              title: 'Slicer-ready 3MF output',
+              desc: 'Bundles model + supports into one file with slicer settings baked in (1 wall, 10% cubic infill). Open and print.',
+            },
+            {
+              icon: (
+                <svg width='20' height='20' viewBox='0 0 24 24' fill='none' stroke='currentColor' strokeWidth='1.5' className='text-accent'>
+                  <circle cx='12' cy='12' r='10' />
+                  <path d='M12 8v4l3 3' />
+                </svg>
+              ),
+              label: 'Gap control',
+              title: 'Precision air gap',
+              desc: 'Configurable margin between model and support (default 0.2 mm). Tune it for your nozzle and filament.',
+            },
+            {
+              icon: (
+                <svg width='20' height='20' viewBox='0 0 24 24' fill='none' stroke='currentColor' strokeWidth='1.5' className='text-accent'>
+                  <rect x='2' y='3' width='20' height='14' rx='2' ry='2' />
+                  <line x1='8' y1='21' x2='16' y2='21' />
+                  <line x1='12' y1='17' x2='12' y2='21' />
+                </svg>
+              ),
+              label: 'Cross-platform',
+              title: 'Web, CLI, and API',
+              desc: 'Same algorithm in the browser, CLI, and JS API. Identical output everywhere.',
+            },
+          ].map((f, i) => (
+            <div key={f.title} className='py-8 px-6 max-md:px-0 max-md:py-6'>
+              <div className='w-9 h-9 rounded-lg bg-accent-dim/50 flex items-center justify-center shrink-0 mb-3'>{f.icon}</div>
+              <p className='label-xs mb-2'>{f.label}</p>
+              <p className='text-primary/70 text-sm font-medium mb-1'>{f.title}</p>
+              <p className='text-dim text-sm leading-relaxed'>{f.desc}</p>
+            </div>
+          ))}
         </div>
       </section>
 
@@ -412,7 +375,8 @@ export default function Landing() {
           <p className='label-xs mb-4 text-center tracking-[0.14em]'>Pricing</p>
           <h2 className='text-center mb-4 text-3xl font-semibold tracking-[-0.02em]'>Simple, one-time pricing</h2>
           <p className='text-dim text-center text-[1.05rem] max-w-[420px] mx-auto mb-14 leading-relaxed'>
-            Start free. Upgrade when you're ready — one payment, no subscriptions.
+            Start free. Consider helping us keep improving by purchasing a lifetime license. Your support means a lot and helps fund
+            development, filament for testing, maintenance, and new features.
           </p>
           <div className='grid grid-cols-2 gap-5 max-w-[760px] mx-auto max-sm:grid-cols-1'>
             {/* Free */}
@@ -554,6 +518,7 @@ export default function Landing() {
           <p className='text-center mt-10 text-muted text-xs font-mono'>All prices in USD · Secure checkout via Stripe</p>
         </div>
       </section>
+
     </div>
   )
 }
