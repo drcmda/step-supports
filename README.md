@@ -64,9 +64,13 @@ For each overhang region:
 
 ## API
 
+Call `activate()` with your license token before generating. The token is the same one you use for the CLI.
+
 ```js
-import { generateSupports } from 'negative-support'
+import { generateSupports, activate } from 'negative-support'
 import { readFileSync, writeFileSync } from 'fs'
+
+await activate('ns_live_...')
 
 const buffer = readFileSync('model.stl').buffer
 const result = await generateSupports(buffer, {
@@ -79,7 +83,7 @@ writeFileSync('supports.stl', Buffer.from(result.stl))
 console.log(result.stats) // { pieces, faces, volume }
 ```
 
-`result.supportPieces` contains individual `ParsedMesh` objects for custom export or 3MF packaging.
+`generateSupports()` will throw if called without activation or if the free tier is exhausted. `result.supportPieces` contains individual `ParsedMesh` objects for custom export or 3MF packaging.
 
 ## Documentation
 

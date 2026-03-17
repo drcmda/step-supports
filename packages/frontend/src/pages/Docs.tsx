@@ -166,11 +166,17 @@ negative-support model.stl -o my_supports.stl`}
           <div className="flex items-center gap-3 mb-5 pt-5 border-t border-border">
             <h2 className="text-lg font-medium">npm API reference</h2>
           </div>
-          <p className="text-dim text-sm mb-4 leading-relaxed">You can also use negative-support as a library:</p>
+          <p className="text-dim text-sm mb-4 leading-relaxed">
+            You can also use negative-support as a library. Call{" "}
+            <code className="font-mono text-[11px] bg-surface px-1.5 py-0.5 rounded text-primary/70">activate()</code>{" "}
+            with your license token before generating:
+          </p>
           <div className="bg-base/60 border border-border rounded-lg px-4 py-3.5 mb-4 overflow-x-auto">
             <code className="font-mono text-xs text-code whitespace-pre leading-relaxed">
-              {`import { generateSupports } from 'negative-support'
+              {`import { generateSupports, activate } from 'negative-support'
 import { readFileSync, writeFileSync } from 'fs'
+
+await activate('ns_live_...')
 
 const buffer = readFileSync('model.stl').buffer
 const result = await generateSupports(buffer, {
@@ -182,6 +188,12 @@ writeFileSync('model_supports.stl', Buffer.from(result.stl))
 console.log(result.stats) // { pieces, faces, volume }`}
             </code>
           </div>
+          <p className="text-dim text-sm mb-4 leading-relaxed">
+            The token is the same one you use for the CLI. Get it from the user menu after signing in
+            at <a href="/" className="text-accent no-underline hover:underline">negative.support</a>.
+            Calling <code className="font-mono text-[11px] bg-surface px-1.5 py-0.5 rounded text-primary/70">generateSupports()</code> without
+            activation will throw.
+          </p>
 
           <h3 className="text-base font-medium mt-6 mb-3">GenerateOptions</h3>
           <div className="rounded-xl overflow-hidden border border-border">
