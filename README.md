@@ -60,7 +60,7 @@ For each overhang region:
 ### 3. Output
 
 - **STL** (default) — All support pieces merged into a single binary STL
-- **3MF** (`--3mf`) — Model + individual support pieces as separate objects with per-piece slicer settings (0% infill, no top layers)
+- **3MF** (`--3mf`) — Model + individual support pieces as separate objects with per-piece slicer settings (1 wall, 10% cubic infill)
 
 ## API
 
