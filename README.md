@@ -29,14 +29,14 @@ negative-support model.stl -q              # quiet mode for scripting
 
 ### Options
 
-| Flag | Default | Description |
-|------|---------|-------------|
-| `-m, --margin <mm>` | `0.2` | Gap between supports and model |
-| `-a, --angle <deg>` | `45` | Overhang angle threshold |
-| `--min-volume <mm³>` | `1.0` | Discard pieces smaller than this |
-| `--3mf` | off | Export 3MF with model + supports |
-| `-o, --output <path>` | `<input>_supports.stl` | Output path |
-| `-q, --quiet` | off | Suppress progress display |
+| Flag                  | Default                | Description                      |
+| --------------------- | ---------------------- | -------------------------------- |
+| `-m, --margin <mm>`   | `0.2`                  | Gap between supports and model   |
+| `-a, --angle <deg>`   | `45`                   | Overhang angle threshold         |
+| `--min-volume <mm³>`  | `1.0`                  | Discard pieces smaller than this |
+| `--3mf`               | off                    | Export 3MF with model + supports |
+| `-o, --output <path>` | `<input>_supports.stl` | Output path                      |
+| `-q, --quiet`         | off                    | Suppress progress display        |
 
 ## How It Works
 
@@ -88,20 +88,6 @@ console.log(result.stats) // { pieces, faces, volume }
 ## Documentation
 
 Full docs at [negative.support/docs](https://negative.support/docs).
-
-## Repo Structure
-
-This is the public repo (website + API + issue tracking). The core algorithm lives in a private submodule at `packages/core/`.
-
-```
-packages/
-  core/                     # git submodule → negative-support-core (private)
-    src/                    # TypeScript algorithm + CLI source
-    tests/                  # Test suite + baselines
-    models/                 # Test models
-  server/                   # Cloudflare Worker API
-  frontend/                 # React SPA (Vite + Tailwind)
-```
 
 ## Development
 
