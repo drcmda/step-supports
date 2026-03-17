@@ -13,9 +13,9 @@ import type { ParsedMesh, STEPFaceInfo } from '@core/types';
 import { parseSTL, exportSTL } from '@core/stl';
 import { parseOBJ } from '@core/obj';
 import { parseSTEP } from '../lib/step';
-import { repairMesh } from '@core/mesh-utils';
+import { repairMesh, computeMeshOverhangs } from '@core/mesh-utils';
 import { export3MF } from '@core/threemf';
-import { getManifold, generateSupportsMesh, generateSupportsSTEP } from '@core/supports';
+import { getManifold, generateSupportsMesh, generateSupportsMeshOverhang, generateSupportsSTEP } from '@core/supports';
 
 // -- Message types --
 
@@ -121,9 +121,21 @@ self.onmessage = async (e: MessageEvent<InMessage>) => {
     };
 
     // Run the appropriate pipeline from core
-    const result = stepFaces
-      ? generateSupportsSTEP(parsed, stepFaces, msg.margin, msg.angle, msg.minVolume, progress)
-      : generateSupportsMesh(parsed, msg.margin, msg.minVolume, progress);
+    let result;
+    if (stepFaces) {
+      result = generateSupportsSTEP(parsed, stepFaces, msg.margin, msg.angle, msg.minVolume, progress);
+    } else {
+      // Try overhang detection for mesh files (STL/OBJ)
+      progress('Overhang', 'Detecting overhangs...');
+      const overhangClusters = computeMeshOverhangs(parsed, msg.angle);
+      if (overhangClusters.length > 0) {
+        progress('Overhang', `${overhangClusters.length} regions detected`);
+        result = generateSupportsMeshOverhang(parsed, overhangClusters, msg.margin, msg.angle, msg.minVolume, progress);
+      } else {
+        progress('Overhang', 'No overhangs — full shell');
+        result = generateSupportsMesh(parsed, msg.margin, msg.minVolume, progress);
+      }
+    }
 
     // Export 3MF (model + supports)
     progress('Export', 'Writing 3MF...');
