@@ -40,7 +40,16 @@ interface ResultMessage {
   type: 'result';
   stlBuffer: ArrayBuffer;
   threemfBuffer: ArrayBuffer;
-  stats: { pieces: number; faces: number; volume: number };
+  stats: {
+    pieces: number; faces: number; volume: number;
+    modelVertices: number; modelFaces: number;
+    supportVertices: number; supportFaces: number;
+    margin: number; format: string;
+  };
+  modelVertices: Float32Array;
+  modelFaces: Uint32Array;
+  supportVertices: Float32Array;
+  supportFaces: Uint32Array;
 }
 
 interface ErrorMessage {
@@ -120,13 +129,38 @@ self.onmessage = async (e: MessageEvent<InMessage>) => {
     progress('Export', 'Writing 3MF...');
     const threemfBuffer = export3MF(modelMesh, result.supportPieces);
 
+    // Copy model mesh for viewer (modelMesh buffers are consumed by transfer)
+    const viewerModelVerts = new Float32Array(modelMesh.vertices);
+    const viewerModelFaces = new Uint32Array(modelMesh.faces);
+
     const out: ResultMessage = {
       type: 'result',
       stlBuffer: result.stl,
       threemfBuffer,
-      stats: result.stats,
+      stats: {
+        ...result.stats,
+        modelVertices: modelMesh.vertices.length / 3,
+        modelFaces: modelMesh.faces.length / 3,
+        supportVertices: result.supportMesh.vertices.length / 3,
+        supportFaces: result.supportMesh.faces.length / 3,
+        margin: msg.margin,
+        format: ext.toUpperCase(),
+      },
+      modelVertices: viewerModelVerts,
+      modelFaces: viewerModelFaces,
+      supportVertices: result.supportMesh.vertices,
+      supportFaces: result.supportMesh.faces,
     };
-    self.postMessage(out, { transfer: [result.stl, threemfBuffer] });
+    self.postMessage(out, {
+      transfer: [
+        result.stl,
+        threemfBuffer,
+        viewerModelVerts.buffer,
+        viewerModelFaces.buffer,
+        result.supportMesh.vertices.buffer,
+        result.supportMesh.faces.buffer,
+      ],
+    });
   } catch (err) {
     self.postMessage({
       type: 'error',

@@ -1,8 +1,10 @@
-import { useState, useRef, useCallback, useEffect } from 'react';
+import { useState, useRef, useCallback, useEffect, lazy, Suspense } from 'react';
 import FileDropZone from '../components/FileDropZone';
 import ProgressSteps, { type Step } from '../components/ProgressSteps';
 import { useAuth } from '../lib/AuthContext';
 import { loginUrl } from '../lib/auth';
+
+const MeshViewer = lazy(() => import('../components/MeshViewer'));
 
 type Phase = 'upload' | 'processing' | 'done' | 'error';
 
@@ -12,6 +14,12 @@ interface Stats {
   pieces: number;
   faces: number;
   volume: number;
+  modelVertices: number;
+  modelFaces: number;
+  supportVertices: number;
+  supportFaces: number;
+  margin: number;
+  format: string;
 }
 
 export default function Try() {
@@ -25,6 +33,12 @@ export default function Try() {
   const [errorMsg, setErrorMsg] = useState('');
   const [downloadUrl, setDownloadUrl] = useState<string | null>(null);
   const [downloadUrl3mf, setDownloadUrl3mf] = useState<string | null>(null);
+  const [meshData, setMeshData] = useState<{
+    modelVertices: Float32Array;
+    modelFaces: Uint32Array;
+    supportVertices: Float32Array;
+    supportFaces: Uint32Array;
+  } | null>(null);
   const workerRef = useRef<Worker | null>(null);
 
   const isDev = import.meta.env.DEV;
@@ -92,6 +106,12 @@ export default function Try() {
         const threemfBlob = new Blob([msg.threemfBuffer], { type: 'application/vnd.ms-package.3dmanufacturing-3dmodel+xml' });
         setDownloadUrl3mf(URL.createObjectURL(threemfBlob));
         setStats(msg.stats);
+        setMeshData({
+          modelVertices: msg.modelVertices,
+          modelFaces: msg.modelFaces,
+          supportVertices: msg.supportVertices,
+          supportFaces: msg.supportFaces,
+        });
         setPhase('done');
         // Track run server-side
         if (!licensed && auth.license?.token) {
@@ -143,6 +163,7 @@ export default function Try() {
     if (downloadUrl3mf) URL.revokeObjectURL(downloadUrl3mf);
     setDownloadUrl(null);
     setDownloadUrl3mf(null);
+    setMeshData(null);
     setPhase('upload');
     setFile(null);
     setSteps([]);
@@ -197,6 +218,8 @@ export default function Try() {
   return (
     <div className="py-16">
       <div className="max-w-[1200px] mx-auto px-6">
+
+        {/* Header */}
         <div className="flex items-center gap-3 mb-4">
           <p className="label-xs tracking-[0.14em]">Browser</p>
           {licensed && (
@@ -207,141 +230,189 @@ export default function Try() {
           )}
         </div>
         <h1 className="text-2xl font-semibold mb-2 tracking-[-0.01em]">Generate supports</h1>
-        <p className="text-dim text-sm mb-8 leading-relaxed max-w-[520px]">
+        <p className="text-dim text-sm leading-relaxed mb-6 max-w-[560px]">
           Upload an STL, OBJ, or STEP file and generate negative-space supports.
           Runs entirely in your browser — no install needed.
         </p>
 
-        {phase === 'upload' && (
-          <div>
-            <FileDropZone onFile={setFile} disabled={exhausted} />
-
-            <div className="flex items-center gap-4 flex-wrap">
-              <label className="flex items-center gap-2 text-sm text-dim">
-                <span className="font-mono text-[11px] tracking-[0.04em] text-muted">Margin (mm)</span>
-                <input
-                  type="number"
-                  min={0.05}
-                  max={2.0}
-                  step={0.05}
-                  value={margin}
-                  onChange={(e) => setMargin(parseFloat(e.target.value) || 0.2)}
-                  className="w-[72px] px-2 py-1.5 bg-base/60 border border-border rounded-md text-primary font-mono text-xs focus:border-accent/40 focus:outline-none transition-colors"
-                />
-              </label>
-              <label className="flex items-center gap-2 text-sm text-dim">
-                <span className="font-mono text-[11px] tracking-[0.04em] text-muted">Angle (°)</span>
-                <input
-                  type="number"
-                  min={20}
-                  max={80}
-                  step={5}
-                  value={angle}
-                  onChange={(e) => setAngle(parseInt(e.target.value, 10) || 45)}
-                  className="w-[72px] px-2 py-1.5 bg-base/60 border border-border rounded-md text-primary font-mono text-xs focus:border-accent/40 focus:outline-none transition-colors"
-                />
-              </label>
-
-              {exhausted ? (
-                <div className="rounded-xl px-5 py-4 flex-1 glass">
-                  <p className="text-dim text-sm mb-2">You've used all {FREE_RUNS} free runs.</p>
-                  <div className="flex items-center gap-3 flex-wrap">
-                    <a href="/#pricing" className="text-accent text-sm no-underline hover:underline">Buy a license</a>
-                  </div>
-                </div>
-              ) : (
-                <>
-                  <button
-                    className="inline-flex items-center gap-2 px-5 py-2.5 rounded-lg text-sm font-medium bg-accent text-base border-none cursor-pointer hover:brightness-110 transition-all glow-accent disabled:opacity-50 disabled:cursor-not-allowed disabled:shadow-none"
-                    onClick={handleGenerate}
-                    disabled={!file}
-                  >
-                    Generate supports
-                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className="opacity-60"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
-                  </button>
-                  {licensed ? (
-                    <p className="text-accent/50 text-xs font-mono ml-auto">∞ unlimited</p>
-                  ) : (
-                    <p className="text-muted text-xs font-mono ml-auto">
-                      {auth.freeRemaining}/{FREE_RUNS} free
-                    </p>
-                  )}
-                </>
-              )}
-            </div>
-          </div>
-        )}
-
-        {phase === 'processing' && (
-          <div className="mt-6">
-            <ProgressSteps steps={steps} />
-            <button
-              className="inline-flex items-center px-5 py-2.5 rounded-lg text-sm font-medium glass glass-hover text-primary/70 cursor-pointer border-none"
-              onClick={handleCancel}
-            >
-              Cancel
-            </button>
-          </div>
-        )}
-
-        {phase === 'done' && stats && (
-          <div className="mt-6">
-            <div className="rounded-xl p-6 mb-6 border border-accent/20 bg-accent-glow">
-              <p className="label-xs text-accent/50 mb-4">Result</p>
-              <div className="grid grid-cols-3 gap-6 max-sm:grid-cols-1">
-                <div>
-                  <p className="font-mono text-[11px] text-muted mb-1">Pieces</p>
-                  <p className="font-pixel text-2xl text-accent">{stats.pieces}</p>
-                </div>
-                <div>
-                  <p className="font-mono text-[11px] text-muted mb-1">Faces</p>
-                  <p className="font-pixel text-2xl text-accent">{stats.faces.toLocaleString()}</p>
-                </div>
-                <div>
-                  <p className="font-mono text-[11px] text-muted mb-1">Volume</p>
-                  <p className="font-pixel text-2xl text-accent">{stats.volume.toLocaleString(undefined, { maximumFractionDigits: 1 })} <span className="text-sm text-dim font-mono">mm&sup3;</span></p>
-                </div>
-              </div>
-            </div>
-            <div className="flex gap-3 flex-wrap">
-              <a
-                className="inline-flex items-center gap-2 px-5 py-2.5 rounded-lg text-sm font-medium no-underline bg-accent text-base hover:brightness-110 transition-all glow-accent"
-                href={downloadUrl3mf!}
-                download={outputName3mf}
+        {/* Controls row */}
+        {(phase === 'upload' || phase === 'processing') && !exhausted && (
+          <div className="flex flex-wrap items-center gap-3 mb-6">
+            <label className="flex items-center gap-2">
+              <span className="font-mono text-[11px] tracking-[0.04em] text-muted">Margin (mm)</span>
+              <input
+                type="number"
+                min={0.05}
+                max={2.0}
+                step={0.05}
+                value={margin}
+                onChange={(e) => setMargin(parseFloat(e.target.value) || 0.2)}
+                disabled={phase === 'processing'}
+                className="w-[68px] px-2 py-1.5 bg-base/60 border border-border rounded-md text-primary font-mono text-xs focus:border-accent/40 focus:outline-none transition-colors disabled:opacity-40"
+              />
+            </label>
+            <label className="flex items-center gap-2">
+              <span className="font-mono text-[11px] tracking-[0.04em] text-muted">Angle (°)</span>
+              <input
+                type="number"
+                min={20}
+                max={80}
+                step={5}
+                value={angle}
+                onChange={(e) => setAngle(parseInt(e.target.value, 10) || 45)}
+                disabled={phase === 'processing'}
+                className="w-[68px] px-2 py-1.5 bg-base/60 border border-border rounded-md text-primary font-mono text-xs focus:border-accent/40 focus:outline-none transition-colors disabled:opacity-40"
+              />
+            </label>
+            {phase === 'upload' ? (
+              <button
+                className="inline-flex items-center gap-2 px-5 py-2.5 rounded-lg text-sm font-medium bg-accent text-base border-none cursor-pointer hover:brightness-110 transition-all glow-accent disabled:opacity-50 disabled:cursor-not-allowed disabled:shadow-none"
+                onClick={handleGenerate}
+                disabled={!file}
               >
-                Download 3MF
-                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className="opacity-60"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
-              </a>
-              <a
-                className="inline-flex items-center gap-2 px-5 py-2.5 rounded-lg text-sm font-medium no-underline glass glass-hover text-primary/70"
-                href={downloadUrl!}
-                download={outputName}
-              >
-                Download STL
-              </a>
+                Generate supports
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className="opacity-60"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+              </button>
+            ) : (
               <button
                 className="inline-flex items-center px-5 py-2.5 rounded-lg text-sm font-medium glass glass-hover text-primary/70 cursor-pointer border-none"
-                onClick={handleReset}
+                onClick={handleCancel}
               >
-                Generate another
+                Cancel
               </button>
-            </div>
+            )}
           </div>
         )}
 
-        {phase === 'error' && (
-          <div className="mt-6">
-            <div className="rounded-xl px-5 py-4 mb-4 border border-red-500/20 bg-red-500/5">
-              <p className="text-red-400 text-sm">{errorMsg}</p>
-            </div>
+        {phase === 'upload' && exhausted && (
+          <div className="rounded-xl px-5 py-4 mb-6 glass inline-block">
+            <p className="text-dim text-sm mb-2">You've used all {FREE_RUNS} free runs.</p>
+            <a href="/#pricing" className="text-accent text-sm no-underline hover:underline">Buy a license →</a>
+          </div>
+        )}
+
+        {phase === 'done' && (
+          <div className="flex gap-3 flex-wrap items-center mb-6">
+            <a
+              className="inline-flex items-center gap-2 px-5 py-2.5 rounded-lg text-sm font-medium no-underline bg-accent text-base hover:brightness-110 transition-all glow-accent"
+              href={downloadUrl3mf!}
+              download={outputName3mf}
+            >
+              Download 3MF
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className="opacity-60"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+            </a>
+            <a
+              className="inline-flex items-center gap-2 px-5 py-2.5 rounded-lg text-sm font-medium no-underline glass glass-hover text-primary/70"
+              href={downloadUrl!}
+              download={outputName}
+            >
+              Download STL
+            </a>
             <button
               className="inline-flex items-center px-5 py-2.5 rounded-lg text-sm font-medium glass glass-hover text-primary/70 cursor-pointer border-none"
               onClick={handleReset}
             >
-              Try again
+              Generate another
             </button>
           </div>
         )}
+
+        {phase === 'error' && (
+          <button
+            className="inline-flex items-center px-5 py-2.5 rounded-lg text-sm font-medium glass glass-hover text-primary/70 cursor-pointer border-none mb-6"
+            onClick={handleReset}
+          >
+            Try again
+          </button>
+        )}
+
+        {/* Body */}
+        {phase === 'upload' && (
+          <>
+            <FileDropZone onFile={setFile} disabled={exhausted} />
+            <div className="flex justify-end mt-2">
+              {licensed ? (
+                <p className="text-accent/40 text-xs font-mono">∞ unlimited</p>
+              ) : (
+                <p className="text-muted text-xs font-mono">{auth.freeRemaining}/{FREE_RUNS} free</p>
+              )}
+            </div>
+          </>
+        )}
+
+        {phase === 'processing' && <ProgressSteps steps={steps} />}
+
+        {phase === 'error' && (
+          <div className="rounded-xl px-5 py-4 border border-red-500/20 bg-red-500/5">
+            <p className="text-red-400 text-sm">{errorMsg}</p>
+          </div>
+        )}
+
+        {phase === 'done' && stats && (
+          <>
+            {meshData && (
+              <Suspense
+                fallback={
+                  <div className="w-full aspect-[16/10] rounded-xl border border-border mb-6 flex items-center justify-center text-dim text-sm">
+                    <div className="w-4 h-4 border-2 border-border border-t-accent rounded-full animate-spin mr-2" />
+                    Loading viewer...
+                  </div>
+                }
+              >
+                <MeshViewer {...meshData} />
+              </Suspense>
+            )}
+            {/* Result panel */}
+            <div className="rounded-xl border border-accent/10 overflow-hidden">
+              {/* Header bar */}
+              <div className="flex items-center justify-between px-5 py-3 border-b border-accent/10 bg-accent/[0.03]">
+                <div className="flex items-center gap-2.5">
+                  <div className="w-1.5 h-1.5 rounded-full bg-accent animate-pulse" />
+                  <span className="font-mono text-[10px] tracking-[0.16em] text-accent/60 uppercase">Generation complete</span>
+                </div>
+                <span className="font-mono text-[10px] text-muted">{stats.format} → 3MF</span>
+              </div>
+
+              {/* Primary stats */}
+              <div className="grid grid-cols-3 max-sm:grid-cols-1 border-b border-accent/10">
+                <div className="px-5 py-5 border-r border-accent/10 max-sm:border-r-0 max-sm:border-b">
+                  <p className="font-mono text-[10px] tracking-[0.12em] text-muted mb-2 uppercase">Pieces</p>
+                  <p className="font-[family-name:var(--font-pixel-grid)] text-4xl text-accent leading-none">{stats.pieces}</p>
+                </div>
+                <div className="px-5 py-5 border-r border-accent/10 max-sm:border-r-0 max-sm:border-b">
+                  <p className="font-mono text-[10px] tracking-[0.12em] text-muted mb-2 uppercase">Volume</p>
+                  <p className="font-[family-name:var(--font-pixel-grid)] text-4xl text-accent leading-none">
+                    {stats.volume.toLocaleString(undefined, { maximumFractionDigits: 1 })}
+                    <span className="text-base text-accent/40 ml-1 font-mono">mm³</span>
+                  </p>
+                </div>
+                <div className="px-5 py-5">
+                  <p className="font-mono text-[10px] tracking-[0.12em] text-muted mb-2 uppercase">Air gap</p>
+                  <p className="font-[family-name:var(--font-pixel-grid)] text-4xl text-accent leading-none">
+                    {stats.margin}
+                    <span className="text-base text-accent/40 ml-1 font-mono">mm</span>
+                  </p>
+                </div>
+              </div>
+
+              {/* Secondary stats grid */}
+              <div className="grid grid-cols-4 max-sm:grid-cols-2">
+                {[
+                  ['Model verts', stats.modelVertices.toLocaleString()],
+                  ['Model tris', stats.modelFaces.toLocaleString()],
+                  ['Support verts', stats.supportVertices.toLocaleString()],
+                  ['Support tris', stats.supportFaces.toLocaleString()],
+                ].map(([label, value], i) => (
+                  <div key={label} className={`px-5 py-3 ${i < 3 ? 'border-r border-accent/10 max-sm:border-r-0' : ''} ${i < 2 ? 'max-sm:border-b max-sm:border-accent/10' : ''} ${i === 1 ? 'max-sm:border-r' : ''}`}>
+                    <p className="font-mono text-[9px] tracking-[0.12em] text-muted/60 uppercase mb-1">{label}</p>
+                    <p className="font-[family-name:var(--font-pixel-square)] text-sm text-primary/70">{value}</p>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </>
+        )}
+
       </div>
     </div>
   );
