@@ -53,15 +53,14 @@ Full docs at [negative.support/docs](https://negative.support/docs).
 
 ## Repo Structure
 
-This is the public repo (website + API + issue tracking). The core algorithm lives in a private submodule at `core/`.
+This is the public repo (website + API + issue tracking). The core algorithm lives in a private submodule at `packages/core/`.
 
 ```
-core/                       # git submodule → negative-support-core (private)
-  src/                      # TypeScript algorithm + CLI source
-  tests/                    # Test suite + baselines
-  models/                   # Test models
-
 packages/
+  core/                     # git submodule → negative-support-core (private)
+    src/                    # TypeScript algorithm + CLI source
+    tests/                  # Test suite + baselines
+    models/                 # Test models
   server/                   # Cloudflare Worker API
   frontend/                 # React SPA (Vite + Tailwind)
 

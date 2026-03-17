@@ -11,8 +11,11 @@
     "deploy:server": "cd packages/server && npx wrangler deploy",
     "migrate": "npm run migrate --prefix packages/server",
     "migrate:local": "npm run migrate:local --prefix packages/server",
-    "test": "cd core && npm test",
-    "generate": "cd core && node tests/_generate_npm.mjs",
-    "build:npm": "cd core && npm run build"
+    "test": "cd packages/core && npm test",
+    "generate": "tsx packages/core/src/cli.ts",
+    "build:npm": "cd packages/core && npm run build"
+  },
+  "devDependencies": {
+    "tsx": "^4.21.0"
   }
 }

@@ -4,15 +4,14 @@ Negative-space 3D print support generator. Available on npm (`negative-support`)
 
 ## Repo Structure
 
-This is the **public** repo (website + API + issue tracking). The core algorithm lives in a **private submodule** at `core/`.
+This is the **public** repo (website + API + issue tracking). The core algorithm lives in a **private submodule** at `packages/core/`.
 
 ```
-core/                       # git submodule → negative-support-core (private)
-  src/                      # TypeScript algorithm + CLI source
-  tests/                    # Test suite + baselines
-  models/                   # Test models
-
 packages/
+  core/                     # git submodule → negative-support-core (private)
+    src/                    # TypeScript algorithm + CLI source
+    tests/                  # Test suite + baselines
+    models/                 # Test models
   server/                   # Cloudflare Worker API
     src/index.ts            # Worker entry, routes /api/* and static
     src/api.ts              # API handlers (free-tier, validate, activate, stripe, checkout)
@@ -46,7 +45,7 @@ npm test                  # Full test suite (build + baselines + browser)
 npm run test:baseline     # Legacy STEP regression
 
 # Generate supports for a model
-npm run generate -- models/stock_t.step
+npm run generate -- packages/core/models/stock_t.step
 
 # Core package
 npm run build:npm         # Build npm package
@@ -60,14 +59,9 @@ npm run build:npm         # Build npm package
 npm test
 ```
 
-This runs:
-1. Builds npm package
-2. npm pipeline tests against golden baselines
-3. Browser build check
-
 Update baselines after intentional algorithm changes:
 ```bash
-cd core && node tests/generate_baselines.mjs
+cd packages/core && node tests/generate_baselines.mjs
 ```
 
 ## Architecture
@@ -94,7 +88,7 @@ cd core && node tests/generate_baselines.mjs
 ### npm
 ```bash
 npm run build:npm
-cd core && npm publish
+cd packages/core && npm publish
 ```
 
 ### Server (Cloudflare)
