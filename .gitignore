@@ -8,6 +8,7 @@ venv/
 *.stl
 *.step
 *.stp
+*.3mf
 node_modules/
 models/
 .DS_Store

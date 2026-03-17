@@ -1,6 +1,8 @@
 import { useState, useEffect } from 'react'
+import { useAuth } from '../lib/AuthContext'
 
 export default function Landing() {
+  const { user, loading: authLoading } = useAuth()
   const [loading, setLoading] = useState(false)
   const [price, setPrice] = useState(19)
 
@@ -128,6 +130,48 @@ export default function Landing() {
             <a href='/docs' className='font-mono text-[11px] tracking-[0.06em] text-pink/60 no-underline hover:text-pink transition-colors'>
               Read the docs &rarr;
             </a>
+          </div>
+        </div>
+      </section>
+
+      {/* Explainer */}
+      <section className='py-24'>
+        <div className='max-w-[1200px] mx-auto px-6'>
+          <p className='label-xs mb-4 text-center tracking-[0.14em]'>What is this?</p>
+          <h2 className='text-center mb-6 text-2xl font-semibold tracking-[-0.01em]'>Supports that are shaped like your model</h2>
+          <p className='text-dim text-center text-[1.05rem] max-w-[580px] mx-auto mb-14 leading-relaxed'>
+            Feed it a 3D model, get back support structures that conform to every surface. Instead of generic trees or grids, it subtracts
+            your model from a solid block — the leftover is the support. A precision air gap keeps them from touching, so they snap off
+            clean.
+          </p>
+          <div className='grid grid-cols-3 gap-5 max-sm:grid-cols-1'>
+            {/* Who */}
+            <div className='rounded-xl p-7 glass'>
+              <p className='label-xs mb-3 text-accent/70'>Who it's for</p>
+              <p className='text-sm text-primary/70 font-medium mb-2'>Designers and creators</p>
+              <p className='text-dim text-sm leading-relaxed'>
+                If you design and publish 3D models, ship them with pre-made supports for perfect results out of the box. Your users get a
+                single file that prints without tuning. STEP files give the best results — full B-Rep overhang detection per face.
+              </p>
+            </div>
+            {/* Who 2 */}
+            <div className='rounded-xl p-7 glass'>
+              <p className='label-xs mb-3 text-accent/70'>Also for</p>
+              <p className='text-sm text-primary/70 font-medium mb-2'>People who print</p>
+              <p className='text-dim text-sm leading-relaxed'>
+                Downloaded an STL that needs supports? Drop it in and generate. Triangle-normal clustering gives you targeted per-region
+                supports — not as precise as STEP, but in some cases better than what your slicer generates.
+              </p>
+            </div>
+            {/* How */}
+            <div className='rounded-xl p-7 glass'>
+              <p className='label-xs mb-3 text-accent/70'>How it works</p>
+              <p className='text-sm text-primary/70 font-medium mb-2'>Boolean subtraction</p>
+              <p className='text-dim text-sm leading-relaxed'>
+                The model is inflated outward by a small margin, then subtracted from a bounding column using boolean operations. The
+                negative space left behind is your support. Overlapping pieces are merged, tiny fragments discarded.
+              </p>
+            </div>
           </div>
         </div>
       </section>
@@ -303,7 +347,7 @@ export default function Landing() {
                 ),
                 label: 'STEP + Mesh',
                 title: 'Smart overhang detection',
-                desc: 'STEP files use B-Rep face topology to identify exactly which surfaces need support — only overhangs get them. STL and OBJ files receive full negative-shell supports around the entire model.',
+                desc: 'STEP files use B-Rep face topology to identify exactly which surfaces need support. STL and OBJ files use triangle-normal clustering to detect overhang regions — both produce targeted per-region supports.',
               },
               {
                 icon: (
@@ -496,12 +540,30 @@ export default function Landing() {
                   All future updates
                 </li>
               </ul>
-              <button
-                className='inline-flex items-center gap-2 px-5 py-2 rounded-lg text-sm font-medium bg-accent text-base border-none cursor-pointer hover:brightness-110 transition-all disabled:opacity-60 disabled:cursor-not-allowed'
-                onClick={handleBuy}
-                disabled={loading}>
-                {loading ? 'Redirecting...' : 'Buy now'}
-                {!loading && (
+              {user ? (
+                <button
+                  className='inline-flex items-center gap-2 px-5 py-2 rounded-lg text-sm font-medium bg-accent text-base border-none cursor-pointer hover:brightness-110 transition-all disabled:opacity-60 disabled:cursor-not-allowed'
+                  onClick={handleBuy}
+                  disabled={loading}>
+                  {loading ? 'Redirecting...' : 'Buy now'}
+                  {!loading && (
+                    <svg
+                      width='14'
+                      height='14'
+                      viewBox='0 0 24 24'
+                      fill='none'
+                      stroke='currentColor'
+                      strokeWidth='2.5'
+                      className='opacity-60'>
+                      <path d='M5 12h14M12 5l7 7-7 7' />
+                    </svg>
+                  )}
+                </button>
+              ) : (
+                <a
+                  href='/api/auth/github'
+                  className='inline-flex items-center gap-2 px-5 py-2 rounded-lg text-sm font-medium bg-accent text-base no-underline hover:brightness-110 transition-all'>
+                  Sign in to buy
                   <svg
                     width='14'
                     height='14'
@@ -512,8 +574,8 @@ export default function Landing() {
                     className='opacity-60'>
                     <path d='M5 12h14M12 5l7 7-7 7' />
                   </svg>
-                )}
-              </button>
+                </a>
+              )}
             </div>
           </div>
           <p className='text-center mt-10 text-muted text-xs font-mono'>All prices in USD · Secure checkout via Stripe</p>
