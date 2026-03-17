@@ -10,33 +10,19 @@ export default function Docs() {
           <div className="flex items-center gap-3 mb-5 pt-5 border-t border-border">
             <h2 className="text-lg font-medium">1. Install</h2>
           </div>
-          <div className="grid grid-cols-2 gap-4 mb-4 max-sm:grid-cols-1">
-            <div className="rounded-xl p-5 glass">
-              <p className="label-xs mb-3">npm</p>
-              <div className="bg-base/60 border border-border rounded-md px-3 py-2.5 mb-3 overflow-x-auto">
-                <code className="font-mono text-xs text-code whitespace-pre">npm install -g negative-support</code>
-              </div>
-              <p className="text-dim text-sm mb-3 leading-relaxed">
-                Or run directly with npx (no install needed):
-              </p>
-              <div className="bg-base/60 border border-border rounded-md px-3 py-2.5 overflow-x-auto">
-                <code className="font-mono text-xs text-code whitespace-pre">npx negative-support model.stl</code>
-              </div>
+          <div className="rounded-xl p-5 glass mb-4">
+            <p className="label-xs mb-3">npm</p>
+            <div className="bg-base/60 border border-border rounded-md px-3 py-2.5 mb-3 overflow-x-auto">
+              <code className="font-mono text-xs text-code whitespace-pre">npm install -g negative-support</code>
             </div>
-            <div className="rounded-xl p-5 glass">
-              <p className="label-xs mb-3">pip</p>
-              <div className="bg-base/60 border border-border rounded-md px-3 py-2.5 mb-3 overflow-x-auto">
-                <code className="font-mono text-xs text-code whitespace-pre">pip install negative-support</code>
-              </div>
-              <p className="text-dim text-sm mb-3 leading-relaxed">
-                For STEP file support (B-Rep overhang detection):
-              </p>
-              <div className="bg-base/60 border border-border rounded-md px-3 py-2.5 overflow-x-auto">
-                <code className="font-mono text-xs text-code whitespace-pre">pip install negative-support[step]</code>
-              </div>
+            <p className="text-dim text-sm mb-3 leading-relaxed">
+              Or run directly with npx (no install needed):
+            </p>
+            <div className="bg-base/60 border border-border rounded-md px-3 py-2.5 overflow-x-auto">
+              <code className="font-mono text-xs text-code whitespace-pre">npx negative-support model.stl</code>
             </div>
           </div>
-          <p className="text-muted text-xs font-mono">Requires Node.js 18+ (npm) or Python 3.10+ (pip).</p>
+          <p className="text-muted text-xs font-mono">Requires Node.js 18+.</p>
         </section>
 
         {/* Activate */}
@@ -56,7 +42,7 @@ export default function Docs() {
           </div>
           <p className="text-dim text-sm mb-4 leading-relaxed">
             You can find your token in the user menu after signing in. It works on up to 3 machines
-            and is shared between npm and pip on the same machine.
+            and is shared across machines.
           </p>
           <div className="rounded-xl p-5 glass">
             <div className="flex items-start gap-4 max-sm:flex-col">
@@ -86,7 +72,7 @@ export default function Docs() {
             <h2 className="text-lg font-medium">3. Use</h2>
           </div>
           <p className="text-dim text-sm mb-4 leading-relaxed">
-            Both CLIs work the same way with the same arguments and output formats.
+            The CLI accepts the following arguments and output formats.
           </p>
           <div className="bg-base/60 border border-border rounded-lg px-4 py-3.5 mb-4 overflow-x-auto">
             <code className="font-mono text-xs text-code whitespace-pre leading-relaxed">
@@ -118,8 +104,7 @@ negative-support model.stl -o my_supports.stl`}
             <h2 className="text-lg font-medium">CLI reference</h2>
           </div>
           <p className="text-dim text-sm mb-4 leading-relaxed">
-            Both <code className="font-mono text-[11px] bg-surface px-1.5 py-0.5 rounded text-primary/70">npx negative-support</code> and{" "}
-            <code className="font-mono text-[11px] bg-surface px-1.5 py-0.5 rounded text-primary/70">negative-support</code> (pip) accept the same flags:
+            <code className="font-mono text-[11px] bg-surface px-1.5 py-0.5 rounded text-primary/70">npx negative-support</code> accepts the following flags:
           </p>
           <div className="rounded-xl overflow-hidden border border-border">
             <table className="w-full border-collapse">
@@ -256,30 +241,6 @@ console.log(result.stats) // { pieces, faces, volume }`}
           </div>
         </section>
 
-        {/* Python API */}
-        <section className="mb-14">
-          <div className="flex items-center gap-3 mb-5 pt-5 border-t border-border">
-            <h2 className="text-lg font-medium">Python API</h2>
-          </div>
-          <p className="text-dim text-sm mb-4 leading-relaxed">You can also use negative-support as a Python library:</p>
-          <div className="bg-base/60 border border-border rounded-lg px-4 py-3.5 mb-4 overflow-x-auto">
-            <code className="font-mono text-xs text-code whitespace-pre leading-relaxed">
-              {`from negative_support import load_step, compute_supports
-
-# STEP file
-part, z_offset = load_step("model.step")
-supports = compute_supports(part, margin=0.2, angle=45.0)
-supports.export("supports.stl")
-
-# Mesh file
-from negative_support import load_mesh, compute_supports_mesh
-
-mesh, z_offset = load_mesh("model.stl")
-supports = compute_supports_mesh(mesh, margin=0.2)
-supports.export("supports.stl")`}
-            </code>
-          </div>
-        </section>
       </div>
     </div>
   );

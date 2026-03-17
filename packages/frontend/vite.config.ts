@@ -8,7 +8,7 @@ export default defineConfig({
   plugins: [tailwindcss(), react(), wasm()],
   resolve: {
     alias: {
-      "@core": resolve(__dirname, "../../core/packages/npm/src"),
+      "@core": resolve(__dirname, "../../core/src"),
       "occt-import-js": resolve(__dirname, "node_modules/occt-import-js"),
       "manifold-3d": resolve(__dirname, "node_modules/manifold-3d"),
     },

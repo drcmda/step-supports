@@ -116,14 +116,14 @@ export default function Landing() {
               View on npm &rarr;
             </a>
           </div>
-          {/* pip */}
+          {/* api */}
           <div className='py-8 px-6 last:pr-0 max-md:px-0 max-md:last:pb-8'>
-            <p className='label-xs mb-3'>pip</p>
+            <p className='label-xs mb-3'>api</p>
             <div className='bg-base/60 border border-border rounded-md px-3 py-2 mb-2 overflow-x-auto'>
-              <code className='font-mono text-xs text-code whitespace-pre'>pip install negative-support</code>
+              <code className='font-mono text-xs text-code whitespace-pre'>npm install negative-support</code>
             </div>
             <div className='bg-base/60 border border-border rounded-md px-3 py-2 mb-3 overflow-x-auto'>
-              <code className='font-mono text-xs text-code whitespace-pre'>negative-support model.stl</code>
+              <code className='font-mono text-xs text-code whitespace-pre'>{`import { generateSupports } from 'negative-support'`}</code>
             </div>
             <a href='/docs' className='font-mono text-[11px] tracking-[0.06em] text-pink/60 no-underline hover:text-pink transition-colors'>
               Read the docs &rarr;
@@ -359,8 +359,8 @@ export default function Landing() {
                   </svg>
                 ),
                 label: 'Cross-platform',
-                title: 'Web, npm, and pip',
-                desc: 'Same algorithm everywhere. Generate in the browser, automate with the Node.js or Python CLI, or integrate via the JavaScript and Python APIs. Identical results on every platform.',
+                title: 'Web, CLI, and API',
+                desc: 'Same algorithm everywhere. Generate in the browser, automate with the CLI, or integrate via the JavaScript API. Identical results on every platform.',
               },
             ].map((f) => (
               <div key={f.title} className='rounded-xl p-7 glass group hover:bg-surface-bright/60 transition-colors'>

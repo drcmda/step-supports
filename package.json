@@ -1,7 +1,8 @@
 {
-  "name": "negative-support",
+  "name": "negative-support-monorepo",
   "private": true,
   "scripts": {
+    "start": "npm run dev:server & npm run dev:frontend",
     "dev": "npm run dev:frontend",
     "dev:frontend": "npm run dev --prefix packages/frontend",
     "dev:server": "npm run dev --prefix packages/server",
@@ -10,10 +11,8 @@
     "deploy:server": "cd packages/server && npx wrangler deploy",
     "migrate": "npm run migrate --prefix packages/server",
     "migrate:local": "npm run migrate:local --prefix packages/server",
-    "test": "cd core && python3 tests/run_all.py",
-    "test:python": "cd core && python3 tests/test_python.py",
-    "test:baseline": "cd core && python3 tests/baseline.py",
-    "build:npm": "cd core/packages/npm && npm run build",
-    "build:pip": "cd core/packages/pip && python3 -m build"
+    "test": "cd core && npm test",
+    "generate": "cd core && node tests/_generate_npm.mjs",
+    "build:npm": "cd core && npm run build"
   }
 }

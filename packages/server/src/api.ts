@@ -16,6 +16,7 @@ export interface Env {
   DB: D1Database;
   STRIPE_SECRET_KEY: string;
   STRIPE_WEBHOOK_SECRET: string;
+  STRIPE_PRICE_ID: string;
   RESEND_API_KEY: string;
   GITHUB_CLIENT_ID: string;
   GITHUB_CLIENT_SECRET: string;
@@ -26,7 +27,6 @@ export interface Env {
 const FREE_RUNS = 10;
 const MAX_MACHINES_PER_TOKEN = 3;
 const STRIPE_API = "https://api.stripe.com/v1";
-const PRICE_ID = "price_1TBB3d9HnoOYYyWYyX2sg3Gq";
 const SUCCESS_URL = "https://negative.support/success?session_id={CHECKOUT_SESSION_ID}";
 const CANCEL_URL = "https://negative.support/";
 
@@ -390,7 +390,7 @@ export async function handleRecover(request: Request, env: Env): Promise<Respons
 }
 
 export async function handlePrice(env: Env): Promise<Response> {
-  const resp = await fetch(`${STRIPE_API}/prices/${PRICE_ID}`, {
+  const resp = await fetch(`${STRIPE_API}/prices/${env.STRIPE_PRICE_ID}`, {
     headers: { Authorization: `Bearer ${env.STRIPE_SECRET_KEY}` },
   });
 
@@ -413,7 +413,7 @@ export async function handleCheckout(request: Request, env: Env): Promise<Respon
 
   const params = new URLSearchParams({
     mode: "payment",
-    "line_items[0][price]": PRICE_ID,
+    "line_items[0][price]": env.STRIPE_PRICE_ID,
     "line_items[0][quantity]": "1",
     success_url: SUCCESS_URL,
     cancel_url: CANCEL_URL,
