@@ -118,7 +118,7 @@ self.onmessage = async (e: MessageEvent<InMessage>) => {
 
     // Export 3MF (model + supports)
     progress('Export', 'Writing 3MF...');
-    const threemfBuffer = export3MF(modelMesh, result.supportMesh);
+    const threemfBuffer = export3MF(modelMesh, result.supportPieces);
 
     const out: ResultMessage = {
       type: 'result',
