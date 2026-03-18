@@ -384,10 +384,13 @@ export default function Landing() {
             <div className='grid grid-cols-2 max-sm:grid-cols-1'>
               {/* Free */}
               <div className='px-7 py-8 border-r border-accent/10 max-sm:border-r-0 max-sm:border-b'>
-                <p className='font-mono text-[10px] tracking-[0.12em] text-muted mb-4 uppercase'>Free tier</p>
-                <div className='flex items-baseline gap-1 mb-6'>
+                <div className='flex items-center gap-2.5 mb-4'>
+                  <p className='font-mono text-[10px] tracking-[0.12em] text-muted uppercase'>Free tier</p>
+                </div>
+                <div className='flex items-baseline gap-2 mb-1'>
                   <span className='font-[family-name:var(--font-pixel-grid)] text-5xl text-primary/50 leading-none'>$0</span>
                 </div>
+                <p className='font-mono text-[10px] text-transparent mb-6 select-none'>—</p>
                 <div className='space-y-2.5 mb-8'>
                   {['10 free runs', 'All features included', 'GitHub login'].map((item) => (
                     <div key={item} className='flex items-center gap-2.5'>
@@ -418,8 +421,9 @@ export default function Landing() {
                   <p className='font-mono text-[10px] tracking-[0.12em] text-accent/60 uppercase'>Lifetime</p>
                   <span className='font-mono text-[9px] tracking-wider text-muted/40 uppercase'>recommended</span>
                 </div>
-                <div className='flex items-baseline gap-1.5 mb-1'>
+                <div className='flex items-baseline gap-2 mb-1'>
                   <span className='font-[family-name:var(--font-pixel-grid)] text-5xl text-accent leading-none'>${price}</span>
+                  <span className='font-[family-name:var(--font-pixel-square)] text-lg text-muted/40 line-through decoration-muted/30'>$27</span>
                 </div>
                 <p className='font-mono text-[10px] text-muted/60 mb-6'>one-time payment</p>
                 <div className='space-y-2.5 mb-8'>
