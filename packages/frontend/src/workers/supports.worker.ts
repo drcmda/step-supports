@@ -88,6 +88,7 @@ self.onmessage = async (e: MessageEvent<InMessage>) => {
       parsed = parseOBJ(msg.fileBuffer);
     } else if (ext === 'step' || ext === 'stp') {
       progress('Parse', 'Loading OpenCascade WASM (first time may take a moment)...');
+      // Store buffer + tessellation params for potential retries
       const stepResult = await parseSTEP(msg.fileBuffer);
       parsed = stepResult.mesh;
       stepFaces = stepResult.faces;
@@ -123,8 +124,15 @@ self.onmessage = async (e: MessageEvent<InMessage>) => {
     // Run the appropriate pipeline from core
     let result;
     if (stepFaces) {
-      result = generateSupportsSTEP(parsed, stepFaces, msg.margin, msg.angle, msg.minVolume, progress);
-    } else {
+      try {
+        result = generateSupportsSTEP(parsed, stepFaces, msg.margin, msg.angle, msg.minVolume, progress);
+      } catch {
+        // STEP tessellation issues — fall back to mesh pipeline
+        progress('Fallback', 'STEP pipeline failed, using mesh pipeline');
+        stepFaces = null;
+      }
+    }
+    if (!stepFaces && !result) {
       // Try overhang detection for mesh files (STL/OBJ)
       progress('Overhang', 'Detecting overhangs...');
       const overhangClusters = computeMeshOverhangs(parsed, msg.angle);
@@ -136,6 +144,8 @@ self.onmessage = async (e: MessageEvent<InMessage>) => {
         result = generateSupportsMesh(parsed, msg.margin, msg.minVolume, progress);
       }
     }
+
+    if (!result) throw new Error('Support generation failed — no result produced.');
 
     // Export 3MF (model + supports)
     progress('Export', 'Writing 3MF...');
