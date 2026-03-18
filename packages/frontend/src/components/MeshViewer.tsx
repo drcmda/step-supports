@@ -53,7 +53,7 @@ function SetZUp() {
 
 export default function MeshViewer({ modelVertices, modelFaces, supportVertices, supportFaces }: MeshViewerProps) {
   return (
-    <div className='w-full aspect-[16/10] rounded-xl overflow-hidden border border-border mb-6'>
+    <div className='w-full min-h-[400px] lg:h-full lg:aspect-auto aspect-[16/10] rounded-xl overflow-hidden border border-border'>
       <Canvas camera={{ fov: 45, near: 0.1, far: 100000, up: [0, 0, 1] }} style={{ background: 'transparent' }}>
         <ambientLight intensity={0.6} />
         <directionalLight position={[5, 5, 10]} intensity={1} />

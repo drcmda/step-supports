@@ -245,174 +245,184 @@ export default function Try() {
           Runs entirely in your browser — no install needed.
         </p>
 
-        {/* Controls row */}
-        {(phase === 'upload' || phase === 'processing') && !exhausted && (
-          <div className="flex flex-wrap items-center gap-3 mb-6">
-            <label className="flex items-center gap-2">
-              <span className="font-mono text-[11px] tracking-[0.04em] text-muted">Margin (mm)</span>
-              <input
-                type="number"
-                min={0.05}
-                max={2.0}
-                step={0.05}
-                value={margin}
-                onChange={(e) => setMargin(parseFloat(e.target.value) || 0.2)}
-                disabled={phase === 'processing'}
-                className="w-[68px] px-2 py-1.5 bg-base/60 border border-border rounded-md text-primary font-mono text-xs focus:border-accent/40 focus:outline-none transition-colors disabled:opacity-40"
-              />
-            </label>
-            <label className="flex items-center gap-2">
-              <span className="font-mono text-[11px] tracking-[0.04em] text-muted">Angle (°)</span>
-              <input
-                type="number"
-                min={20}
-                max={80}
-                step={5}
-                value={angle}
-                onChange={(e) => setAngle(parseInt(e.target.value, 10) || 45)}
-                disabled={phase === 'processing'}
-                className="w-[68px] px-2 py-1.5 bg-base/60 border border-border rounded-md text-primary font-mono text-xs focus:border-accent/40 focus:outline-none transition-colors disabled:opacity-40"
-              />
-            </label>
-            {phase === 'processing' && (
+        {/* Two-column layout: viewer left, controls/results right on large screens */}
+        <div className={`${phase === 'done' && meshData ? 'grid grid-cols-[1fr_280px] gap-6 items-stretch 2xl:grid-cols-[1fr_300px] max-lg:grid-cols-1' : ''}`}>
+
+          {/* Left: viewer (only in done phase) */}
+          {phase === 'done' && meshData && (
+            <Suspense
+              fallback={
+                <div className="w-full aspect-[16/10] rounded-xl border border-border flex items-center justify-center text-dim text-sm">
+                  <div className="w-4 h-4 border-2 border-border border-t-accent rounded-full animate-spin mr-2" />
+                  Loading viewer...
+                </div>
+              }
+            >
+              <MeshViewer {...meshData} />
+            </Suspense>
+          )}
+
+          {/* Right: controls + body + results */}
+          <div>
+            {/* Controls row */}
+            {(phase === 'upload' || phase === 'processing') && !exhausted && (
+              <div className="flex flex-wrap items-center gap-3 mb-6">
+                <label className="flex items-center gap-2">
+                  <span className="font-mono text-[11px] tracking-[0.04em] text-muted">Margin (mm)</span>
+                  <input
+                    type="number"
+                    min={0.05}
+                    max={2.0}
+                    step={0.05}
+                    value={margin}
+                    onChange={(e) => setMargin(parseFloat(e.target.value) || 0.2)}
+                    disabled={phase === 'processing'}
+                    className="w-[68px] px-2 py-1.5 bg-base/60 border border-border rounded-md text-primary font-mono text-xs focus:border-accent/40 focus:outline-none transition-colors disabled:opacity-40"
+                  />
+                </label>
+                <label className="flex items-center gap-2">
+                  <span className="font-mono text-[11px] tracking-[0.04em] text-muted">Angle (°)</span>
+                  <input
+                    type="number"
+                    min={20}
+                    max={80}
+                    step={5}
+                    value={angle}
+                    onChange={(e) => setAngle(parseInt(e.target.value, 10) || 45)}
+                    disabled={phase === 'processing'}
+                    className="w-[68px] px-2 py-1.5 bg-base/60 border border-border rounded-md text-primary font-mono text-xs focus:border-accent/40 focus:outline-none transition-colors disabled:opacity-40"
+                  />
+                </label>
+                {phase === 'processing' && (
+                  <button
+                    className="inline-flex items-center px-5 py-2.5 rounded-lg text-sm font-medium glass glass-hover text-primary/70 cursor-pointer border-none"
+                    onClick={handleCancel}
+                  >
+                    Cancel
+                  </button>
+                )}
+              </div>
+            )}
+
+            {phase === 'upload' && exhausted && (
+              <div className="rounded-xl px-5 py-4 mb-6 glass inline-block">
+                <p className="text-dim text-sm mb-2">You've used all {FREE_RUNS} free runs.</p>
+                <a href="/#pricing" className="text-accent text-sm no-underline hover:underline">Buy a license →</a>
+              </div>
+            )}
+
+            {/* Download buttons */}
+            {phase === 'done' && (
+              <div className="flex flex-row flex-wrap gap-2 mb-6 lg:flex-col">
+                <a
+                  className="flex items-center justify-center gap-2 px-5 py-2.5 rounded-lg text-sm font-medium no-underline bg-accent text-base hover:brightness-110 transition-all glow-accent"
+                  href={downloadUrl3mf!}
+                  download={outputName3mf}
+                >
+                  Download 3MF
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className="opacity-60"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+                </a>
+                <a
+                  className="flex items-center justify-center gap-2 px-5 py-2.5 rounded-lg text-sm font-medium no-underline glass glass-hover text-primary/70"
+                  href={downloadUrl!}
+                  download={outputName}
+                >
+                  Download STL
+                </a>
+                <button
+                  className="flex items-center justify-center px-5 py-2.5 rounded-lg text-sm font-medium glass glass-hover text-primary/70 cursor-pointer border-none"
+                  onClick={handleReset}
+                >
+                  Generate another
+                </button>
+              </div>
+            )}
+
+            {phase === 'error' && (
               <button
-                className="inline-flex items-center px-5 py-2.5 rounded-lg text-sm font-medium glass glass-hover text-primary/70 cursor-pointer border-none"
-                onClick={handleCancel}
+                className="inline-flex items-center px-5 py-2.5 rounded-lg text-sm font-medium glass glass-hover text-primary/70 cursor-pointer border-none mb-6"
+                onClick={handleReset}
               >
-                Cancel
+                Try again
               </button>
             )}
-          </div>
-        )}
 
-        {phase === 'upload' && exhausted && (
-          <div className="rounded-xl px-5 py-4 mb-6 glass inline-block">
-            <p className="text-dim text-sm mb-2">You've used all {FREE_RUNS} free runs.</p>
-            <a href="/#pricing" className="text-accent text-sm no-underline hover:underline">Buy a license →</a>
-          </div>
-        )}
-
-        {phase === 'done' && (
-          <div className="flex gap-3 flex-wrap items-center mb-6">
-            <a
-              className="inline-flex items-center gap-2 px-5 py-2.5 rounded-lg text-sm font-medium no-underline bg-accent text-base hover:brightness-110 transition-all glow-accent"
-              href={downloadUrl3mf!}
-              download={outputName3mf}
-            >
-              Download 3MF
-              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className="opacity-60"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
-            </a>
-            <a
-              className="inline-flex items-center gap-2 px-5 py-2.5 rounded-lg text-sm font-medium no-underline glass glass-hover text-primary/70"
-              href={downloadUrl!}
-              download={outputName}
-            >
-              Download STL
-            </a>
-            <button
-              className="inline-flex items-center px-5 py-2.5 rounded-lg text-sm font-medium glass glass-hover text-primary/70 cursor-pointer border-none"
-              onClick={handleReset}
-            >
-              Generate another
-            </button>
-          </div>
-        )}
-
-        {phase === 'error' && (
-          <button
-            className="inline-flex items-center px-5 py-2.5 rounded-lg text-sm font-medium glass glass-hover text-primary/70 cursor-pointer border-none mb-6"
-            onClick={handleReset}
-          >
-            Try again
-          </button>
-        )}
-
-        {/* Body */}
-        {phase === 'upload' && (
-          <>
-            <FileDropZone onFile={setFile} disabled={exhausted} />
-            <div className="flex justify-end mt-2">
-              {licensed ? (
-                <p className="text-accent/40 text-xs font-mono">∞ unlimited</p>
-              ) : (
-                <p className="text-muted text-xs font-mono">{auth.freeRemaining}/{FREE_RUNS} free</p>
-              )}
-            </div>
-          </>
-        )}
-
-        {phase === 'processing' && <ProgressSteps steps={steps} />}
-
-        {phase === 'error' && (
-          <div className="rounded-xl px-5 py-4 border border-red-500/20 bg-red-500/5">
-            <p className="text-red-400 text-sm">{errorMsg}</p>
-          </div>
-        )}
-
-        {phase === 'done' && stats && (
-          <>
-            {meshData && (
-              <Suspense
-                fallback={
-                  <div className="w-full aspect-[16/10] rounded-xl border border-border mb-6 flex items-center justify-center text-dim text-sm">
-                    <div className="w-4 h-4 border-2 border-border border-t-accent rounded-full animate-spin mr-2" />
-                    Loading viewer...
-                  </div>
-                }
-              >
-                <MeshViewer {...meshData} />
-              </Suspense>
+            {/* Body */}
+            {phase === 'upload' && (
+              <>
+                <FileDropZone onFile={setFile} disabled={exhausted} />
+                <div className="flex justify-end mt-2">
+                  {licensed ? (
+                    <p className="text-accent/40 text-xs font-mono">∞ unlimited</p>
+                  ) : (
+                    <p className="text-muted text-xs font-mono">{auth.freeRemaining}/{FREE_RUNS} free</p>
+                  )}
+                </div>
+              </>
             )}
+
+            {phase === 'processing' && <ProgressSteps steps={steps} />}
+
+            {phase === 'error' && (
+              <div className="rounded-xl px-5 py-4 border border-red-500/20 bg-red-500/5">
+                <p className="text-red-400 text-sm">{errorMsg}</p>
+              </div>
+            )}
+
             {/* Result panel */}
-            <div className="rounded-xl border border-accent/10 overflow-hidden">
-              {/* Header bar */}
-              <div className="flex items-center justify-between px-5 py-3 border-b border-accent/10 bg-accent/[0.03]">
-                <div className="flex items-center gap-2.5">
-                  <div className="w-1.5 h-1.5 rounded-full bg-accent animate-pulse" />
-                  <span className="font-mono text-[10px] tracking-[0.16em] text-accent/60 uppercase">Generation complete</span>
+            {phase === 'done' && stats && (
+              <div className="rounded-xl border border-accent/10 overflow-hidden">
+                {/* Header bar */}
+                <div className="flex items-center justify-between px-5 py-3 border-b border-accent/10 bg-accent/[0.03]">
+                  <div className="flex items-center gap-2.5">
+                    <div className="w-1.5 h-1.5 rounded-full bg-accent animate-pulse" />
+                    <span className="font-mono text-[10px] tracking-[0.16em] text-accent/60 uppercase">Complete</span>
+                  </div>
+                  <span className="font-mono text-[10px] text-muted">{stats.format} → 3MF</span>
                 </div>
-                <span className="font-mono text-[10px] text-muted">{stats.format} → 3MF</span>
-              </div>
 
-              {/* Primary stats */}
-              <div className="grid grid-cols-3 max-sm:grid-cols-1 border-b border-accent/10">
-                <div className="px-5 py-5 border-r border-accent/10 max-sm:border-r-0 max-sm:border-b">
-                  <p className="font-mono text-[10px] tracking-[0.12em] text-muted mb-2 uppercase">Pieces</p>
-                  <p className="font-[family-name:var(--font-pixel-grid)] text-4xl text-accent leading-none">{stats.pieces}</p>
-                </div>
-                <div className="px-5 py-5 border-r border-accent/10 max-sm:border-r-0 max-sm:border-b">
-                  <p className="font-mono text-[10px] tracking-[0.12em] text-muted mb-2 uppercase">Volume</p>
-                  <p className="font-[family-name:var(--font-pixel-grid)] text-4xl text-accent leading-none">
-                    {stats.volume.toLocaleString(undefined, { maximumFractionDigits: 1 })}
-                    <span className="text-base text-accent/40 ml-1 font-mono">mm³</span>
-                  </p>
-                </div>
-                <div className="px-5 py-5">
-                  <p className="font-mono text-[10px] tracking-[0.12em] text-muted mb-2 uppercase">Air gap</p>
-                  <p className="font-[family-name:var(--font-pixel-grid)] text-4xl text-accent leading-none">
-                    {stats.margin}
-                    <span className="text-base text-accent/40 ml-1 font-mono">mm</span>
-                  </p>
-                </div>
-              </div>
-
-              {/* Secondary stats grid */}
-              <div className="grid grid-cols-4 max-sm:grid-cols-2">
+                {/* Stats — vertical stack */}
                 {[
-                  ['Model verts', stats.modelVertices.toLocaleString()],
-                  ['Model tris', stats.modelFaces.toLocaleString()],
-                  ['Support verts', stats.supportVertices.toLocaleString()],
-                  ['Support tris', stats.supportFaces.toLocaleString()],
-                ].map(([label, value], i) => (
-                  <div key={label} className={`px-5 py-3 ${i < 3 ? 'border-r border-accent/10 max-sm:border-r-0' : ''} ${i < 2 ? 'max-sm:border-b max-sm:border-accent/10' : ''} ${i === 1 ? 'max-sm:border-r' : ''}`}>
-                    <p className="font-mono text-[9px] tracking-[0.12em] text-muted/60 uppercase mb-1">{label}</p>
-                    <p className="font-[family-name:var(--font-pixel-square)] text-sm text-primary/70">{value}</p>
+                  ['Pieces', String(stats.pieces), null],
+                  ['Volume', stats.volume.toLocaleString(undefined, { maximumFractionDigits: 1 }), 'mm³'],
+                  ['Air gap', String(stats.margin), 'mm'],
+                ].map(([label, value, unit]) => (
+                  <div key={label} className="px-5 py-4 border-b border-accent/10">
+                    <p className="font-mono text-[10px] tracking-[0.12em] text-muted mb-1.5 uppercase">{label}</p>
+                    <p className="font-[family-name:var(--font-pixel-grid)] text-3xl text-accent leading-none">
+                      {value}
+                      {unit && <span className="text-sm text-accent/40 ml-1 font-mono">{unit}</span>}
+                    </p>
                   </div>
                 ))}
+
+                {/* Model stats row */}
+                <div className="grid grid-cols-2 border-b border-accent/10">
+                  <div className="px-5 py-3 border-r border-accent/10">
+                    <p className="font-mono text-[9px] tracking-[0.12em] text-muted/60 uppercase mb-1">Model verts</p>
+                    <p className="font-[family-name:var(--font-pixel-square)] text-sm text-primary/70">{stats.modelVertices.toLocaleString()}</p>
+                  </div>
+                  <div className="px-5 py-3">
+                    <p className="font-mono text-[9px] tracking-[0.12em] text-muted/60 uppercase mb-1">Model tris</p>
+                    <p className="font-[family-name:var(--font-pixel-square)] text-sm text-primary/70">{stats.modelFaces.toLocaleString()}</p>
+                  </div>
+                </div>
+
+                {/* Support stats row */}
+                <div className="grid grid-cols-2">
+                  <div className="px-5 py-3 border-r border-accent/10">
+                    <p className="font-mono text-[9px] tracking-[0.12em] text-muted/60 uppercase mb-1">Support verts</p>
+                    <p className="font-[family-name:var(--font-pixel-square)] text-sm text-primary/70">{stats.supportVertices.toLocaleString()}</p>
+                  </div>
+                  <div className="px-5 py-3">
+                    <p className="font-mono text-[9px] tracking-[0.12em] text-muted/60 uppercase mb-1">Support tris</p>
+                    <p className="font-[family-name:var(--font-pixel-square)] text-sm text-primary/70">{stats.supportFaces.toLocaleString()}</p>
+                  </div>
+                </div>
               </div>
-            </div>
-          </>
-        )}
+            )}
+          </div>
+        </div>
 
       </div>
     </div>

@@ -61,7 +61,7 @@ export default function Landing() {
           <h1 className='text-[3.8rem] font-semibold leading-[1.06] mb-6 tracking-[-0.02em]'>
             <span className='max-md:whitespace-normal whitespace-nowrap'>Negative-space supports</span>
             <br />
-            that <span className='text-accent'>fit perfectly</span>
+            that <span className='text-accent inline-block origin-left'>fit perfectly</span>
           </h1>
           <p className='text-[1.1rem] text-dim max-w-[460px] mb-10 leading-relaxed'>
             Generate volumetric supports that follow the curvature of your model. Clean prints, spotless contact surfaces, stability during
@@ -361,129 +361,108 @@ export default function Landing() {
       </section>
 
       {/* Pricing */}
-      <section className='relative py-32 border-t border-border overflow-hidden' id='pricing'>
-        {/* Background glow */}
-        <div
-          className='absolute inset-0 pointer-events-none'
-          style={{ background: 'radial-gradient(ellipse 600px 500px at 50% 50%, rgba(93,228,199,0.05) 0%, transparent 70%)' }}
-        />
-        <div
-          className='absolute inset-0 pointer-events-none'
-          style={{ background: 'radial-gradient(ellipse 400px 300px at 60% 55%, rgba(240,135,189,0.04) 0%, transparent 70%)' }}
-        />
-        <div className='relative max-w-[1200px] mx-auto px-6'>
+      <section className='py-32 border-t border-border' id='pricing'>
+        <div className='max-w-[1200px] mx-auto px-6'>
           <p className='label-xs mb-4 text-center tracking-[0.14em]'>Pricing</p>
-          <h2 className='text-center mb-4 text-3xl font-semibold tracking-[-0.02em]'>Simple, one-time pricing</h2>
+          <h2 className='text-center mb-4 text-2xl font-semibold tracking-[-0.01em]'>Simple, one-time pricing</h2>
           <p className='text-dim text-center text-[1.05rem] max-w-[420px] mx-auto mb-14 leading-relaxed'>
             Start free. Consider helping us keep improving by purchasing a lifetime license. Your support means a lot and helps fund
             development, filament for testing, maintenance, and new features.
           </p>
-          <div className='grid grid-cols-2 gap-5 max-w-[760px] mx-auto max-sm:grid-cols-1'>
-            {/* Free */}
-            <div className='rounded-2xl p-9 glass text-center'>
-              <p className='label-xs mb-6'>Free tier</p>
-              <div className='text-[3rem] leading-none mb-2 text-primary/60'>$0</div>
-              <p className='text-dim text-xs mb-8'>&nbsp;</p>
-              <ul className='list-none mb-8 space-y-3'>
-                <li className='text-dim text-sm flex items-center gap-2 justify-center'>
-                  <svg
-                    width='14'
-                    height='14'
-                    viewBox='0 0 24 24'
-                    fill='none'
-                    stroke='currentColor'
-                    strokeWidth='2.5'
-                    className='text-accent shrink-0'>
-                    <polyline points='20 6 9 17 4 12' />
-                  </svg>
-                  10 free runs
-                </li>
-                <li className='text-dim text-sm flex items-center gap-2 justify-center'>
-                  <svg
-                    width='14'
-                    height='14'
-                    viewBox='0 0 24 24'
-                    fill='none'
-                    stroke='currentColor'
-                    strokeWidth='2.5'
-                    className='text-accent shrink-0'>
-                    <polyline points='20 6 9 17 4 12' />
-                  </svg>
-                  All features included
-                </li>
-                <li className='text-dim text-sm flex items-center gap-2 justify-center'>
-                  <svg
-                    width='14'
-                    height='14'
-                    viewBox='0 0 24 24'
-                    fill='none'
-                    stroke='currentColor'
-                    strokeWidth='2.5'
-                    className='text-accent shrink-0'>
-                    <polyline points='20 6 9 17 4 12' />
-                  </svg>
-                  GitHub login
-                </li>
-              </ul>
-              <a
-                href='/docs'
-                className='inline-flex items-center px-5 py-2 rounded-lg text-sm font-medium no-underline glass glass-hover text-primary/70'>
-                Get started
-              </a>
+
+          <div className='max-w-[760px] mx-auto rounded-xl border border-accent/10 overflow-hidden'>
+            {/* Header bar */}
+            <div className='flex items-center justify-between px-5 py-3 border-b border-accent/10 bg-accent/[0.03]'>
+              <div className='flex items-center gap-2.5'>
+                <div className='w-1.5 h-1.5 rounded-full bg-accent animate-pulse' />
+                <span className='font-mono text-[10px] tracking-[0.16em] text-accent/60 uppercase'>License plans</span>
+              </div>
+              <span className='font-mono text-[10px] text-muted'>USD · Stripe</span>
             </div>
-            {/* Lifetime */}
-            <div className='rounded-2xl p-9 text-center border border-accent/20 bg-[rgba(255,255,255,0.02)] relative overflow-hidden animate-glow-pulse'>
-              <p className='label-xs mb-6 text-pink/50'>Lifetime</p>
-              <div className='text-[3rem] leading-none mb-2 text-pink'>${price}</div>
-              <p className='text-dim text-xs mb-8'>one-time payment</p>
-              <ul className='list-none mb-8 space-y-3'>
-                <li className='text-dim text-sm flex items-center gap-2 justify-center'>
-                  <svg
-                    width='14'
-                    height='14'
-                    viewBox='0 0 24 24'
-                    fill='none'
-                    stroke='currentColor'
-                    strokeWidth='2.5'
-                    className='text-accent shrink-0'>
-                    <polyline points='20 6 9 17 4 12' />
-                  </svg>
-                  Unlimited runs
-                </li>
-                <li className='text-dim text-sm flex items-center gap-2 justify-center'>
-                  <svg
-                    width='14'
-                    height='14'
-                    viewBox='0 0 24 24'
-                    fill='none'
-                    stroke='currentColor'
-                    strokeWidth='2.5'
-                    className='text-accent shrink-0'>
-                    <polyline points='20 6 9 17 4 12' />
-                  </svg>
-                  Up to 3 machines
-                </li>
-                <li className='text-dim text-sm flex items-center gap-2 justify-center'>
-                  <svg
-                    width='14'
-                    height='14'
-                    viewBox='0 0 24 24'
-                    fill='none'
-                    stroke='currentColor'
-                    strokeWidth='2.5'
-                    className='text-accent shrink-0'>
-                    <polyline points='20 6 9 17 4 12' />
-                  </svg>
-                  All future updates
-                </li>
-              </ul>
-              {user ? (
-                <button
-                  className='inline-flex items-center gap-2 px-5 py-2 rounded-lg text-sm font-medium bg-accent text-base border-none cursor-pointer hover:brightness-110 transition-all disabled:opacity-60 disabled:cursor-not-allowed'
-                  onClick={handleBuy}
-                  disabled={loading}>
-                  {loading ? 'Redirecting...' : 'Buy now'}
-                  {!loading && (
+
+            {/* Two plans side by side */}
+            <div className='grid grid-cols-2 max-sm:grid-cols-1'>
+              {/* Free */}
+              <div className='px-7 py-8 border-r border-accent/10 max-sm:border-r-0 max-sm:border-b'>
+                <p className='font-mono text-[10px] tracking-[0.12em] text-muted mb-4 uppercase'>Free tier</p>
+                <div className='flex items-baseline gap-1 mb-6'>
+                  <span className='font-[family-name:var(--font-pixel-grid)] text-5xl text-primary/50 leading-none'>$0</span>
+                </div>
+                <div className='space-y-2.5 mb-8'>
+                  {['10 free runs', 'All features included', 'GitHub login'].map((item) => (
+                    <div key={item} className='flex items-center gap-2.5'>
+                      <svg
+                        width='12'
+                        height='12'
+                        viewBox='0 0 24 24'
+                        fill='none'
+                        stroke='currentColor'
+                        strokeWidth='2.5'
+                        className='text-accent/50 shrink-0'>
+                        <polyline points='20 6 9 17 4 12' />
+                      </svg>
+                      <span className='font-[family-name:var(--font-pixel-square)] text-xs text-primary/50'>{item}</span>
+                    </div>
+                  ))}
+                </div>
+                <a
+                  href='/docs'
+                  className='inline-flex items-center px-4 py-2 rounded-lg text-xs font-mono no-underline text-primary/50 border border-border hover:border-accent/20 transition-colors'>
+                  Get started
+                </a>
+              </div>
+
+              {/* Lifetime */}
+              <div className='px-7 py-8'>
+                <div className='flex items-center gap-2.5 mb-4'>
+                  <p className='font-mono text-[10px] tracking-[0.12em] text-accent/60 uppercase'>Lifetime</p>
+                  <span className='font-mono text-[9px] tracking-wider text-muted/40 uppercase'>recommended</span>
+                </div>
+                <div className='flex items-baseline gap-1.5 mb-1'>
+                  <span className='font-[family-name:var(--font-pixel-grid)] text-5xl text-accent leading-none'>${price}</span>
+                </div>
+                <p className='font-mono text-[10px] text-muted/60 mb-6'>one-time payment</p>
+                <div className='space-y-2.5 mb-8'>
+                  {['Unlimited runs', 'Up to 3 machines', 'All future updates'].map((item) => (
+                    <div key={item} className='flex items-center gap-2.5'>
+                      <svg
+                        width='12'
+                        height='12'
+                        viewBox='0 0 24 24'
+                        fill='none'
+                        stroke='currentColor'
+                        strokeWidth='2.5'
+                        className='text-accent shrink-0'>
+                        <polyline points='20 6 9 17 4 12' />
+                      </svg>
+                      <span className='font-[family-name:var(--font-pixel-square)] text-xs text-primary/70'>{item}</span>
+                    </div>
+                  ))}
+                </div>
+                {user ? (
+                  <button
+                    className='inline-flex items-center gap-2 px-5 py-2 rounded-lg text-sm font-medium bg-accent text-base border-none cursor-pointer hover:brightness-110 transition-all disabled:opacity-60 disabled:cursor-not-allowed'
+                    onClick={handleBuy}
+                    disabled={loading}>
+                    {loading ? 'Redirecting...' : 'Buy now'}
+                    {!loading && (
+                      <svg
+                        width='14'
+                        height='14'
+                        viewBox='0 0 24 24'
+                        fill='none'
+                        stroke='currentColor'
+                        strokeWidth='2.5'
+                        className='opacity-60'>
+                        <path d='M5 12h14M12 5l7 7-7 7' />
+                      </svg>
+                    )}
+                  </button>
+                ) : (
+                  <a
+                    href='/api/auth/github'
+                    className='inline-flex items-center gap-2 px-5 py-2 rounded-lg text-sm font-medium bg-accent text-base no-underline hover:brightness-110 transition-all'>
+                    Sign in to buy
                     <svg
                       width='14'
                       height='14'
@@ -494,31 +473,13 @@ export default function Landing() {
                       className='opacity-60'>
                       <path d='M5 12h14M12 5l7 7-7 7' />
                     </svg>
-                  )}
-                </button>
-              ) : (
-                <a
-                  href='/api/auth/github'
-                  className='inline-flex items-center gap-2 px-5 py-2 rounded-lg text-sm font-medium bg-accent text-base no-underline hover:brightness-110 transition-all'>
-                  Sign in to buy
-                  <svg
-                    width='14'
-                    height='14'
-                    viewBox='0 0 24 24'
-                    fill='none'
-                    stroke='currentColor'
-                    strokeWidth='2.5'
-                    className='opacity-60'>
-                    <path d='M5 12h14M12 5l7 7-7 7' />
-                  </svg>
-                </a>
-              )}
+                  </a>
+                )}
+              </div>
             </div>
           </div>
-          <p className='text-center mt-10 text-muted text-xs font-mono'>All prices in USD · Secure checkout via Stripe</p>
         </div>
       </section>
-
     </div>
   )
 }
