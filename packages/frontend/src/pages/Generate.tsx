@@ -231,7 +231,7 @@ export default function Generate() {
         </div>
         <h1 className='text-2xl font-semibold mb-2 tracking-[-0.01em]'>Generate supports</h1>
         <p className='text-dim text-sm leading-relaxed mb-6 max-w-[560px]'>
-          Upload an STL (preferred, gives the most accurate results), OBJ, or STEP file and generate negative-space supports. Runs entirely
+          Upload an STEP (preferred, gives the most accurate results), STL or OBJ file and generate negative-space supports. Runs entirely
           in your browser — no install needed.
         </p>
 
