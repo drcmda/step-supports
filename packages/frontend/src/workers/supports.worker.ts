@@ -26,6 +26,7 @@ interface GenerateMessage {
   margin: number;
   angle: number;
   minVolume: number;
+  skipMerge?: boolean;
 }
 
 type InMessage = GenerateMessage;
@@ -125,7 +126,7 @@ self.onmessage = async (e: MessageEvent<InMessage>) => {
     let result;
     if (stepFaces) {
       try {
-        result = generateSupportsSTEP(parsed, stepFaces, msg.margin, msg.angle, msg.minVolume, progress);
+        result = generateSupportsSTEP(parsed, stepFaces, msg.margin, msg.angle, msg.minVolume, progress, msg.skipMerge);
       } catch {
         // STEP tessellation issues — fall back to mesh pipeline
         progress('Fallback', 'STEP pipeline failed, using mesh pipeline');
@@ -138,10 +139,10 @@ self.onmessage = async (e: MessageEvent<InMessage>) => {
       const overhangClusters = computeMeshOverhangs(parsed, msg.angle);
       if (overhangClusters.length > 0) {
         progress('Overhang', `${overhangClusters.length} regions detected`);
-        result = generateSupportsMeshOverhang(parsed, overhangClusters, msg.margin, msg.angle, msg.minVolume, progress);
+        result = generateSupportsMeshOverhang(parsed, overhangClusters, msg.margin, msg.angle, msg.minVolume, progress, msg.skipMerge);
       } else {
         progress('Overhang', 'No overhangs — full shell');
-        result = generateSupportsMesh(parsed, msg.margin, msg.minVolume, progress);
+        result = generateSupportsMesh(parsed, msg.margin, msg.minVolume, progress, msg.skipMerge);
       }
     }
 

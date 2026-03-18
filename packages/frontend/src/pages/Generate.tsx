@@ -125,6 +125,23 @@ export default function Generate() {
         }
         worker.terminate()
       } else if (msg.type === 'error') {
+        if (msg.message?.includes('memory access out of bounds') && !(worker as any)._retried) {
+          // OOM in merge — retry without piece merging
+          worker.terminate()
+          updateStep('Retrying', 'Out of memory — retrying without piece merging')
+          const retryWorker = new Worker(new URL('../workers/supports.worker.ts', import.meta.url), { type: 'module' })
+          ;(retryWorker as any)._retried = true
+          retryWorker.onmessage = worker.onmessage
+          retryWorker.onerror = worker.onerror
+          workerRef.current = retryWorker
+          file!.arrayBuffer().then((buf) => {
+            retryWorker.postMessage(
+              { type: 'generate', fileBuffer: buf, fileName: file!.name, margin, angle, minVolume: 1.0, skipMerge: true },
+              [buf],
+            )
+          })
+          return
+        }
         setErrorMsg(msg.message)
         setPhase('error')
         worker.terminate()
