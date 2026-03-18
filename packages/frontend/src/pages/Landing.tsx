@@ -63,15 +63,31 @@ export default function Landing() {
             <br />
             that <span className='text-accent inline-block origin-left'>fit perfectly</span>
           </h1>
-          <p className='text-[1.1rem] text-dim max-w-[460px] mb-10 leading-relaxed'>
-            Generate volumetric supports that follow the curvature of your model. Clean prints, spotless contact surfaces, stability during
-            printing, and easy removal after.
+          <p className='text-[1.1rem] text-dim max-w-[480px] mb-8 leading-relaxed'>
+            Generative volumetric supports that follow the curvature of your model — for STEP, STL, and OBJ files.
           </p>
+          <ul className='list-none space-y-2 mb-10 max-w-[420px]'>
+            {['Cleaner prints', 'Spotless contact surfaces', 'stability during printing', 'Easy removal after'].map((item) => (
+              <li key={item} className='flex items-center gap-2.5 text-sm text-dim'>
+                <svg
+                  width='12'
+                  height='12'
+                  viewBox='0 0 24 24'
+                  fill='none'
+                  stroke='currentColor'
+                  strokeWidth='2.5'
+                  className='text-accent/60 shrink-0'>
+                  <polyline points='20 6 9 17 4 12' />
+                </svg>
+                {item}
+              </li>
+            ))}
+          </ul>
           <div className='flex gap-3'>
             <a
               href='/generate'
               className='inline-flex items-center gap-2 px-5 py-2.5 rounded-lg text-sm font-medium no-underline bg-accent text-base transition-all hover:brightness-110 glow-accent'>
-              Generate now
+              {user ? 'Generate' : 'Try 10 free runs'}
               <svg width='14' height='14' viewBox='0 0 24 24' fill='none' stroke='currentColor' strokeWidth='2.5' className='opacity-60'>
                 <path d='M5 12h14M12 5l7 7-7 7' />
               </svg>
@@ -140,8 +156,7 @@ export default function Landing() {
           <p className='label-xs mb-4 text-center tracking-[0.14em]'>What is this?</p>
           <h2 className='text-center mb-6 text-2xl font-semibold tracking-[-0.01em]'>Supports that are shaped like your model</h2>
           <p className='text-dim text-center text-[1.05rem] max-w-[580px] mx-auto mb-14 leading-relaxed'>
-            Drop in a STEP, STL or OBJ file, get back supports shaped like the negative space around your model. Negative-space supports
-            have been around for a while, but you needed to{' '}
+            Negative-space supports have been around for a while, but you needed to{' '}
             <a
               href='https://www.youtube.com/watch?v=_R2E8VwyNz0'
               target='_blank'
@@ -179,9 +194,9 @@ export default function Landing() {
               </div>
               <ul className='list-none space-y-3'>
                 {[
-                  ['Fuse to the model', 'Tips bond to surfaces, scarring threads, mating faces, and smooth finishes.'],
-                  ['Struggle with complex geometry', 'Curved overhangs and internal cavities get inconsistent coverage.'],
-                  ['Are difficult to remove', 'Supports snap unevenly and leave stubs — especially with PETG and nylon.'],
+                  ['Scar threads, mating faces, and finishes', "Tips bond to surfaces. Post-processing can't always undo the damage."],
+                  ['Miss curved overhangs and cavities', 'Complex geometry gets inconsistent or no coverage at all.'],
+                  ['Snap unevenly, leave stubs', 'Removal is painful — especially with PETG and nylon.'],
                 ].map(([title, desc]) => (
                   <li key={title} className='flex gap-2.5'>
                     <div className='w-8 shrink-0 flex justify-center pt-0.5'>
@@ -224,9 +239,12 @@ export default function Landing() {
               </div>
               <ul className='list-none space-y-3'>
                 {[
-                  ['Have less contact damage', 'A configurable air gap keeps supports off the surface. Fine details come out clean.'],
-                  ['Cover on any shape', 'Supports follow overhangs, undercuts, and cavities uniformly.'],
-                  ['Are easier to remove', 'Supports lift off in one piece. Works across PLA, PETG, ABS, and nylon.'],
+                  [
+                    'Save surface finish on cosmetic parts',
+                    'A configurable air gap keeps supports off the surface. Fine details come out clean.',
+                  ],
+                  ['Follow overhangs, undercuts, and cavities', 'Supports cover complex geometry uniformly — no missed regions.'],
+                  ['Peel off in one piece', 'Clean removal across PLA, PETG, ABS, and nylon. No stubs, no scarring.'],
                 ].map(([title, desc]) => (
                   <li key={title} className='flex gap-2.5'>
                     <div className='w-8 shrink-0 flex justify-center pt-0.5'>
@@ -310,7 +328,7 @@ export default function Landing() {
                 </svg>
               ),
               label: 'STEP + Mesh',
-              title: 'Smart overhang detection',
+              title: 'Overhang detection that reads your model',
               desc: 'STEP files get B-Rep face detection. STL and OBJ use triangle-normal clustering. Both produce per-region supports.',
             },
             {
@@ -323,8 +341,8 @@ export default function Landing() {
                 </svg>
               ),
               label: '3MF export',
-              title: 'Slicer-ready 3MF output',
-              desc: 'Bundles model + supports into one file with slicer settings baked in (1 wall, 10% cubic infill). Open and print.',
+              title: 'Open in Bambu, Prusa, Orca and print',
+              desc: 'Bundles model + supports into one 3MF with slicer settings baked in (1 wall, 10% cubic infill). Open and print.',
             },
             {
               icon: (
@@ -334,8 +352,8 @@ export default function Landing() {
                 </svg>
               ),
               label: 'Gap control',
-              title: 'Precision air gap',
-              desc: 'Configurable margin between model and support (default 0.2 mm). Tune it for your nozzle and filament.',
+              title: 'Configurable air gap — no fusing',
+              desc: 'Adjustable margin between model and support (default 0.2 mm). Tune it for your nozzle and filament.',
             },
             {
               icon: (
@@ -346,8 +364,8 @@ export default function Landing() {
                 </svg>
               ),
               label: 'Cross-platform',
-              title: 'Web, CLI, and API',
-              desc: 'Same algorithm in the browser, CLI, and JS API. Identical output everywhere.',
+              title: 'Same result everywhere',
+              desc: 'Same algorithm in the browser, CLI, and JS API. Identical output on every platform.',
             },
           ].map((f, i) => (
             <div key={f.title} className='py-8 px-6 max-md:px-0 max-md:py-6'>
@@ -366,8 +384,7 @@ export default function Landing() {
           <p className='label-xs mb-4 text-center tracking-[0.14em]'>Pricing</p>
           <h2 className='text-center mb-4 text-2xl font-semibold tracking-[-0.01em]'>Simple, one-time pricing</h2>
           <p className='text-dim text-center text-[1.05rem] max-w-[420px] mx-auto mb-14 leading-relaxed'>
-            Start free. Consider helping us keep improving by purchasing a lifetime license. Your support means a lot and helps fund
-            development, filament for testing, maintenance, and new features.
+            Start free with 10 runs. Go unlimited with a one-time payment — no subscriptions, no per-run fees.
           </p>
 
           <div className='max-w-[760px] mx-auto rounded-xl border border-accent/10 overflow-hidden'>
@@ -409,9 +426,9 @@ export default function Landing() {
                   ))}
                 </div>
                 <a
-                  href='/docs'
+                  href='/generate'
                   className='inline-flex items-center px-4 py-2 rounded-lg text-xs font-mono no-underline text-primary/50 border border-border hover:border-accent/20 transition-colors'>
-                  Get started
+                  {user ? 'Generate' : 'Try 10 free runs'}
                 </a>
               </div>
 
@@ -423,7 +440,9 @@ export default function Landing() {
                 </div>
                 <div className='flex items-baseline gap-2 mb-1'>
                   <span className='font-[family-name:var(--font-pixel-grid)] text-5xl text-accent leading-none'>${price}</span>
-                  <span className='font-[family-name:var(--font-pixel-square)] text-lg text-muted/40 line-through decoration-muted/30'>$27</span>
+                  <span className='font-[family-name:var(--font-pixel-square)] text-lg text-muted/40 line-through decoration-muted/30'>
+                    $27
+                  </span>
                 </div>
                 <p className='font-mono text-[10px] text-muted/60 mb-6'>one-time payment</p>
                 <div className='space-y-2.5 mb-8'>
