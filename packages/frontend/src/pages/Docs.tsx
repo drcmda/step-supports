@@ -120,7 +120,7 @@ negative-support model.stl -o my_supports.stl`}
                   ["-o, --output", "*_supports.stl", "Output file path"],
                   ["-m, --margin", "0.2", "Gap between supports and model (mm)"],
                   ["--min-volume", "1.0", "Discard support pieces smaller than this (mm\u00b3)"],
-                  ["-a, --angle", "45", "Overhang angle threshold in degrees (STEP only)"],
+                  ["-a, --angle", "45", "Overhang angle threshold in degrees"],
                   ["--3mf", "\u2014", "Export 3MF with model + supports"],
                   ["-q, --quiet", "\u2014", "Suppress progress display"],
                   ["--version", "\u2014", "Show version"],
@@ -210,7 +210,7 @@ console.log(result.stats) // { pieces, faces, volume }`}
                 {[
                   ["format", "string", "auto-detect", "File format: 'stl', 'obj', 'step', or 'stp'"],
                   ["margin", "number", "0.2", "Gap between supports and model (mm)"],
-                  ["angle", "number", "45", "Overhang angle threshold (STEP only)"],
+                  ["angle", "number", "45", "Overhang angle threshold in degrees"],
                   ["minVolume", "number", "1.0", "Discard pieces smaller than this (mm\u00b3)"],
                   ["onProgress", "(step, detail?) => void", "\u2014", "Progress callback for each stage"],
                 ].map(([prop, type, def, desc]) => (

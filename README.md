@@ -29,14 +29,17 @@ negative-support model.stl -q              # quiet mode for scripting
 
 ### Options
 
-| Flag                  | Default                | Description                      |
-| --------------------- | ---------------------- | -------------------------------- |
-| `-m, --margin <mm>`   | `0.2`                  | Gap between supports and model   |
-| `-a, --angle <deg>`   | `45`                   | Overhang angle threshold         |
-| `--min-volume <mm³>`  | `1.0`                  | Discard pieces smaller than this |
-| `--3mf`               | off                    | Export 3MF with model + supports |
-| `-o, --output <path>` | `<input>_supports.stl` | Output path                      |
-| `-q, --quiet`         | off                    | Suppress progress display        |
+| Flag                    | Default                | Description                      |
+| ----------------------- | ---------------------- | -------------------------------- |
+| `-o, --output <path>`   | `<input>_supports.stl` | Output path                      |
+| `-m, --margin <mm>`     | `0.2`                  | Gap between supports and model   |
+| `-a, --angle <degrees>` | `45`                   | Overhang angle threshold         |
+| `--min-volume <mm³>`    | `1.0`                  | Discard pieces smaller than this |
+| `--3mf`                 |                        | Export 3MF with model + supports |
+| `-q, --quiet`           |                        | Suppress progress display        |
+| `--version`             |                        | Show version                     |
+| `--status`              |                        | Show license status              |
+| `--activate <token>`    |                        | Activate license token           |
 
 ## How It Works
 
