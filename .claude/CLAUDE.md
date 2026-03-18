@@ -1,6 +1,6 @@
 # Project: negative-support
 
-Negative-space 3D print support generator. Available on npm (`negative-support`) and as a browser app at negative.support/try.
+Negative-space 3D print support generator. Available on npm (`negative-support`) and as a browser app at negative.support/generate.
 
 ## Repo Structure
 

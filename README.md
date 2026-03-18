@@ -2,7 +2,7 @@
 
 Generates model-conforming support structures for 3D printing. Unlike slicer-generated tree or grid supports, these are **negative-space** supports — exact shapes created by subtracting the model from a surrounding block, producing solid mesh that conforms to the model's actual surface contours.
 
-Available on [npm](https://www.npmjs.com/package/negative-support) and as a browser app at [negative.support/try](https://negative.support/try).
+Available on [npm](https://www.npmjs.com/package/negative-support) and as a browser app at [negative.support/generate](https://negative.support/generate).
 
 ## Install
 
