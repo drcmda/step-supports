@@ -46,6 +46,14 @@ export default function Try() {
   const canGenerate = licensed || auth.freeRemaining > 0;
   const exhausted = !licensed && auth.freeRemaining <= 0 && auth.user !== null;
 
+  // Auto-start generation when a file is selected
+  const handleGenerateRef = useRef<(() => void) | null>(null);
+  useEffect(() => {
+    if (file && phase === 'upload' && canGenerate) {
+      handleGenerateRef.current?.();
+    }
+  }, [file]);
+
   // Cleanup download URLs on unmount
   useEffect(() => {
     return () => {
@@ -150,6 +158,8 @@ export default function Try() {
       );
     });
   }, [file, margin, angle, canGenerate, licensed, auth, downloadUrl, updateStep, markAllDone]);
+
+  handleGenerateRef.current = handleGenerate;
 
   const handleCancel = useCallback(() => {
     workerRef.current?.terminate();
@@ -264,16 +274,7 @@ export default function Try() {
                 className="w-[68px] px-2 py-1.5 bg-base/60 border border-border rounded-md text-primary font-mono text-xs focus:border-accent/40 focus:outline-none transition-colors disabled:opacity-40"
               />
             </label>
-            {phase === 'upload' ? (
-              <button
-                className="inline-flex items-center gap-2 px-5 py-2.5 rounded-lg text-sm font-medium bg-accent text-base border-none cursor-pointer hover:brightness-110 transition-all glow-accent disabled:opacity-50 disabled:cursor-not-allowed disabled:shadow-none"
-                onClick={handleGenerate}
-                disabled={!file}
-              >
-                Generate supports
-                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className="opacity-60"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
-              </button>
-            ) : (
+            {phase === 'processing' && (
               <button
                 className="inline-flex items-center px-5 py-2.5 rounded-lg text-sm font-medium glass glass-hover text-primary/70 cursor-pointer border-none"
                 onClick={handleCancel}
