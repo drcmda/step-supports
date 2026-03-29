@@ -49,7 +49,7 @@ export default function Docs() {
               <div className="flex-1">
                 <p className="label-xs mb-2">Free tier</p>
                 <p className="text-dim text-sm leading-relaxed">
-                  Every account starts with 10 free runs. No credit card needed.
+                  Every account starts with 100 free runs. No credit card needed.
                   Once exhausted, buy a lifetime license to continue — your
                   existing token is automatically upgraded, no re-activation needed.
                 </p>

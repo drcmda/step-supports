@@ -24,7 +24,7 @@ export interface Env {
 
 // ── Constants ────────────────────────────────────────────────────────
 
-const FREE_RUNS = 10;
+const FREE_RUNS = 100;
 const MAX_MACHINES_PER_TOKEN = 3;
 const STRIPE_API = "https://api.stripe.com/v1";
 const SUCCESS_URL = "https://negative.support/success?session_id={CHECKOUT_SESSION_ID}";

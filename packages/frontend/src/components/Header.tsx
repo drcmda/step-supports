@@ -3,7 +3,7 @@ import { useCallback, useState, useEffect, useRef } from 'react'
 import { useAuth } from '../lib/AuthContext'
 import { loginUrl, logout } from '../lib/auth'
 
-const FREE_RUNS = 10
+const FREE_RUNS = 100
 
 export default function Header() {
   const navigate = useNavigate()

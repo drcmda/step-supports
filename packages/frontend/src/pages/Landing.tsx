@@ -87,7 +87,7 @@ export default function Landing() {
             <a
               href='/generate'
               className='inline-flex items-center gap-2 px-5 py-2.5 rounded-lg text-sm font-medium no-underline bg-accent text-base transition-all hover:brightness-110 glow-accent'>
-              {user ? 'Generate' : 'Try 10 free runs'}
+              {user ? 'Generate' : 'Try 100 free runs'}
               <svg width='14' height='14' viewBox='0 0 24 24' fill='none' stroke='currentColor' strokeWidth='2.5' className='opacity-60'>
                 <path d='M5 12h14M12 5l7 7-7 7' />
               </svg>
@@ -384,7 +384,7 @@ export default function Landing() {
           <p className='label-xs mb-4 text-center tracking-[0.14em]'>Pricing</p>
           <h2 className='text-center mb-4 text-2xl font-semibold tracking-[-0.01em]'>Simple, one-time pricing</h2>
           <p className='text-dim text-center text-[1.05rem] max-w-[420px] mx-auto mb-14 leading-relaxed'>
-            Start free with 10 runs. Go unlimited with a one-time payment — no subscriptions, no per-run fees.
+            Start free with 100 runs. Go unlimited with a one-time payment — no subscriptions, no per-run fees.
           </p>
 
           <div className='max-w-[760px] mx-auto rounded-xl border border-accent/10 overflow-hidden'>
@@ -409,7 +409,7 @@ export default function Landing() {
                 </div>
                 <p className='font-mono text-[10px] text-transparent mb-6 select-none'>—</p>
                 <div className='space-y-2.5 mb-8'>
-                  {['10 free runs', 'All features included', 'GitHub login'].map((item) => (
+                  {['100 free runs', 'All features included', 'GitHub login'].map((item) => (
                     <div key={item} className='flex items-center gap-2.5'>
                       <svg
                         width='12'
@@ -428,7 +428,7 @@ export default function Landing() {
                 <a
                   href='/generate'
                   className='inline-flex items-center px-4 py-2 rounded-lg text-xs font-mono no-underline text-primary/50 border border-border hover:border-accent/20 transition-colors'>
-                  {user ? 'Generate' : 'Try 10 free runs'}
+                  {user ? 'Generate' : 'Try 100 free runs'}
                 </a>
               </div>
 

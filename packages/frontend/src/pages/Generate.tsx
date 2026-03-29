@@ -8,7 +8,7 @@ const MeshViewer = lazy(() => import('../components/MeshViewer'))
 
 type Phase = 'upload' | 'processing' | 'done' | 'error'
 
-const FREE_RUNS = 10
+const FREE_RUNS = 100
 
 interface Stats {
   pieces: number

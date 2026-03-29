@@ -23,7 +23,7 @@ Tokens may be activated on up to **3 machines**. Activation binds the token to a
 
 ### Free Tier
 
-Unactivated use is permitted for up to **10 runs per machine**. Free-tier runs are tracked by machine identifier. Circumventing this limit — for example by spoofing or cycling machine identifiers — is prohibited.
+Unactivated use is permitted for up to **100 runs per machine**. Free-tier runs are tracked by machine identifier. Circumventing this limit — for example by spoofing or cycling machine identifiers — is prohibited.
 
 ### Abuse and Misuse
 

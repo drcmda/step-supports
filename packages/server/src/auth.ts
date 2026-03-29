@@ -17,7 +17,7 @@ const GITHUB_TOKEN = "https://github.com/login/oauth/access_token";
 const GITHUB_USER = "https://api.github.com/user";
 const GITHUB_EMAILS = "https://api.github.com/user/emails";
 const SESSION_MAX_AGE = 30 * 24 * 60 * 60; // 30 days in seconds
-const FREE_RUNS = 10;
+const FREE_RUNS = 100;
 
 // ── Helpers ──────────────────────────────────────────────────────────
 
