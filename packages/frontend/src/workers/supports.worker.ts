@@ -15,7 +15,7 @@ import { parseOBJ } from '@core/obj';
 import { parseSTEP } from '../lib/step';
 import { repairMesh, computeMeshOverhangs } from '@core/mesh-utils';
 import { export3MF } from '@core/threemf';
-import { getManifold, generateSupportsMesh, generateSupportsMeshOverhang, generateSupportsSTEP } from '@core/supports';
+import { getManifold, generateSupportsMesh, generateSupportsMeshOverhang, generateSupportsSTEP, prepareMesh } from '@core/supports';
 
 // -- Message types --
 
@@ -117,10 +117,11 @@ self.onmessage = async (e: MessageEvent<InMessage>) => {
     }
 
     // Save model mesh copy for 3MF (pipeline modifies vertices in-place)
-    const modelMesh: ParsedMesh = {
+    // prepareMesh welds duplicate vertices (STEP tessellation) for clean 3MF export
+    const modelMesh = prepareMesh({
       vertices: new Float32Array(parsed.vertices),
       faces: new Uint32Array(parsed.faces),
-    };
+    });
 
     // Run the appropriate pipeline from core
     let result;
