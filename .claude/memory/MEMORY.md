@@ -1,0 +1,5 @@
+- [user_profile.md](user_profile.md) — Paul Henschel (drcmda), prefers autonomous task handling
+- [project_domain.md](project_domain.md) — negative.support domain setup: Cloudflare + Namecheap, account details, nameservers
+- [project_stripe.md](project_stripe.md) — Stripe account, price ID, webhook endpoint, secrets configuration
+- [project_npm_only.md](project_npm_only.md) — Dropped Python/pip package in favor of npm-only (single source of truth)
+- [project_history.md](project_history.md) — Full development history: STEP manifold crisis → Minkowski, 3MF positioning, OOM retry, browser architecture

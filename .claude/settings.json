@@ -33,7 +33,9 @@
       "Bash(grep -r \"jagged\\\\|degenerate\\\\|quality\\\\|artifact\" --include=*.ts --include=*.md --include=*.txt packages/core/src packages/core/README.md)",
       "Bash(grep '\"\"manifold-3d\"\"' node_modules/manifold-3d/package.json)",
       "Bash(grep '\"\"version\"\"' node_modules/manifold-3d/package.json)",
-      "Bash(node -e \"console.log\\(require\\(''manifold-3d/package.json''\\).version\\)\")"
+      "Bash(node -e \"console.log\\(require\\(''manifold-3d/package.json''\\).version\\)\")",
+      "Bash(cp /Users/dev/.claude/projects/-Users-dev-dev-stl-supports/memory/project_history.md /Users/dev/dev/stl-supports/.claude/memory/)",
+      "Bash(cp /Users/dev/.claude/projects/-Users-dev-dev-stl-supports/memory/MEMORY.md /Users/dev/dev/stl-supports/.claude/memory/)"
     ],
     "additionalDirectories": [
       "/Users/dev/dev/stl-supports/packages/core",
