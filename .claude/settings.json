@@ -1,0 +1,43 @@
+{
+  "permissions": {
+    "allow": [
+      "Read(//Users/dev/Desktop/**)",
+      "Bash(ls -lah ~/Desktop/*.mp4 ~/Desktop/*.mov ~/Desktop/*.webm)",
+      "Read(//Users/dev/Movies/**)",
+      "Bash(ls -lah ~/Desktop/vn* ~/Desktop/VN*)",
+      "Bash(find ~/Desktop -maxdepth 1 -name *vn* -o -name *VN* -o -name *video*)",
+      "Bash(ffprobe -v quiet -print_format json -show_streams ~/Movies/VN/1774715925257118.mp4)",
+      "Bash(ffprobe -v quiet -print_format json -show_streams /Users/dev/dev/stl-supports/packages/frontend/public/hero-video.mp4)",
+      "Bash(ffmpeg -i ~/Movies/VN/1774715925257118.mp4 -vf \"scale=1280:-2\" -c:v libx264 -preset slow -crf 30 -an -movflags +faststart /Users/dev/dev/stl-supports/packages/frontend/public/hero-video.mp4 -y)",
+      "Bash(ffprobe -v quiet -print_format json -show_streams ~/Movies/VN/1774717033948364.mp4)",
+      "Bash(ffmpeg -i ~/Movies/VN/1774717033948364.mp4 -vf \"scale=1280:-2\" -c:v libx264 -preset slow -crf 28 -an -movflags +faststart /Users/dev/dev/stl-supports/packages/frontend/public/hero-video.mp4 -y)",
+      "Bash(ffprobe -v quiet -show_entries stream=duration ~/Movies/VN/1774717326588600.mp4)",
+      "Bash(ffmpeg -i ~/Movies/VN/1774717326588600.mp4 -vf \"scale=1280:-2\" -c:v libx264 -preset slow -crf 28 -an -movflags +faststart /Users/dev/dev/stl-supports/packages/frontend/public/hero-video.mp4 -y)",
+      "Bash(ffmpeg -i ~/Movies/VN/1774717398756206.mp4 -vf \"scale=1280:-2\" -c:v libx264 -preset slow -crf 28 -an -movflags +faststart /Users/dev/dev/stl-supports/packages/frontend/public/hero-video.mp4 -y)",
+      "Bash(rm -rf .git)",
+      "Bash(git init:*)",
+      "Bash(git remote:*)",
+      "Bash(mv packages/core /tmp/core-backup)",
+      "Bash(rm -rf packages/core)",
+      "Bash(mv /tmp/core-backup packages/core)",
+      "Bash(sed -i '' 's/FREE_RUNS = 10/FREE_RUNS = 100/g' packages/server/src/api.ts packages/server/src/auth.ts packages/frontend/src/pages/Generate.tsx)",
+      "Bash(sed -i '' 's/Try 10 free runs/Try 100 free runs/g' packages/frontend/src/pages/Landing.tsx)",
+      "Bash(sed -i '' 's/Start free with 10 runs/Start free with 100 runs/g' packages/frontend/src/pages/Landing.tsx)",
+      "Bash(sed -i '' 's/up to \\\\*\\\\*10 runs/up to **100 runs/g' TERMS.md)",
+      "Bash(sed -i '' 's/FREE_RUNS = 10/FREE_RUNS = 100/g' src/license.ts)",
+      "Bash(sed -i '' 's/get 10 runs/get 100 runs/g' src/license.ts)",
+      "Bash(sed -i '' 's/10\\\\/10 runs/100\\\\/100 runs/g' src/api-license.ts)",
+      "Bash(sed -i '' 's/10 free runs/100 free runs/g' packages/frontend/src/pages/Landing.tsx packages/frontend/src/pages/Docs.tsx)",
+      "Bash(sed -i '' 's/starts with 10 free/starts with 100 free/g' packages/frontend/src/pages/Docs.tsx)",
+      "Bash(node -e \":*)",
+      "Bash(grep -r \"jagged\\\\|degenerate\\\\|quality\\\\|artifact\" --include=*.ts --include=*.md --include=*.txt packages/core/src packages/core/README.md)",
+      "Bash(grep '\"\"manifold-3d\"\"' node_modules/manifold-3d/package.json)",
+      "Bash(grep '\"\"version\"\"' node_modules/manifold-3d/package.json)",
+      "Bash(node -e \"console.log\\(require\\(''manifold-3d/package.json''\\).version\\)\")"
+    ],
+    "additionalDirectories": [
+      "/Users/dev/dev/stl-supports/packages/core",
+      "/Users/dev/dev/stl-supports/.claude"
+    ]
+  }
+}
